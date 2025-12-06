@@ -1,0 +1,270 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/doc-frontmatter.schema.json",
+  "title": "Documentation Front Matter Schema",
+  "description": "JSON Schema for validating YAML front matter in documentation files",
+  "type": "object",
+  "required": ["id", "doc_type", "title", "status", "last_verified_at", "owner"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique, stable identifier for this document",
+      "pattern": "^(FEAT|ADR|HOWTO|REF|EXPL|TEST|RUN)-[0-9]{4}-[0-9]{2}-.+$",
+      "examples": ["FEAT-2025-10-dashboard", "ADR-0012", "HOWTO-2025-10-setup"]
+    },
+    "doc_type": {
+      "type": "string",
+      "description": "Diátaxis document type or engineering-specific type",
+      "enum": [
+        "feature",
+        "howto",
+        "reference",
+        "explanation",
+        "adr",
+        "test_report",
+        "runbook",
+        "tutorial"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable title of the document",
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "status": {
+      "type": "string",
+      "description": "Lifecycle status of the document",
+      "enum": [
+        "draft",
+        "proposed",
+        "accepted",
+        "deprecated",
+        "superseded"
+      ]
+    },
+    "last_verified_at": {
+      "type": "string",
+      "description": "ISO 8601 date when document was last verified as accurate",
+      "format": "date",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+      "examples": ["2025-10-25"]
+    },
+    "owner": {
+      "type": "string",
+      "description": "Team or person responsible for maintaining this document (CODEOWNERS format)",
+      "pattern": "^@[a-zA-Z0-9_-]+$",
+      "examples": ["@team-frontend", "@username"]
+    },
+    "supersedes": {
+      "type": "array",
+      "description": "List of document IDs that this document replaces",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "superseded_by": {
+      "type": "array",
+      "description": "List of document IDs that replaced this document (if status is superseded)",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "code_refs": {
+      "type": "array",
+      "description": "References to code files and symbols",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "File path with optional line numbers (e.g., src/file.ts#L10-L50)"
+          },
+          "symbol": {
+            "type": "string",
+            "description": "Fully qualified symbol name (e.g., ClassName.methodName)"
+          }
+        }
+      }
+    },
+    "test_refs": {
+      "type": "array",
+      "description": "References to test files and CI runs",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Test file path with optional test name (e.g., tests/file.test.ts::test_name)"
+          },
+          "ci_run": {
+            "type": "string",
+            "description": "CI run URL or identifier (e.g., gh-actions://runs/12345)"
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "description": "Test results and evidence of correctness",
+      "properties": {
+        "tests_passed": {
+          "type": "boolean",
+          "description": "Whether tests for this feature/doc passed"
+        },
+        "coverage_delta": {
+          "type": "string",
+          "description": "Coverage change from this feature (e.g., +3.2%)",
+          "pattern": "^[+-][0-9]+\\.[0-9]+%$"
+        }
+      }
+    },
+    "sources_of_truth": {
+      "type": "array",
+      "description": "List of authoritative sources for this information (ADRs, specs, etc.)",
+      "items": {
+        "type": "string"
+      }
+    },
+    "search": {
+      "type": "object",
+      "description": "Search engine metadata (for MkDocs Material)",
+      "properties": {
+        "boost": {
+          "type": "number",
+          "description": "Search ranking boost (1 = normal, 2 = high priority, 0.5 = low priority)",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 1
+        },
+        "exclude": {
+          "type": "boolean",
+          "description": "Exclude from search index",
+          "default": false
+        }
+      }
+    },
+    "keywords": {
+      "type": "array",
+      "description": "Keywords for search and categorization",
+      "items": {
+        "type": "string"
+      }
+    },
+    "date": {
+      "type": "string",
+      "description": "Date of creation or decision (for ADRs)",
+      "format": "date",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "deciders": {
+      "type": "array",
+      "description": "People who made the decision (for ADRs)",
+      "items": {
+        "type": "string",
+        "pattern": "^@[a-zA-Z0-9_-]+$"
+      }
+    },
+    "consulted": {
+      "type": "array",
+      "description": "People consulted for input (for ADRs)",
+      "items": {
+        "type": "string"
+      }
+    },
+    "informed": {
+      "type": "array",
+      "description": "People informed of the decision (for ADRs)",
+      "items": {
+        "type": "string"
+      }
+    },
+    "test_date": {
+      "type": "string",
+      "description": "Date tests were executed (for test reports)",
+      "format": "date",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "test_type": {
+      "type": "string",
+      "description": "Type of testing performed (for test reports)",
+      "enum": ["unit", "integration", "e2e", "performance", "security", "smoke", "regression"]
+    },
+    "environment": {
+      "type": "string",
+      "description": "Environment where tests ran (for test reports)",
+      "enum": ["development", "staging", "production", "ci"]
+    },
+    "on_call_team": {
+      "type": "string",
+      "description": "Team responsible for on-call response (for runbooks)",
+      "pattern": "^@[a-zA-Z0-9_-]+$"
+    },
+    "severity_levels": {
+      "type": "array",
+      "description": "Incident severity levels (for runbooks)",
+      "items": {
+        "type": "string"
+      }
+    },
+    "difficulty": {
+      "type": "string",
+      "description": "Difficulty level (for how-to guides)",
+      "enum": ["beginner", "intermediate", "advanced"]
+    },
+    "time_estimate": {
+      "type": "string",
+      "description": "Estimated time to complete (for how-to guides)",
+      "pattern": "^[0-9]+ (minutes?|hours?|days?)$",
+      "examples": ["15 minutes", "2 hours", "1 day"]
+    },
+    "api_version": {
+      "type": "string",
+      "description": "API version (for reference docs)",
+      "pattern": "^v?[0-9]+\\.[0-9]+(\\.[0-9]+)?$",
+      "examples": ["v1.0", "2.1.0"]
+    },
+    "audience": {
+      "type": "string",
+      "description": "Target audience (for explanation docs)",
+      "enum": ["developers", "architects", "operations", "all", "executives"]
+    },
+    "created_by_agent": {
+      "type": "object",
+      "description": "Metadata about AI agent that created/modified this doc",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Agent name or identifier"
+        },
+        "model": {
+          "type": "string",
+          "description": "Model identifier (e.g., gpt-4, claude-3)"
+        },
+        "confidence": {
+          "type": "number",
+          "description": "Agent's confidence in the doc (0-1)",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    }
+  },
+  "additionalProperties": true,
+  "if": {
+    "properties": {
+      "status": { "const": "superseded" }
+    }
+  },
+  "then": {
+    "properties": {
+      "superseded_by": {
+        "type": "array",
+        "minItems": 1
+      }
+    },
+    "required": ["superseded_by"]
+  }
+}

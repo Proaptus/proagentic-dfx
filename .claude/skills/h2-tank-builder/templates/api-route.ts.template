@@ -1,0 +1,155 @@
+/**
+ * [Endpoint Name] API Route
+ * 
+ * RTM Coverage:
+ * - REQ-XXX: [Requirement description]
+ * - REQ-XXX: [Requirement description]
+ * 
+ * Mock Server Status: [Addressed/Pending]
+ * Data Mode: [Static/Simulated/Both]
+ * 
+ * @see mock-server-specification.md Section X
+ * @see openapi-h2-tank-api.yaml /paths/[endpoint]
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+
+// Request validation schema (for POST endpoints)
+const RequestSchema = z.object({
+  // Define request body schema
+  field1: z.string(),
+  field2: z.number().optional(),
+});
+
+// Response type (matches OpenAPI spec)
+interface ResponseType {
+  // Define response structure
+  id: string;
+  data: unknown;
+  // ... other fields
+}
+
+// Static data import (for static mode)
+import staticData from '@/data/static/[data-file].json';
+
+// Simulator import (for simulated mode)
+// import { [Simulator] } from '@/lib/simulators';
+
+/**
+ * Get current data mode from environment
+ */
+function getDataMode(): 'static' | 'simulated' | 'hybrid' {
+  return (process.env.DATA_MODE as any) || 'static';
+}
+
+/**
+ * Add realistic delay for demo purposes
+ */
+async function addDelay(ms: number = 100): Promise<void> {
+  if (process.env.NODE_ENV === 'development') {
+    await new Promise(resolve => setTimeout(resolve, ms));
+  }
+}
+
+/**
+ * GET handler
+ * 
+ * Returns [description of what this endpoint returns]
+ */
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { id } = params;
+    const searchParams = request.nextUrl.searchParams;
+    
+    // Parse query parameters
+    const queryParam = searchParams.get('param') || 'default';
+    
+    // Add realistic delay
+    await addDelay(100);
+    
+    // Get data based on mode
+    const dataMode = getDataMode();
+    let responseData: ResponseType;
+    
+    if (dataMode === 'static') {
+      // Return static data
+      responseData = staticData[id] || staticData['default'];
+    } else if (dataMode === 'simulated') {
+      // Generate simulated data
+      // const simulator = new [Simulator]();
+      // responseData = simulator.generate(id, { param: queryParam });
+      responseData = { id, data: 'simulated' };
+    } else {
+      // Hybrid: use static for some, simulated for others
+      responseData = staticData[id] || { id, data: 'hybrid' };
+    }
+    
+    return NextResponse.json(responseData);
+    
+  } catch (error) {
+    console.error('[Endpoint] error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', message: (error as Error).message },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * POST handler (if applicable)
+ * 
+ * Processes [description of what this endpoint processes]
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    
+    // Validate request body
+    const validationResult = RequestSchema.safeParse(body);
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { error: 'Validation error', details: validationResult.error.errors },
+        { status: 400 }
+      );
+    }
+    
+    const validatedData = validationResult.data;
+    
+    // Add realistic delay
+    await addDelay(200);
+    
+    // Process request
+    const responseData: ResponseType = {
+      id: 'generated-id',
+      data: validatedData,
+      // ... process and return
+    };
+    
+    return NextResponse.json(responseData);
+    
+  } catch (error) {
+    console.error('[Endpoint] POST error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', message: (error as Error).message },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * OPTIONS handler for CORS preflight
+ */
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': 'http://localhost:3000',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
+}

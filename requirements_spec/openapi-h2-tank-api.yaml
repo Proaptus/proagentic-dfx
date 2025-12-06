@@ -1,0 +1,1497 @@
+openapi: 3.0.3
+info:
+  title: H2 Tank Designer API
+  description: |
+    API for hydrogen pressure vessel design optimization.
+    
+    This specification is the **source of truth** for the API contract.
+    The mock server implements this exactly. The real backend must match.
+  version: 1.0.0
+  contact:
+    name: Proaptus Ltd
+    email: contact@proaptus.co.uk
+
+servers:
+  - url: http://localhost:3001
+    description: Mock server (development)
+  - url: https://api.h2tank.proaptus.com
+    description: Production server
+
+tags:
+  - name: Requirements
+    description: Parse and manage design requirements
+  - name: Configuration
+    description: Tank type and material selection
+  - name: Optimization
+    description: Multi-objective design optimization
+  - name: Designs
+    description: Individual design analysis
+  - name: Export
+    description: Documentation generation and download
+
+paths:
+  # ============================================================
+  # SCREEN 1: REQUIREMENTS
+  # ============================================================
+  
+  /api/requirements/parse:
+    post:
+      tags: [Requirements]
+      summary: Parse natural language requirements
+      operationId: parseRequirements
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequirementsInput'
+            example:
+              input_mode: natural_language
+              raw_text: "700 bar, 150L hydrogen tank for heavy-duty truck. Max 80kg, marine environment, 15 year life, EU certification."
+      responses:
+        '200':
+          description: Successfully parsed requirements
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParsedRequirementsResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/standards:
+    get:
+      tags: [Requirements]
+      summary: Get available standards database
+      operationId: getStandards
+      responses:
+        '200':
+          description: List of applicable standards
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StandardsResponse'
+
+  # ============================================================
+  # SCREEN 2: CONFIGURATION
+  # ============================================================
+  
+  /api/tank-type/recommend:
+    post:
+      tags: [Configuration]
+      summary: Get tank type recommendation
+      operationId: recommendTankType
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TankTypeRequest'
+      responses:
+        '200':
+          description: Tank type recommendation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TankTypeResponse'
+
+  /api/materials:
+    get:
+      tags: [Configuration]
+      summary: Get material database
+      operationId: getMaterials
+      responses:
+        '200':
+          description: Full material database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaterialsResponse'
+
+  /api/materials/select:
+    post:
+      tags: [Configuration]
+      summary: Validate material selection
+      operationId: selectMaterials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaterialSelectionRequest'
+      responses:
+        '200':
+          description: Material selection validated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaterialSelectionResponse'
+
+  # ============================================================
+  # SCREEN 3: OPTIMIZATION
+  # ============================================================
+  
+  /api/optimization:
+    post:
+      tags: [Optimization]
+      summary: Start optimization job
+      operationId: startOptimization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OptimizationRequest'
+      responses:
+        '200':
+          description: Optimization job started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OptimizationJob'
+
+  /api/optimization/{id}:
+    get:
+      tags: [Optimization]
+      summary: Get optimization job status
+      operationId: getOptimizationStatus
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: Job status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OptimizationStatus'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Optimization]
+      summary: Cancel optimization job
+      operationId: cancelOptimization
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: Job cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+
+  /api/optimization/{id}/stream:
+    get:
+      tags: [Optimization]
+      summary: Stream optimization progress (SSE)
+      operationId: streamOptimizationProgress
+      description: |
+        Server-Sent Events stream for real-time progress updates.
+        
+        Event types:
+        - `progress`: Progress update with generation, designs evaluated, pareto size
+        - `best_update`: New best design found
+        - `complete`: Optimization finished
+        - `error`: Error occurred
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: SSE stream of progress events
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: Server-Sent Events stream
+              example: |
+                event: progress
+                data: {"progress_percent": 45, "generation": 90, "designs_evaluated": 378291, "pareto_size": 35}
+                
+                event: complete
+                data: {"job_id": "opt-a1b2c3d4", "status": "completed"}
+
+  /api/optimization/{id}/results:
+    get:
+      tags: [Optimization]
+      summary: Get optimization results (Pareto frontier)
+      operationId: getOptimizationResults
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: Pareto-optimal designs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OptimizationResults'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ============================================================
+  # SCREEN 5: DESIGN ANALYSIS
+  # ============================================================
+  
+  /api/designs/{id}:
+    get:
+      tags: [Designs]
+      summary: Get design summary
+      operationId: getDesign
+      parameters:
+        - $ref: '#/components/parameters/DesignId'
+      responses:
+        '200':
+          description: Design summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DesignSummary'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/designs/{id}/geometry:
+    get:
+      tags: [Designs]
+      summary: Get 3D geometry data
+      operationId: getDesignGeometry
+      parameters:
+        - $ref: '#/components/parameters/DesignId'
+      responses:
+        '200':
+          description: Geometry data for 3D visualization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeometryData'
+
+  /api/designs/{id}/stress:
+    get:
+      tags: [Designs]
+      summary: Get stress analysis results
+      operationId: getDesignStress
+      parameters:
+        - $ref: '#/components/parameters/DesignId'
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [vonMises, hoop, axial, shear, tsaiWu]
+            default: vonMises
+        - name: load_case
+          in: query
+          schema:
+            type: string
+            enum: [test, burst]
+            default: test
+      responses:
+        '200':
+          description: Stress analysis data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StressData'
+
+  /api/designs/{id}/failure:
+    get:
+      tags: [Designs]
+      summary: Get failure analysis results
+      operationId: getDesignFailure
+      parameters:
+        - $ref: '#/components/parameters/DesignId'
+      responses:
+        '200':
+          description: Failure analysis data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailureData'
+
+  /api/designs/{id}/thermal:
+    get:
+      tags: [Designs]
+      summary: Get thermal analysis results
+      operationId: getDesignThermal
+      parameters:
+        - $ref: '#/components/parameters/DesignId'
+      responses:
+        '200':
+          description: Thermal analysis data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThermalData'
+
+  /api/designs/{id}/reliability:
+    get:
+      tags: [Designs]
+      summary: Get reliability analysis (Monte Carlo)
+      operationId: getDesignReliability
+      parameters:
+        - $ref: '#/components/parameters/DesignId'
+      responses:
+        '200':
+          description: Reliability analysis data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReliabilityData'
+
+  /api/designs/{id}/cost:
+    get:
+      tags: [Designs]
+      summary: Get cost breakdown
+      operationId: getDesignCost
+      parameters:
+        - $ref: '#/components/parameters/DesignId'
+      responses:
+        '200':
+          description: Cost breakdown data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CostData'
+
+  /api/designs/{id}/compliance:
+    get:
+      tags: [Designs]
+      summary: Get standards compliance status
+      operationId: getDesignCompliance
+      parameters:
+        - $ref: '#/components/parameters/DesignId'
+      responses:
+        '200':
+          description: Compliance status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplianceData'
+
+  # ============================================================
+  # SCREEN 6: COMPARISON
+  # ============================================================
+  
+  /api/compare:
+    post:
+      tags: [Designs]
+      summary: Compare multiple designs
+      operationId: compareDesigns
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                design_ids:
+                  type: array
+                  items:
+                    type: string
+                  minItems: 2
+                  maxItems: 5
+              required: [design_ids]
+      responses:
+        '200':
+          description: Comparison data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComparisonData'
+
+  # ============================================================
+  # SCREEN 7: VALIDATION
+  # ============================================================
+  
+  /api/designs/{id}/surrogate-confidence:
+    get:
+      tags: [Designs]
+      summary: Get surrogate model confidence metrics
+      operationId: getSurrogateConfidence
+      parameters:
+        - $ref: '#/components/parameters/DesignId'
+      responses:
+        '200':
+          description: Surrogate model accuracy metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurrogateConfidence'
+
+  /api/designs/{id}/test-plan:
+    get:
+      tags: [Designs]
+      summary: Get test plan specification
+      operationId: getTestPlan
+      parameters:
+        - $ref: '#/components/parameters/DesignId'
+      responses:
+        '200':
+          description: Test plan data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestPlan'
+
+  /api/designs/{id}/sentry:
+    get:
+      tags: [Designs]
+      summary: Get Sentry monitoring specification
+      operationId: getSentrySpec
+      parameters:
+        - $ref: '#/components/parameters/DesignId'
+      responses:
+        '200':
+          description: Monitoring specification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SentrySpec'
+
+  # ============================================================
+  # SCREEN 8: EXPORT
+  # ============================================================
+  
+  /api/export:
+    post:
+      tags: [Export]
+      summary: Start export package generation
+      operationId: startExport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportRequest'
+      responses:
+        '200':
+          description: Export job started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportJob'
+
+  /api/export/{id}:
+    get:
+      tags: [Export]
+      summary: Get export job status
+      operationId: getExportStatus
+      parameters:
+        - $ref: '#/components/parameters/ExportId'
+      responses:
+        '200':
+          description: Export status and file list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportStatus'
+
+  /api/export/{id}/download:
+    get:
+      tags: [Export]
+      summary: Download export package
+      operationId: downloadExport
+      parameters:
+        - $ref: '#/components/parameters/ExportId'
+      responses:
+        '200':
+          description: ZIP file download
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+# ============================================================
+# COMPONENTS
+# ============================================================
+
+components:
+  parameters:
+    JobId:
+      name: id
+      in: path
+      required: true
+      description: Optimization job ID
+      schema:
+        type: string
+        pattern: '^opt-[a-z0-9]+$'
+        
+    DesignId:
+      name: id
+      in: path
+      required: true
+      description: Design ID (A-Z or custom)
+      schema:
+        type: string
+        
+    ExportId:
+      name: id
+      in: path
+      required: true
+      description: Export job ID
+      schema:
+        type: string
+        pattern: '^exp-[a-z0-9]+$'
+
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    # ========================================
+    # ERROR
+    # ========================================
+    Error:
+      type: object
+      properties:
+        error:
+          type: boolean
+          default: true
+        message:
+          type: string
+        code:
+          type: string
+      required: [error, message]
+
+    # ========================================
+    # REQUIREMENTS
+    # ========================================
+    RequirementsInput:
+      type: object
+      properties:
+        input_mode:
+          type: string
+          enum: [natural_language, structured]
+        raw_text:
+          type: string
+          description: Natural language requirements description
+        structured:
+          $ref: '#/components/schemas/StructuredRequirements'
+      required: [input_mode]
+
+    StructuredRequirements:
+      type: object
+      properties:
+        pressure_bar:
+          type: number
+        volume_liters:
+          type: number
+        weight_max_kg:
+          type: number
+        application:
+          type: string
+        environment:
+          type: string
+        service_life_years:
+          type: integer
+        region:
+          type: string
+
+    ParsedRequirementsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        parsed_requirements:
+          $ref: '#/components/schemas/StructuredRequirements'
+        derived_requirements:
+          $ref: '#/components/schemas/DerivedRequirements'
+        applicable_standards:
+          type: array
+          items:
+            $ref: '#/components/schemas/StandardSelection'
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        warnings:
+          type: array
+          items:
+            type: string
+        clarification_needed:
+          type: array
+          items:
+            type: string
+
+    DerivedRequirements:
+      type: object
+      properties:
+        test_pressure_bar:
+          type: number
+        burst_pressure_min_bar:
+          type: number
+        burst_ratio_min:
+          type: number
+        cycle_life_min:
+          type: integer
+        permeation_max_nml_hr_l:
+          type: number
+        temp_range_c:
+          type: array
+          items:
+            type: number
+          minItems: 2
+          maxItems: 2
+        fire_test_required:
+          type: boolean
+        fire_test_type:
+          type: string
+
+    StandardSelection:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        selected:
+          type: boolean
+
+    StandardsResponse:
+      type: object
+      properties:
+        standards:
+          type: array
+          items:
+            $ref: '#/components/schemas/Standard'
+
+    Standard:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+        region:
+          type: string
+        requirements:
+          type: object
+          additionalProperties: true
+
+    # ========================================
+    # CONFIGURATION
+    # ========================================
+    TankTypeRequest:
+      type: object
+      properties:
+        requirements:
+          $ref: '#/components/schemas/StructuredRequirements'
+
+    TankTypeResponse:
+      type: object
+      properties:
+        recommendation:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [I, II, III, IV, V]
+            confidence:
+              type: number
+            rationale:
+              type: string
+        alternatives:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              feasible:
+                type: boolean
+              estimated_weight_kg:
+                type: number
+              reason:
+                type: string
+              risk:
+                type: string
+        type_comparison:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              liner:
+                type: string
+              kg_per_l:
+                type: number
+              est_weight:
+                type: number
+              feasible:
+                type: boolean
+
+    MaterialsResponse:
+      type: object
+      properties:
+        fibers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Material'
+        matrices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Material'
+        liners:
+          type: array
+          items:
+            $ref: '#/components/schemas/Material'
+        bosses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Material'
+
+    Material:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        properties:
+          type: object
+          additionalProperties:
+            type: number
+        recommendation:
+          type: string
+
+    MaterialSelectionRequest:
+      type: object
+      properties:
+        fiber_id:
+          type: string
+        matrix_id:
+          type: string
+        liner_id:
+          type: string
+        boss_id:
+          type: string
+
+    MaterialSelectionResponse:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        warnings:
+          type: array
+          items:
+            type: string
+
+    # ========================================
+    # OPTIMIZATION
+    # ========================================
+    OptimizationRequest:
+      type: object
+      properties:
+        requirements:
+          $ref: '#/components/schemas/StructuredRequirements'
+        materials:
+          $ref: '#/components/schemas/MaterialSelectionRequest'
+        objectives:
+          type: array
+          items:
+            type: string
+            enum: [minimize_weight, minimize_cost, maximize_reliability]
+        priority:
+          type: array
+          items:
+            type: integer
+
+    OptimizationJob:
+      type: object
+      properties:
+        job_id:
+          type: string
+        status:
+          type: string
+          enum: [started, running, completed, failed, cancelled]
+        estimated_duration_seconds:
+          type: integer
+        stream_url:
+          type: string
+
+    OptimizationStatus:
+      type: object
+      properties:
+        job_id:
+          type: string
+        status:
+          type: string
+        progress_percent:
+          type: number
+        generation:
+          type: integer
+        designs_evaluated:
+          type: integer
+        pareto_size:
+          type: integer
+
+    OptimizationResults:
+      type: object
+      properties:
+        job_id:
+          type: string
+        status:
+          type: string
+        execution_time_seconds:
+          type: number
+        total_evaluations:
+          type: integer
+        pareto_front_size:
+          type: integer
+        recommended_design_id:
+          type: string
+        pareto_designs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParetoDesign'
+
+    ParetoDesign:
+      type: object
+      properties:
+        id:
+          type: string
+        weight_kg:
+          type: number
+        burst_pressure_bar:
+          type: number
+        burst_ratio:
+          type: number
+        cost_eur:
+          type: number
+        p_failure:
+          type: number
+        fatigue_life_cycles:
+          type: integer
+        permeation_rate:
+          type: number
+        volumetric_efficiency:
+          type: number
+        trade_off_category:
+          type: string
+        recommendation_reason:
+          type: string
+
+    # ========================================
+    # DESIGN ANALYSIS
+    # ========================================
+    DesignSummary:
+      type: object
+      properties:
+        design_id:
+          type: string
+        weight_kg:
+          type: number
+        burst_pressure_bar:
+          type: number
+        cost_eur:
+          type: number
+        p_failure:
+          type: number
+        compliance_status:
+          type: string
+          enum: [pass, fail, warning]
+
+    GeometryData:
+      type: object
+      properties:
+        design_id:
+          type: string
+        dimensions:
+          type: object
+          properties:
+            inner_radius_mm:
+              type: number
+            outer_radius_mm:
+              type: number
+            cylinder_length_mm:
+              type: number
+            total_length_mm:
+              type: number
+            wall_thickness_mm:
+              type: number
+            internal_volume_liters:
+              type: number
+        dome:
+          type: object
+          properties:
+            type:
+              type: string
+            parameters:
+              type: object
+              additionalProperties:
+                type: number
+            profile_points:
+              type: array
+              items:
+                type: object
+                properties:
+                  r:
+                    type: number
+                  z:
+                    type: number
+        thickness_distribution:
+          type: object
+          additionalProperties:
+            type: number
+        layup:
+          type: object
+          properties:
+            total_layers:
+              type: integer
+            helical_count:
+              type: integer
+            hoop_count:
+              type: integer
+            fiber_volume_fraction:
+              type: number
+            layers:
+              type: array
+              items:
+                $ref: '#/components/schemas/Layer'
+
+    Layer:
+      type: object
+      properties:
+        layer:
+          type: integer
+        type:
+          type: string
+          enum: [helical, hoop]
+        angle_deg:
+          type: number
+        thickness_mm:
+          type: number
+        coverage:
+          type: string
+          enum: [full, cylinder]
+
+    StressData:
+      type: object
+      properties:
+        design_id:
+          type: string
+        load_case:
+          type: string
+        load_pressure_bar:
+          type: number
+        stress_type:
+          type: string
+        max_stress:
+          type: object
+          properties:
+            value_mpa:
+              type: number
+            location:
+              $ref: '#/components/schemas/Location3D'
+            region:
+              type: string
+            allowable_mpa:
+              type: number
+            margin_percent:
+              type: number
+        contour_data:
+          type: object
+          properties:
+            type:
+              type: string
+            colormap:
+              type: string
+            min_value:
+              type: number
+            max_value:
+              type: number
+            nodes:
+              type: array
+              items:
+                $ref: '#/components/schemas/StressNode'
+        per_layer_stress:
+          type: array
+          items:
+            $ref: '#/components/schemas/LayerStress'
+
+    Location3D:
+      type: object
+      properties:
+        r:
+          type: number
+        z:
+          type: number
+        theta:
+          type: number
+
+    StressNode:
+      type: object
+      properties:
+        x:
+          type: number
+        y:
+          type: number
+        z:
+          type: number
+        value:
+          type: number
+
+    LayerStress:
+      type: object
+      properties:
+        layer:
+          type: integer
+        type:
+          type: string
+        sigma1_mpa:
+          type: number
+        sigma2_mpa:
+          type: number
+        tau12_mpa:
+          type: number
+        tsai_wu:
+          type: number
+
+    FailureData:
+      type: object
+      properties:
+        design_id:
+          type: string
+        predicted_failure_mode:
+          type: object
+          properties:
+            mode:
+              type: string
+              enum: [fiber_breakage, matrix_cracking, delamination, liner_failure, boss_failure]
+            is_preferred:
+              type: boolean
+            location:
+              type: string
+            confidence:
+              type: number
+            explanation:
+              type: string
+        tsai_wu:
+          type: object
+          properties:
+            max_at_test:
+              type: object
+              properties:
+                value:
+                  type: number
+                layer:
+                  type: integer
+                location:
+                  type: string
+            max_at_burst:
+              type: object
+              properties:
+                value:
+                  type: number
+                layer:
+                  type: integer
+                location:
+                  type: string
+        first_ply_failure:
+          type: object
+          properties:
+            layer:
+              type: integer
+            layer_type:
+              type: string
+            angle_deg:
+              type: number
+            location:
+              type: string
+            pressure_bar:
+              type: number
+            mode:
+              type: string
+        progressive_failure_sequence:
+          type: array
+          items:
+            type: object
+            properties:
+              pressure_bar:
+                type: number
+              event:
+                type: string
+              layers_affected:
+                type: array
+                items:
+                  type: integer
+        hashin_indices:
+          type: object
+          properties:
+            at_test:
+              $ref: '#/components/schemas/HashinSet'
+            at_burst:
+              $ref: '#/components/schemas/HashinSet'
+
+    HashinSet:
+      type: object
+      properties:
+        fiber_tension:
+          type: number
+        fiber_compression:
+          type: number
+        matrix_tension:
+          type: number
+        matrix_compression:
+          type: number
+
+    ThermalData:
+      type: object
+      properties:
+        design_id:
+          type: string
+        fast_fill:
+          type: object
+          properties:
+            scenario:
+              type: string
+            peak_gas_temp_c:
+              type: number
+            peak_wall_temp_c:
+              type: number
+            peak_liner_temp_c:
+              type: number
+            time_to_peak_seconds:
+              type: integer
+            liner_limit_c:
+              type: number
+            status:
+              type: string
+        thermal_stress:
+          type: object
+          properties:
+            max_mpa:
+              type: number
+            location:
+              type: string
+            components:
+              type: object
+              properties:
+                hoop_mpa:
+                  type: number
+                axial_mpa:
+                  type: number
+                radial_mpa:
+                  type: number
+            combined_with_pressure_max_mpa:
+              type: number
+        extreme_temperature_performance:
+          type: array
+          items:
+            type: object
+            properties:
+              condition:
+                type: string
+              temp_c:
+                type: number
+              max_stress_mpa:
+                type: number
+              margin_percent:
+                type: number
+              status:
+                type: string
+
+    ReliabilityData:
+      type: object
+      properties:
+        design_id:
+          type: string
+        monte_carlo:
+          type: object
+          properties:
+            samples:
+              type: integer
+            p_failure:
+              type: number
+            interpretation:
+              type: string
+            comparison_to_requirement:
+              type: string
+        burst_distribution:
+          type: object
+          properties:
+            mean_bar:
+              type: number
+            std_bar:
+              type: number
+            cov:
+              type: number
+            percentile_5:
+              type: number
+            percentile_95:
+              type: number
+            histogram:
+              type: array
+              items:
+                type: object
+                properties:
+                  bin_center:
+                    type: number
+                  count:
+                    type: integer
+        uncertainty_breakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              source:
+                type: string
+              cov:
+                type: number
+              variance_contribution:
+                type: number
+        key_insight:
+          type: string
+        sensitivity:
+          type: array
+          items:
+            type: object
+            properties:
+              parameter:
+                type: string
+              effect_bar_per_percent:
+                type: number
+
+    CostData:
+      type: object
+      properties:
+        design_id:
+          type: string
+        total_eur:
+          type: number
+        components:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              cost_eur:
+                type: number
+              percent:
+                type: number
+
+    ComplianceData:
+      type: object
+      properties:
+        design_id:
+          type: string
+        overall_status:
+          type: string
+          enum: [pass, fail]
+        standards:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              status:
+                type: string
+              clauses:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    clause:
+                      type: string
+                    requirement:
+                      type: string
+                    value:
+                      type: string
+                    status:
+                      type: string
+
+    ComparisonData:
+      type: object
+      properties:
+        design_ids:
+          type: array
+          items:
+            type: string
+        metrics:
+          type: array
+          items:
+            type: object
+            properties:
+              metric:
+                type: string
+              values:
+                type: object
+                additionalProperties:
+                  type: number
+              best:
+                type: string
+
+    SurrogateConfidence:
+      type: object
+      properties:
+        design_id:
+          type: string
+        metrics:
+          type: array
+          items:
+            type: object
+            properties:
+              metric:
+                type: string
+              r_squared:
+                type: number
+              mean_error_percent:
+                type: number
+              confidence_interval:
+                type: object
+                properties:
+                  low:
+                    type: number
+                  high:
+                    type: number
+
+    TestPlan:
+      type: object
+      properties:
+        design_id:
+          type: string
+        tests:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              articles:
+                type: integer
+              duration:
+                type: string
+              parameters:
+                type: string
+        total_articles:
+          type: string
+        estimated_duration:
+          type: string
+        estimated_cost:
+          type: string
+
+    SentrySpec:
+      type: object
+      properties:
+        design_id:
+          type: string
+        critical_monitoring_points:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              location:
+                $ref: '#/components/schemas/Location3D'
+              region:
+                type: string
+              reason:
+                type: string
+              recommended_sensor:
+                type: string
+              inspection_interval_months:
+                type: integer
+        recommended_sensors:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              count:
+                type: integer
+              purpose:
+                type: string
+        inspection_schedule:
+          type: object
+          additionalProperties:
+            type: string
+
+    # ========================================
+    # EXPORT
+    # ========================================
+    ExportRequest:
+      type: object
+      properties:
+        design_id:
+          type: string
+        include:
+          type: object
+          properties:
+            geometry:
+              type: array
+              items:
+                type: string
+            manufacturing:
+              type: array
+              items:
+                type: string
+            analysis:
+              type: array
+              items:
+                type: string
+            compliance:
+              type: array
+              items:
+                type: string
+            sentry:
+              type: array
+              items:
+                type: string
+        format:
+          type: string
+          enum: [zip]
+
+    ExportJob:
+      type: object
+      properties:
+        export_id:
+          type: string
+        status:
+          type: string
+        estimated_duration_seconds:
+          type: integer
+        status_url:
+          type: string
+
+    ExportStatus:
+      type: object
+      properties:
+        export_id:
+          type: string
+        status:
+          type: string
+          enum: [generating, completed, failed]
+        files:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              size_bytes:
+                type: integer
+        total_size_bytes:
+          type: integer
+        download_url:
+          type: string

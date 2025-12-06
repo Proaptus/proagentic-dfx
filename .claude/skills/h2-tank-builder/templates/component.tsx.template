@@ -1,0 +1,107 @@
+/**
+ * [ComponentName] Component
+ * 
+ * RTM Coverage:
+ * - REQ-XXX: [Requirement description]
+ * - REQ-XXX: [Requirement description]
+ * 
+ * @see frontend-implementation-plan.md Screen X
+ * @see mock-server-specification.md GET /api/[endpoint]
+ */
+
+'use client';
+
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api/client';
+
+// Types - Define prop and data interfaces
+interface [ComponentName]Props {
+  // Required props
+  designId: string;
+  // Optional props with defaults
+  initialTab?: string;
+}
+
+interface [DataType] {
+  // Data structure from API
+  id: string;
+  // ... other fields
+}
+
+/**
+ * Hook for fetching component data
+ * Encapsulates API call and caching logic
+ */
+function use[ComponentName]Data(designId: string) {
+  return useQuery({
+    queryKey: ['[component-name]', designId],
+    queryFn: () => apiClient<[DataType]>(`/api/designs/${designId}/[endpoint]`),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+/**
+ * Main component
+ */
+export function [ComponentName]({ designId, initialTab = 'default' }: [ComponentName]Props) {
+  // 1. Hooks first
+  const { data, isLoading, error } = use[ComponentName]Data(designId);
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  // 2. Early returns for loading/error states
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 bg-red-50 text-red-700 rounded-lg">
+        <p className="font-semibold">Error loading data</p>
+        <p className="text-sm">{error.message}</p>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="p-4 bg-yellow-50 text-yellow-700 rounded-lg">
+        <p>No data available</p>
+      </div>
+    );
+  }
+
+  // 3. Render
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <header className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold">[Component Title]</h2>
+        {/* Optional controls */}
+      </header>
+
+      {/* Main content */}
+      <main>
+        {/* Implement component content here */}
+        {/* Reference RTM requirements in comments */}
+        
+        {/* REQ-XXX: [Feature description] */}
+        <div data-testid="[feature-test-id]">
+          {/* Feature implementation */}
+        </div>
+      </main>
+
+      {/* Footer actions */}
+      <footer className="flex justify-end gap-2">
+        {/* Action buttons */}
+      </footer>
+    </div>
+  );
+}
+
+// Default export for lazy loading
+export default [ComponentName];

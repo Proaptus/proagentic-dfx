@@ -1,0 +1,109 @@
+{
+  "deployment_id": "20251019-143022",
+  "project": "proagentic",
+  "mode": "full",
+  "status": "success",
+  "started_at": "2025-10-19T14:30:22Z",
+  "completed_at": "2025-10-19T14:45:55Z",
+  "total_duration_seconds": 933,
+  "phases": [
+    {
+      "phase": "pre-deploy-checks",
+      "status": "success",
+      "duration_seconds": 12,
+      "timestamp": "2025-10-19T14:30:34Z",
+      "checks_passed": 18,
+      "checks_failed": 0
+    },
+    {
+      "phase": "backend-deploy",
+      "status": "success",
+      "duration_seconds": 180,
+      "timestamp": "2025-10-19T14:33:34Z",
+      "data": {
+        "service": "proagentic-server",
+        "region": "europe-west2",
+        "gcloud_project": "novae-compare",
+        "revision": "proagentic-server-abc123def456",
+        "backend_url": "https://proagentic-server-705044459306.europe-west2.run.app",
+        "traffic_percentage": 100
+      }
+    },
+    {
+      "phase": "staging-deploy",
+      "status": "success",
+      "duration_seconds": 120,
+      "timestamp": "2025-10-19T14:35:34Z",
+      "data": {
+        "alias": "staging--proagentic1",
+        "domain": "https://staging--proagentic1.netlify.app",
+        "build_time_seconds": 45,
+        "deploy_time_seconds": 15
+      }
+    },
+    {
+      "phase": "staging-validation",
+      "status": "success",
+      "duration_seconds": 30,
+      "timestamp": "2025-10-19T14:36:04Z",
+      "data": {
+        "health_check": "ok",
+        "cors_validation": "passed",
+        "csp_validation": "passed",
+        "response_time_ms": 342
+      }
+    },
+    {
+      "phase": "uat-testing",
+      "status": "success",
+      "duration_seconds": 420,
+      "timestamp": "2025-10-19T14:43:04Z",
+      "data": {
+        "scope": "full",
+        "test_results": "all_passed",
+        "tests_run": 45,
+        "tests_passed": 45,
+        "tests_failed": 0,
+        "tests_skipped": 0
+      }
+    },
+    {
+      "phase": "production-deploy",
+      "status": "success",
+      "duration_seconds": 120,
+      "timestamp": "2025-10-19T14:45:04Z",
+      "data": {
+        "domain": "https://proagentic.ai",
+        "build_time_seconds": 48,
+        "deploy_time_seconds": 12
+      }
+    },
+    {
+      "phase": "production-validation",
+      "status": "success",
+      "duration_seconds": 33,
+      "timestamp": "2025-10-19T14:45:37Z",
+      "data": {
+        "health_check": "ok",
+        "cors_validation": "passed",
+        "csp_validation": "passed",
+        "response_time_ms": 289
+      }
+    }
+  ],
+  "errors": [],
+  "warnings": [
+    {
+      "phase": "staging-validation",
+      "message": "CSP header not found in response headers",
+      "severity": "info"
+    }
+  ],
+  "summary": {
+    "all_phases_passed": true,
+    "deployment_successful": true,
+    "production_live": true,
+    "rollback_available": true,
+    "previous_revision": "proagentic-server-xyz789uvw012"
+  }
+}

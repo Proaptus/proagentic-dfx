@@ -1,0 +1,157 @@
+#!/bin/bash
+# rtm-validator.sh
+# Validates RTM coverage and identifies gaps
+
+set -e
+
+RTM_FILE="${1:-requirements-traceability-matrix.csv}"
+
+if [ ! -f "$RTM_FILE" ]; then
+  echo "Error: RTM file not found: $RTM_FILE"
+  exit 1
+fi
+
+echo "╔════════════════════════════════════════════════════════════╗"
+echo "║           RTM COVERAGE VALIDATION REPORT                   ║"
+echo "╚════════════════════════════════════════════════════════════╝"
+echo ""
+
+# Count total requirements
+TOTAL=$(tail -n +2 "$RTM_FILE" | wc -l)
+echo "Total Requirements: $TOTAL"
+echo ""
+
+# Count by status
+echo "─────────────────────────────────────────────────────────────"
+echo "STATUS BREAKDOWN"
+echo "─────────────────────────────────────────────────────────────"
+
+ADDRESSED=$(grep -c ",Addressed," "$RTM_FILE" || echo 0)
+DEFERRED=$(grep -c ",Deferred," "$RTM_FILE" || echo 0)
+PENDING=$(grep -c ",Pending," "$RTM_FILE" || echo 0)
+
+ADDRESSED_PCT=$((ADDRESSED * 100 / TOTAL))
+DEFERRED_PCT=$((DEFERRED * 100 / TOTAL))
+PENDING_PCT=$((PENDING * 100 / TOTAL))
+
+printf "Addressed: %4d (%2d%%) " "$ADDRESSED" "$ADDRESSED_PCT"
+printf "["
+for i in $(seq 1 $((ADDRESSED_PCT / 2))); do printf "█"; done
+for i in $(seq 1 $((50 - ADDRESSED_PCT / 2))); do printf "░"; done
+printf "]\n"
+
+printf "Deferred:  %4d (%2d%%) " "$DEFERRED" "$DEFERRED_PCT"
+printf "["
+for i in $(seq 1 $((DEFERRED_PCT / 2))); do printf "▓"; done
+for i in $(seq 1 $((50 - DEFERRED_PCT / 2))); do printf "░"; done
+printf "]\n"
+
+printf "Pending:   %4d (%2d%%) " "$PENDING" "$PENDING_PCT"
+printf "["
+for i in $(seq 1 $((PENDING_PCT / 2))); do printf "▒"; done
+for i in $(seq 1 $((50 - PENDING_PCT / 2))); do printf "░"; done
+printf "]\n"
+
+echo ""
+
+# Count by priority
+echo "─────────────────────────────────────────────────────────────"
+echo "PRIORITY BREAKDOWN"
+echo "─────────────────────────────────────────────────────────────"
+
+P1_TOTAL=$(grep -c ",P1," "$RTM_FILE" || echo 0)
+P1_ADDRESSED=$(grep ",P1," "$RTM_FILE" | grep -c ",Addressed," || echo 0)
+P1_PCT=$((P1_ADDRESSED * 100 / P1_TOTAL))
+
+P2_TOTAL=$(grep -c ",P2," "$RTM_FILE" || echo 0)
+P2_ADDRESSED=$(grep ",P2," "$RTM_FILE" | grep -c ",Addressed," || echo 0)
+P2_PCT=$((P2_ADDRESSED * 100 / P2_TOTAL))
+
+P3_TOTAL=$(grep -c ",P3," "$RTM_FILE" || echo 0)
+P3_ADDRESSED=$(grep ",P3," "$RTM_FILE" | grep -c ",Addressed," || echo 0)
+P3_PCT=$((P3_ADDRESSED * 100 / P3_TOTAL))
+
+printf "P1 (Must Have):   %3d/%3d (%3d%%) %s\n" "$P1_ADDRESSED" "$P1_TOTAL" "$P1_PCT" \
+  $([ "$P1_PCT" -ge 95 ] && echo "✅" || echo "⚠️")
+printf "P2 (Should Have): %3d/%3d (%3d%%) %s\n" "$P2_ADDRESSED" "$P2_TOTAL" "$P2_PCT" \
+  $([ "$P2_PCT" -ge 70 ] && echo "✅" || echo "ℹ️")
+printf "P3 (Nice to Have): %3d/%3d (%3d%%) %s\n" "$P3_ADDRESSED" "$P3_TOTAL" "$P3_PCT" \
+  $([ "$P3_PCT" -ge 50 ] && echo "✅" || echo "ℹ️")
+
+echo ""
+
+# List unaddressed P1 requirements
+P1_UNADDRESSED=$(grep ",P1," "$RTM_FILE" | grep -v ",Addressed," | grep -v ",Pending,")
+
+if [ -n "$P1_UNADDRESSED" ]; then
+  echo "─────────────────────────────────────────────────────────────"
+  echo "⚠️  UNADDRESSED P1 REQUIREMENTS (Action Required)"
+  echo "─────────────────────────────────────────────────────────────"
+  echo "$P1_UNADDRESSED" | while IFS=, read -r req_id category source section desc rest; do
+    printf "  %s: %s\n" "$req_id" "$desc"
+  done
+  echo ""
+fi
+
+# Count by category
+echo "─────────────────────────────────────────────────────────────"
+echo "CATEGORY BREAKDOWN"
+echo "─────────────────────────────────────────────────────────────"
+
+CATEGORIES=$(tail -n +2 "$RTM_FILE" | cut -d, -f2 | sort -u)
+for CAT in $CATEGORIES; do
+  CAT_TOTAL=$(grep -c ",$CAT," "$RTM_FILE" || echo 0)
+  CAT_ADDRESSED=$(grep ",$CAT," "$RTM_FILE" | grep -c ",Addressed," || echo 0)
+  CAT_PCT=$((CAT_ADDRESSED * 100 / CAT_TOTAL))
+  printf "  %-20s: %3d/%3d (%3d%%)\n" "$CAT" "$CAT_ADDRESSED" "$CAT_TOTAL" "$CAT_PCT"
+done
+
+echo ""
+
+# API coverage
+echo "─────────────────────────────────────────────────────────────"
+echo "API ENDPOINT COVERAGE"
+echo "─────────────────────────────────────────────────────────────"
+
+ENDPOINTS=$(tail -n +2 "$RTM_FILE" | cut -d, -f13 | grep -v "N/A" | grep -v "^$" | sort -u)
+ENDPOINT_COUNT=$(echo "$ENDPOINTS" | grep -c "/" || echo 0)
+echo "Total endpoints defined: $ENDPOINT_COUNT"
+echo ""
+echo "Endpoints by path:"
+echo "$ENDPOINTS" | while read -r endpoint; do
+  COUNT=$(grep -c "$endpoint" "$RTM_FILE" || echo 0)
+  printf "  %s (%d requirements)\n" "$endpoint" "$COUNT"
+done | sort -t'(' -k2 -rn | head -15
+
+echo ""
+
+# Data mode coverage
+echo "─────────────────────────────────────────────────────────────"
+echo "DATA MODE DISTRIBUTION"
+echo "─────────────────────────────────────────────────────────────"
+
+STATIC=$(grep -c ",Static$" "$RTM_FILE" || echo 0)
+SIMULATED=$(grep -c ",Simulated$" "$RTM_FILE" || echo 0)
+BOTH=$(grep -c ",Both$" "$RTM_FILE" || echo 0)
+NA=$(grep -c ",N/A$" "$RTM_FILE" || echo 0)
+
+printf "  Static:    %3d (pre-defined JSON data)\n" "$STATIC"
+printf "  Simulated: %3d (generated by simulators)\n" "$SIMULATED"
+printf "  Both:      %3d (either mode works)\n" "$BOTH"
+printf "  N/A:       %3d (frontend-only or deferred)\n" "$NA"
+
+echo ""
+
+# Final verdict
+echo "═════════════════════════════════════════════════════════════"
+if [ "$P1_PCT" -ge 95 ] && [ "$ADDRESSED_PCT" -ge 85 ]; then
+  echo "✅ RTM VALIDATION: PASSED"
+  echo "   All P1 requirements addressed. Coverage is acceptable."
+elif [ "$P1_PCT" -ge 90 ]; then
+  echo "⚠️  RTM VALIDATION: NEEDS ATTENTION"
+  echo "   Some P1 requirements unaddressed. Review before demo."
+else
+  echo "❌ RTM VALIDATION: FAILED"
+  echo "   Too many P1 requirements unaddressed. Fix before proceeding."
+fi
+echo "═════════════════════════════════════════════════════════════"

@@ -1,0 +1,162 @@
+# ProAgentic Deployment Configuration Template
+# 
+# Copy this file to your project root as `deployment.config.yml` and update
+# the values for your specific project. Do NOT commit secrets (API keys).
+# Store secrets in environment variables instead.
+#
+# Environment Variables Required (set in shell before deploying):
+#   - OPENROUTER_API_KEY      (backend API key)
+#   - SUPABASE_URL             (database URL)
+#   - SUPABASE_SERVICE_KEY     (database service key)
+#   - NETLIFY_AUTH_TOKEN       (Netlify authentication)
+
+# Project Identifier
+# Used to organize deployments and select configuration
+project: proagentic
+
+# Backend Configuration (Cloud Run)
+backend:
+  # Google Cloud project ID where Cloud Run service runs
+  gcloud_project: novae-compare
+  
+  # Cloud Run service name (must exist in Google Cloud)
+  service_name: proagentic-server
+  
+  # Cloud Run region (europe-west2 is UK)
+  region: europe-west2
+  
+  # Docker registry prefix (usually gcr.io for Google Container Registry)
+  docker_registry: gcr.io
+  
+  # Dockerfile path relative to project root
+  dockerfile: Dockerfile.backend
+  
+  # Port the backend service listens on
+  port: 8080
+
+# Frontend Staging Configuration (Netlify)
+staging:
+  # Netlify site name (found in Netlify settings or URL)
+  # Example: If your Netlify site URL is "proagentic1.netlify.app", then netlify_site: "proagentic1"
+  netlify_site: proagentic1
+  
+  # Netlify deploy preview alias for staging
+  # This creates URL: https://staging--proagentic1.netlify.app
+  netlify_alias: staging--proagentic1
+  
+  # CORS validation domain for staging
+  # MUST match the staging deploy preview URL exactly
+  cors_domain: https://staging--proagentic1.netlify.app
+  
+  # Build command for staging
+  build_command: npm run build:staging
+  
+  # Publish directory for staging
+  publish_dir: dist
+
+# Frontend Production Configuration (Netlify)
+production:
+  # Production domain (custom domain, not *.netlify.app)
+  domain: https://proagentic.ai
+  
+  # CORS validation domain for production
+  # MUST match the production domain exactly
+  cors_domain: https://proagentic.ai
+  
+  # Build command for production
+  build_command: npm run build
+  
+  # Publish directory for production
+  publish_dir: dist
+
+# UAT (Testing) Configuration
+uat:
+  # Enable UAT testing during deployment (recommended: true)
+  enabled: true
+  
+  # Test scope for --mode smoke (fast, minimal tests)
+  # These tests run in parallel during smoke deployments
+  smoke_scope:
+    - auth                 # Authentication flows
+    - dashboard            # Dashboard rendering and basic functionality
+  
+  # Test scope for --mode full (comprehensive tests)
+  # These tests run in parallel during full deployments
+  full_scope:
+    - auth                 # Authentication flows
+    - dashboard            # Dashboard rendering
+    - workflow             # Project workflow creation
+    - export               # Data export functionality
+  
+  # Timeout for UAT testing (seconds)
+  timeout: 600
+  
+  # Stop deployment if UAT fails (can be overridden with --skip-uat)
+  fail_on_error: true
+
+# Validation Configuration
+validation:
+  # Check CORS headers (recommended: true)
+  check_cors: true
+  
+  # Check CSP headers (recommended: true)
+  check_csp: true
+  
+  # Health check endpoint (relative to domain)
+  health_endpoint: /api/health
+  
+  # Health check timeout (seconds)
+  health_timeout: 30
+  
+  # Allow self-signed certificates in staging (recommended: false)
+  allow_self_signed: false
+
+# Logging Configuration
+logging:
+  # Directory for deployment logs
+  log_dir: .deployment/logs
+  
+  # Log level: debug, info, warn, error
+  log_level: info
+  
+  # Keep logs for N days (0 = keep all)
+  retention_days: 90
+
+# Advanced Configuration (optional)
+advanced:
+  # Skip pre-deployment checks (not recommended)
+  skip_pre_checks: false
+  
+  # Parallel execution for independent phases (recommended: true)
+  parallel_execution: true
+  
+  # Rollback on any failure (recommended: true)
+  auto_rollback: true
+  
+  # Maximum retry attempts for transient failures
+  max_retries: 3
+  
+  # Retry delay in seconds
+  retry_delay: 5
+
+# Notes for Future Developers
+# 
+# If you need to support multiple projects:
+# 1. Create separate config files:
+#    - deployment.config.yml (primary)
+#    - deployment.config.project2.yml (alternative)
+# 
+# 2. Use with: deployment --mode full --config deployment.config.project2.yml
+#
+# If you need different staging environments:
+# 1. Update staging.netlify_alias to different value
+# 2. Update staging.cors_domain to match the new URL
+# 3. Ensure backend CORS allowlist includes the new domain
+#
+# Security Reminders:
+# - Never commit OPENROUTER_API_KEY to this file
+# - Never commit SUPABASE_SERVICE_KEY to this file
+# - Never commit NETLIFY_AUTH_TOKEN to this file
+# - Use environment variables instead
+# - Rotate credentials regularly
+# - Audit deployments via .deployment/logs/

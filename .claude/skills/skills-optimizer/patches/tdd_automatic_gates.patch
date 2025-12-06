@@ -1,0 +1,140 @@
+--- .claude/skills/tdd/SKILL.md.before
++++ .claude/skills/tdd/SKILL.md.after
+@@ -150,7 +150,13 @@
+
+ ---
+
+-#### Step 1B: 🔴 RED VALIDATION GATE - MANDATORY STOP POINT
++#### Step 1B: 🔴 RED VALIDATION GATE - AUTOMATIC CHECKPOINT
++
++**🤖 GATE EXECUTION: AUTOMATIC (NOT MANUAL)**
++- You perform this validation automatically
++- You do NOT stop and wait for user approval
++- You show evidence to user, then proceed automatically to Step 2
++- EXCEPTION: If user explicitly requests "manual gate reviews", then stop and wait
+
+ **🛑 YOU MUST RUN TESTS AND PROVE RED STATE BEFORE PROCEEDING TO STEP 2**
+
+@@ -179,11 +185,11 @@
+    - Point out which tests failed
+    - Explain why they failed (bug doesn't exist yet / feature not implemented)
+
+-4. **STOP and CONFIRM RED state**:
++4. **VERIFY RED state and PROCEED**:
+    - ✅ Tests have been executed
+    - ✅ Tests FAILED (RED confirmed)
+    - ✅ Evidence shown to user
+-   - ✅ User can see the RED state
++   - ✅ AUTOMATICALLY proceed to Step 2A (do NOT wait for user)
+
+ **⚠️ IF TESTS PASS AT THIS POINT**: You wrote the tests incorrectly. Tests should FAIL because the bug/feature doesn't exist yet. Fix the tests to actually validate the requirement.
+
+@@ -195,7 +201,7 @@
+
+ ---
+
+-**🛑 MANDATORY CHECKPOINT: You CANNOT proceed to Step 2 until RED state is proven above with actual command output shown to the user**
++**🛑 AUTOMATIC CHECKPOINT: After proving RED state above with actual command output, AUTOMATICALLY proceed to Step 2**
+
+ ---
+
+@@ -340,7 +346,13 @@
+
+ ---
+
+-#### Step 2B: 🟢 GREEN VALIDATION GATE - MANDATORY STOP POINT
++#### Step 2B: 🟢 GREEN VALIDATION GATE - AUTOMATIC CHECKPOINT
++
++**🤖 GATE EXECUTION: AUTOMATIC (NOT MANUAL)**
++- You perform this validation automatically
++- You do NOT stop and wait for user approval
++- You show evidence to user, then proceed automatically to Step 4
++- EXCEPTION: If user explicitly requests "manual gate reviews", then stop and wait
+
+ **🛑 YOU MUST RUN TESTS AND PROVE GREEN STATE**
+
+@@ -367,11 +379,11 @@
+    - Show that tests now PASS
+    - Explain the RED→GREEN transition
+
+-4. **STOP and CONFIRM GREEN state**:
++4. **VERIFY GREEN state and PROCEED**:
+    - ✅ Tests have been executed
+    - ✅ Tests PASSED (GREEN confirmed)
+    - ✅ Evidence shown to user
+-   - ✅ User can verify RED→GREEN transition
++   - ✅ AUTOMATICALLY proceed to Step 4 (do NOT wait for user)
+
+ **⚠️ IF TESTS STILL FAIL**: Use self-debug loop (max 3 iterations), then show results. Do not proceed until GREEN.
+
+@@ -383,7 +395,7 @@
+
+ ---
+
+-**🛑 MANDATORY CHECKPOINT: You CANNOT proceed to Step 4 until GREEN state is proven above with actual command output shown to the user**
++**🛑 AUTOMATIC CHECKPOINT: After proving GREEN state above with actual command output, AUTOMATICALLY proceed to Step 4**
+
+ ---
+
+@@ -530,7 +542,13 @@
+
+ ---
+
+-#### Step 4B: 🟢 GREEN MAINTENANCE GATE - MANDATORY STOP POINT
++#### Step 4B: 🟢 GREEN MAINTENANCE GATE - AUTOMATIC CHECKPOINT
++
++**🤖 GATE EXECUTION: AUTOMATIC (NOT MANUAL)**
++- You perform this validation automatically after EACH refactor
++- You do NOT stop and wait for user approval
++- You show evidence to user, then proceed automatically to next refactor or Step 5
++- EXCEPTION: If user explicitly requests "manual gate reviews", then stop and wait
+
+ **🛑 AFTER EACH REFACTOR, YOU MUST RUN TESTS AND PROVE STILL GREEN**
+
+@@ -568,7 +586,7 @@
+
+ ---
+
+-**🛑 MANDATORY CHECKPOINT: After EACH refactor, prove tests still GREEN. Repeat this checkpoint for every refactor.**
++**🛑 AUTOMATIC CHECKPOINT: After EACH refactor, prove tests still GREEN, then AUTOMATICALLY proceed to next refactor or Step 5.**
+
+ ---
+
+@@ -622,7 +640,13 @@
+
+ ---
+
+-#### Step 5B: 📊 QUALITY VALIDATION GATE - MANDATORY STOP POINT
++#### Step 5B: 📊 QUALITY VALIDATION GATE - AUTOMATIC CHECKPOINT
++
++**🤖 GATE EXECUTION: AUTOMATIC (NOT MANUAL)**
++- You perform this validation automatically
++- You do NOT stop and wait for user approval
++- You show evidence to user, then proceed automatically to create summary/PR
++- EXCEPTION: If user explicitly requests "manual gate reviews", then stop and wait
+
+ **🛑 YOU MUST RUN FULL TEST SUITE AND PROVE PASS_TO_PASS**
+
+@@ -654,11 +678,11 @@
+    - Confirm all tests pass
+    - Show no regressions
+
+-5. **STOP and CONFIRM quality gates**:
++5. **VERIFY quality gates and PROCEED**:
+    - ✅ Full test suite executed
+    - ✅ All tests pass (PASS_TO_PASS confirmed)
+    - ✅ Evidence shown to user
+-   - ✅ Ready for PR
++   - ✅ AUTOMATICALLY proceed to Step 6 (create summary/PR)
+
+ **❌ FORBIDDEN ACTIONS**:
+ - Do NOT create PR without running full suite
+@@ -668,7 +692,7 @@
+
+ ---
+
+-**🛑 MANDATORY CHECKPOINT: You CANNOT create PR until quality gates proven above with full test suite output shown to user**
++**🛑 AUTOMATIC CHECKPOINT: After proving quality gates above with full test suite output, AUTOMATICALLY proceed to Step 6**
+
+ ---
+

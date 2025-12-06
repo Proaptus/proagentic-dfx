@@ -1,0 +1,663 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "document_type": "competition_requirements",
+  "document_version": "1.0.0",
+  "created_at": "2025-12-05T00:00:00Z",
+  "source_documents": [
+    "Agentic AI Pioneers Prize - Development Phase Competition Brief",
+    "Agentic AI assessor guidance for applicants.pdf",
+    "Phase 1 EOI Application"
+  ],
+
+  "competition": {
+    "name": "The Agentic AI Pioneers Prize - Development Phase",
+    "phase": 2,
+    "phase_description": "Develop and evidence single or multi agent solutions",
+    "organiser": {
+      "primary": "Innovate UK (part of UKRI)",
+      "partner": "Department for Science, Innovation and Technology (DSIT)"
+    },
+    "competition_id": "2355",
+    "ifs_url": "https://apply-for-innovation-funding.service.gov.uk/competition/2355/overview/1bab3bee-1efd-4852-8756-599dd16f8bf6",
+    "funding_type": "Prize Fund",
+    "total_fund_gbp": 1000000
+  },
+
+  "timeline": {
+    "competition_opens": "2025-12-08",
+    "online_briefing_event": "2025-12-11",
+    "competition_closes": {
+      "date": "2026-02-23",
+      "time": "11:00",
+      "timezone": "UK"
+    },
+    "invite_to_interview": "2026-03-06",
+    "interview_panel_start": "2026-03-16",
+    "interview_panel_end": "2026-03-18",
+    "applicants_notified": "2026-03-20",
+    "awards_event": {
+      "timing": "End of March 2026",
+      "location": "London (venue TBC)",
+      "description": "In person event attended by government and industry representatives"
+    }
+  },
+
+  "project_constraints": {
+    "duration_months": 3,
+    "location_requirement": "All participation activities within UK",
+    "exploitation_requirement": "Intend to exploit results in or from UK",
+    "ip_requirement": "Built on proprietary, IP owned codebases",
+    "consortium_rule": "Must apply with same consortium named in EOI"
+  },
+
+  "prizes": {
+    "categories": [
+      {
+        "sector": "Advanced Manufacturing",
+        "first_prize_gbp": 250000
+      },
+      {
+        "sector": "Health and Life Sciences",
+        "first_prize_gbp": 250000
+      },
+      {
+        "sector": "Creative Industries",
+        "first_prize_gbp": 250000
+      }
+    ],
+    "overall_winner": {
+      "bonus_gbp": 250000,
+      "criteria": "Strongest solution among the three category winners based on full assessment criteria"
+    },
+    "payment_note": "Prizes paid to lead organisation only. Lead responsible for distributing to partners."
+  },
+
+  "eligibility": {
+    "must_have": [
+      "Been successful in Phase 1 and invited to apply by Innovate UK",
+      "Developed an agentic AI solution that addresses one of the published challenge statements",
+      "Built the solution on proprietary, IP owned codebases",
+      "Commit to carrying out all participation activities within the UK",
+      "Intend to exploit the results in or from the UK"
+    ],
+    "collaborative_projects": {
+      "requirement": "Submit a draft collaboration agreement as part of Question 9",
+      "final_agreement": "Signed version required to receive prize"
+    },
+    "disqualifiers": [
+      "Failed to exploit a previously funded project",
+      "Overdue independent accountant's report",
+      "Failed to comply with Prize terms and conditions",
+      "Previously submitted application (cannot reuse)"
+    ]
+  },
+
+  "sectors": {
+    "available": ["Advanced Manufacturing", "Health and Life Sciences", "Creative Industries"],
+    "selection_note": "Portfolio approach may be used to ensure balanced selection across sectors, challenges, solution types, company sizes and innovation approaches"
+  },
+
+  "advanced_manufacturing_challenges": {
+    "challenge_1": {
+      "name": "Design Compliance Agents",
+      "official_description": "The solution must be an agentic AI system that supports the understanding, tracking and verification of design compliance across complex supply chains.",
+      "can_do_one_or_more": [
+        "Help create or extract requirements, limits, design rationale, key risks and proof of compliance from many formats, such as certification records, simulation results, test data and analysis reports",
+        "Run simple compliance checks against standards, regulations and certification rules, and mark them as achieved, partly achieved or not achieved, then produce documents that are ready for audit and human review",
+        "Link assurance and compliance systems in an automated way, so there is a continuous and auditable digital thread and shared repositories, without exposing IP or breaking access permissions"
+      ],
+      "optional_focus_areas": [
+        "Provide dashboards that show compliance progress, gaps and risks across the design lifecycle, with optional human checks when needed",
+        "Track how design changes affect compliance, safety and certification status, and make these impacts clear to users"
+      ],
+      "example_use_cases": [
+        "Automotive, marine and aerospace work where materials, structures and systems must meet strict regulations, and where analysis, testing or other set methods are used to prove compliance",
+        "Checking detailed design specifications by comparing the 'as-designed' version with the 'as-made' or 'as-assembled' product, including any repairs or changes, to show that the final product still meets certification requirements"
+      ]
+    },
+    "challenge_2": {
+      "name": "Detailed Design for X Agents",
+      "official_description": "The solution must be an agentic AI system that supports multi-domain design and optimisation across performance, manufacturability and other design priorities.",
+      "can_do_one_or_more": [
+        "Run or mimic domain-specific design and analysis steps, and link these smoothly across design, analysis and testing tools",
+        "Create schematics, Computer-Aided Design (CAD) models or simulations using defined constraints, materials, manufacturing limits, tolerances, standards and written design rules",
+        "Explain design choices, show key trade-offs and describe the optimisation path, including uncertainty, so users can understand and challenge the results",
+        "Support automatic design loops that suggest and apply design improvements, using results from simulations and feedback from users"
+      ],
+      "optional_focus_areas": [
+        "Build optimisation workflows or chains of agents that take high-level system requirements and turn them into clear, detailed design studies",
+        "Include agents that handle a wider range of Design for X goals, such as sustainability, circular use of materials, ease of assembly, in-service inspection, and automatic checks for compliance and quality"
+      ],
+      "example_use_cases": [
+        {
+          "domain": "Battery development",
+          "description": "Choosing raw cell materials and designing cells and electrodes with manufacturing needs in mind"
+        },
+        {
+          "domain": "Sustainable polymer development",
+          "description": "Choosing the right monomers, optimising polymerisation conditions and planning scale-up"
+        },
+        {
+          "domain": "CO2 purification systems",
+          "description": "Gathering data from similar designs, creating early prototypes, running simulations and selecting the best equipment and process design"
+        },
+        {
+          "domain": "Marine vessel components",
+          "description": "Designing parts of a marine vessel, such as seating or other simple but time-consuming components"
+        },
+        {
+          "domain": "Primary airframe structures",
+          "description": "Balancing stiffness, weight and aerodynamic performance to achieve an optimised and compliant design"
+        },
+        {
+          "domain": "Hydrogen storage tank design",
+          "description": "Exploring materials, liners, bosses and geometric features across different tank types, for both gaseous and liquid Hydrogen and considering through-life monitoring"
+        }
+      ]
+    },
+    "challenge_3": {
+      "name": "System of System Concept Design Agents",
+      "official_description": "The solution must be an agentic AI system that supports concept design across multiple interconnected systems where changes in one system affect others.",
+      "can_do_one_or_more": [
+        "Respond to changing inputs from stakeholders or other system agents, at a speed that fits the needs of the application",
+        "Improve performance across several systems at once, and reliably produce or share key outputs in a form that other agents in the SoS network can use, without creating IP conflicts",
+        "Model the links between systems, showing how they affect each other, and use this to spot weak points where key functions or goals could be harmed by changes in conditions"
+      ],
+      "optional_focus_areas": [
+        "Connect to or make use of higher fidelity models, even if those models are not agent based, or create new agents when current ones are not good enough",
+        "Keep a clear and checkable digital thread across all interacting systems, by supporting toolchains and smooth data flow between old and new agents, models and systems"
+      ],
+      "example_use_cases": [
+        "Optimising aircraft, airline and airport logistics by modelling how design, operations, air traffic and infrastructure interact, and balancing size, fuel use, noise limits and passenger flow",
+        "Jointly optimising EV charging networks and vehicle design by modelling how battery choices, charging points and grid limits interact, to improve range, charging times and overall cost while meeting safety rules",
+        "Optimising wind farm layouts and grid connections by testing turbine designs and placements, assessing wake effects and grid loading, and maximising output while controlling maintenance costs and meeting UK standards",
+        "Future energy transition infrastructure, assessing locations, storage, transport and generation options to support low-carbon transport and wider decarbonisation"
+      ]
+    }
+  },
+
+  "application_questions": {
+    "unscored": [
+      {
+        "number": 1,
+        "title": "Applicant location",
+        "requirement": "State the name and full registered address of your organisation and any partners",
+        "purpose": "Understand geographical location of applicants"
+      },
+      {
+        "number": 2,
+        "title": "Animal testing",
+        "requirement": "Select Yes or No",
+        "options": ["Yes", "No"]
+      },
+      {
+        "number": 3,
+        "title": "Permits and licences",
+        "requirement": "Confirm correct permits and licences in place by project start date",
+        "options": ["Yes", "No", "In the process of being applied for", "Not applicable"]
+      },
+      {
+        "number": 4,
+        "title": "International Collaboration",
+        "requirement": "Provide details of any expected international collaboration or engagement"
+      },
+      {
+        "number": 5,
+        "title": "Export licence",
+        "requirement": "Indicate whether export control license required",
+        "options": ["Yes", "No"]
+      },
+      {
+        "number": 6,
+        "title": "Trusted Research and Innovation",
+        "requirement": "Explain relation to UKRI TR&I Principles including dual-use applications, NSI Act relevance, export control, UK Strategic Export Control List"
+      },
+      {
+        "number": 7,
+        "title": "Challenge statement",
+        "requirement": "Select which challenge statement your solution aligns to",
+        "options": [
+          "Advanced Manufacturing Challenge: Design Compliance Agents",
+          "Advanced Manufacturing Challenge: Detailed Design for X Agents",
+          "Advanced Manufacturing Challenge: System of System Concept Design Agents",
+          "Health and Life Science Challenge: Digital Twin Design and Implementation Agents",
+          "Health and Life Science Challenge: Multimodal Biomedical Insight and Decision Support Agents",
+          "Health and Life Science Challenge: Adaptive Operational Intelligence and Readiness Forecasting Agents",
+          "Creative Industries Challenge: Intelligent Creative Workflow and Asset Orchestration Agents",
+          "Creative Industries Challenge: Real-Time Adaptive Media and Experience Design Agents",
+          "Creative Industries Challenge: Rights, Attribution and Provenance Intelligence Agents"
+        ]
+      },
+      {
+        "number": 8,
+        "title": "EOI application number",
+        "requirement": "Provide application number from Phase 1 EOI"
+      },
+      {
+        "number": 9,
+        "title": "Consortium",
+        "requirement": "If collaborative, explain roles, skills and expertise of all organisations. Single organisation answer 'Not applicable'. Collaborative must submit draft collaboration agreement as appendix (PDF, max 10MB, 2 A4 pages)."
+      }
+    ],
+    "scored": [
+      {
+        "number": 10,
+        "title": "High level technical approach",
+        "prompt": "How does the system work and why is it credible?",
+        "must_explain": [
+          "The final system architecture, agent roles, key components and data flows",
+          "What is novel compared with the state of the art and what was hard in practice",
+          "The key performance metrics, datasets and test conditions used to validate the system, including how these relate to the challenge objectives",
+          "The tools, compute and environments used during development and validation"
+        ],
+        "appendix": {
+          "required": true,
+          "format": "PDF",
+          "max_size_mb": 10,
+          "max_pages": 2,
+          "content": "Diagrams, tables or other visuals that help explain technical approach and system performance"
+        },
+        "word_limit": 400
+      },
+      {
+        "number": 11,
+        "title": "User and workflow fit",
+        "prompt": "Who will use it, where does it fit in the workflow, and what does it improve?",
+        "must_explain": [
+          "The real user context, roles and tasks you are designing for, and any human-in-the-loop steps",
+          "Potential implications for time, quality, cost, safety or reliability in that workflow",
+          "Interoperability with existing tools, systems, data formats and governance constraints"
+        ],
+        "appendix": {
+          "required": false,
+          "format": "PDF",
+          "max_size_mb": 10,
+          "max_pages": 2,
+          "content": "Visuals that clarify the user journey, workflow, or how solution fits into existing processes"
+        },
+        "word_limit": 400
+      },
+      {
+        "number": 12,
+        "title": "MVP and integration readiness",
+        "prompt": "Describe what aspects of your solution are ready for demonstration and how they can be deployed.",
+        "must_explain": [
+          "The MVP scope delivered, what can be demonstrated, and how this demonstrable capability aligns with your selected challenge statement and its objectives",
+          "Packaging, Application Programming Interfaces (API), interfaces and deployment model validated during the phase",
+          "Verification and validation results, acceptance thresholds met and known limitations",
+          "What remains to reach production in a typical UK setting, and the plan to close gaps"
+        ],
+        "appendix": {
+          "required": true,
+          "format": "PDF",
+          "max_size_mb": 10,
+          "max_pages": 2,
+          "content": "Diagrams, summaries or tables that help show what MVP does and how it can be deployed or integrated"
+        },
+        "word_limit": 400
+      },
+      {
+        "number": 13,
+        "title": "Risks, assurance and explainability",
+        "prompt": "What could go wrong and how will you control it responsibly?",
+        "must_explain": [
+          "The principal technical, data, safety, security and delivery risks encountered, and mitigations applied",
+          "Assurance activities completed, such as tests, red-teaming, evaluation protocols and audit trails",
+          "How the system explains its outputs or actions to users, and any evidence that this is usable",
+          "Compliance status against any relevant regulations or standards, and remaining actions"
+        ],
+        "appendix": {
+          "required": false,
+          "format": "PDF",
+          "max_size_mb": 10,
+          "max_pages": 2,
+          "content": "Materials that summarise key risks, assurance activities or how you present explainability to users"
+        },
+        "word_limit": 400
+      },
+      {
+        "number": 14,
+        "title": "Potential commercial impact and UK benefit",
+        "prompt": "What impact might this project have outside the project team?",
+        "must_explain": [
+          "Target customers, value proposition and evidence from this phase that supports ROI",
+          "Route to adoption: partnerships, pricing, delivery and support model you validated or de-risked",
+          "Expected UK benefits such as productivity, cost reduction, quality, exports or resilience",
+          "Competitive positioning and how the work strengthens UK capabilities and IP"
+        ],
+        "appendix": {
+          "required": false
+        },
+        "word_limit": 400
+      },
+      {
+        "number": 15,
+        "title": "Future potential and scalability",
+        "prompt": "How far do you think you can develop your solution?",
+        "must_explain": [
+          "The technical roadmap informed by the solution development phase",
+          "Generalisability to adjacent use cases or sectors, and limits to transfer",
+          "Scaling considerations for data, safety, compute, deployment and operations in UK settings",
+          "Partnership, IP and commercial milestones you will pursue post-competition"
+        ],
+        "appendix": {
+          "required": false
+        },
+        "word_limit": 400
+      }
+    ]
+  },
+
+  "assessment_criteria": {
+    "scoring_range": {
+      "min": 1,
+      "max": 10
+    },
+    "assessor_count": 3,
+    "assessment_note": "All scores count towards total score used to make final decision on interview invitation",
+
+    "question_10_criteria": {
+      "title": "High level technical approach",
+      "scores_9_10": [
+        "Technical approach is clear, coherent, and well justified",
+        "Architecture, components and data flows are well explained and easy to understand",
+        "Approach is clearly and convincingly aligned with the selected challenge statement and its objectives",
+        "Where a multi-agent or system-to-system solution is claimed, agent or system roles and interactions are clearly described and evidenced",
+        "Novelty is credible and well demonstrated",
+        "Performance metrics are appropriate, validated and supported with convincing evidence, including how they show progress against the challenge objectives",
+        "Appendix significantly enhances clarity"
+      ],
+      "scores_7_8": [
+        "Technical approach is clearly described but may lack depth in some areas",
+        "Architecture and data flows are understandable though less detailed",
+        "Alignment to the selected challenge statement and objectives is generally sound but not strongly evidenced",
+        "Where a multi-agent or system-to-system solution is claimed, roles and interactions are described but not fully substantiated",
+        "Novelty is present but less well substantiated",
+        "Performance metrics are provided with reasonable but not comprehensive evidence or link to objectives"
+      ],
+      "scores_5_6": [
+        "Approach is described but lacks clarity, structure or detail",
+        "Alignment with the challenge statement and objectives is weak, generic or implied rather than clearly demonstrated",
+        "Claims of multi-agent or system-to-system behaviour are vague or lightly evidenced",
+        "Novelty claims are vague or weakly evidenced",
+        "Performance evidence is limited, illustrative or inconsistently presented, with limited connection to the stated objectives"
+      ],
+      "scores_3_4": [
+        "Technical description is unclear or incomplete",
+        "Alignment with the selected challenge statement is poor or inconsistent",
+        "Minimal or no meaningful novelty is demonstrated",
+        "Little or no credible evidence that the technical approach can achieve the stated objectives",
+        "Performance evidence is weak, inappropriate or absent",
+        "Appendix adds little value or is poorly aligned"
+      ],
+      "scores_1_2": [
+        "Technical approach is fundamentally unclear or incoherent",
+        "No credible evidence that the solution can meet the challenge objectives",
+        "Any claimed multi-agent or system-to-system aspects are absent or not substantiated",
+        "No credible performance evidence",
+        "Appendix missing or unusable"
+      ]
+    },
+
+    "question_11_criteria": {
+      "title": "User and workflow fit",
+      "scores_9_10": [
+        "User context and workflow are described with strong domain understanding",
+        "Clear insight into real tasks, constraints, dependencies and typical organisational practices",
+        "Proposed workflow integration is realistic, coherent and clearly linked to the selected challenge",
+        "Human-in-the-loop roles are identified and well justified where relevant",
+        "Interoperability with existing tools, systems and governance is addressed in a credible way",
+        "Any assumptions about adoption or operation are explicit and plausible",
+        "Appendix enhances clarity, if submitted"
+      ],
+      "scores_7_8": [
+        "User context and workflow are well described, with good domain understanding in most areas",
+        "Workflow integration is plausible but some steps or constraints are not fully explored",
+        "Human-in-the-loop roles are mentioned but not fully developed",
+        "Interoperability is recognised with some relevant detail, though not comprehensive",
+        "Assumptions about adoption are reasonable but not deeply examined"
+      ],
+      "scores_5_6": [
+        "User context is described but in a general or high-level way",
+        "Workflow integration is partially explained or relies on broad assumptions",
+        "Limited discussion of realistic constraints, dependencies or operational challenges",
+        "Human-in-the-loop roles are only lightly touched on or generic",
+        "Interoperability is mentioned but lacks useful detail"
+      ],
+      "scores_3_4": [
+        "Limited or shallow understanding of users, roles or workflows",
+        "Proposed integration into real-world processes is unclear or unrealistic",
+        "Human-in-the-loop needs are ignored or poorly justified",
+        "Interoperability constraints are not recognised or are described inaccurately"
+      ],
+      "scores_1_2": [
+        "No meaningful understanding of users or workflows is demonstrated",
+        "No credible explanation of how the solution would embed into real processes",
+        "Appendix adds no value or is irrelevant, if submitted"
+      ]
+    },
+
+    "question_12_criteria": {
+      "title": "MVP and integration readiness",
+      "scores_9_10": [
+        "Baseline capability and progression to current MVP are clearly and convincingly described",
+        "MVP is well-defined, coherent, and strongly aligned with the selected challenge statement and its objectives",
+        "What can be demonstrated is clearly described and directly evidences progress against the challenge",
+        "Evidence of testing, demonstration and deployment is strong, relevant and robust",
+        "Packaging, interfaces and APIs are clearly described and technically credible",
+        "Verification and validation activities are substantial, appropriate and well evidenced, with clear acceptance thresholds and limitations",
+        "Remaining gaps to production are clearly identified with realistic and credible plans to close them in a UK context",
+        "Environmental and societal considerations relevant to deployment are recognised and addressed appropriately",
+        "Appendix is clear, well structured and materially enhances understanding"
+      ],
+      "scores_7_8": [
+        "Baseline and progression to MVP are described with generally good clarity",
+        "MVP is clear and broadly aligned with the selected challenge statement, though links to objectives may be less explicit",
+        "Demonstrable capability is described and shows plausible progress, though evidence is less comprehensive",
+        "Testing, demonstration and deployment considerations are present but not fully developed",
+        "Verification and validation activities are reasonable but incomplete or less detailed",
+        "Remaining gaps are identified with broadly realistic plans",
+        "Environmental or societal considerations are mentioned but at a high level"
+      ],
+      "scores_5_6": [
+        "Baseline and progression are mentioned but in a general or superficial way",
+        "MVP is described but its alignment to the challenge statement or objectives is only loosely made or implied",
+        "Demonstrable capability is unclear or weakly evidenced",
+        "Evidence of deployment or integration is limited or high-level",
+        "Verification and validation activities are modest, illustrative or poorly connected to claims",
+        "Remaining gaps are noted but plans to address them are vague or unconvincing",
+        "Environmental or societal considerations are only briefly referenced or not clearly linked to deployment"
+      ],
+      "scores_3_4": [
+        "MVP is unclear, inconsistently described or not credible",
+        "Alignment with the selected challenge statement or its objectives is weak or not clearly established",
+        "Minimal useful evidence of testing, demonstration or deployment",
+        "Verification and validation are weak, absent or inappropriate",
+        "Remaining gaps are largely unrecognised or unrealistic",
+        "Environmental or societal considerations are not addressed where they would clearly be relevant",
+        "Appendix is limited, confusing or adds little value"
+      ],
+      "scores_1_2": [
+        "No meaningful MVP is described, or description is incoherent",
+        "No credible link between what can be demonstrated and the selected challenge statement",
+        "No credible evidence of testing, demonstration or deployment",
+        "Required appendix is missing or unusable"
+      ]
+    },
+
+    "question_13_criteria": {
+      "title": "Risks, assurance and explainability",
+      "scores_9_10": [
+        "Key risks are clearly identified, relevant and thoughtfully analysed",
+        "Mitigations are well justified, proportionate and clearly linked to the identified risks",
+        "Assurance activities (for example, testing, evaluation protocols, audit trails, red-teaming) are substantial, appropriate and credible",
+        "Data privacy, security, access control and logging are addressed in a clear and well-reasoned way, with realistic safeguards where sensitive or personal data may be involved",
+        "Potential misuse, unintended behaviours or harmful outputs are recognised with credible mitigation strategies, including any relevant bias or fairness considerations",
+        "Explainability approach is suitable for intended users and supported by some evidence of practicality or usability",
+        "Compliance with relevant regulations or standards is clearly described, with remaining actions well understood"
+      ],
+      "scores_7_8": [
+        "Main risks are identified with generally reasonable mitigations",
+        "Assurance activities are present and broadly appropriate, though not fully developed or evidenced",
+        "Data privacy and security are recognised with some relevant safeguards, though not comprehensive",
+        "Misuse or harmful output risks are mentioned with some mitigation, but not deeply explored",
+        "Explainability approach is appropriate but only lightly evidenced or discussed",
+        "Regulatory or standards alignment is outlined but may lack detail"
+      ],
+      "scores_5_6": [
+        "Risks are acknowledged but analysis is limited or generic",
+        "Mitigations are high-level or lack clear linkage to specific risks",
+        "Assurance activities are modest, incomplete or described at a high level",
+        "Data privacy and security are mentioned briefly or in generic terms, with limited detail on implementation",
+        "Misuse, harmful behaviours, bias or fairness are only lightly referenced, if at all",
+        "Explainability is described but without convincing detail on suitability for users",
+        "Regulatory or standards considerations are mentioned but unclear"
+      ],
+      "scores_3_4": [
+        "Risks are weakly understood, incomplete or poorly prioritised",
+        "Mitigations are vague, unrealistic or largely absent",
+        "Little meaningful assurance activity is described",
+        "Data privacy and security are largely overlooked or described inaccurately",
+        "Misuse, harmful output or fairness risks are not recognised where they would clearly be relevant",
+        "Explainability approach is inappropriate, confusing or not aligned with users",
+        "Regulatory or standards aspects are not addressed or clearly misunderstood"
+      ],
+      "scores_1_2": [
+        "Major risks are unaddressed or not identified",
+        "No credible mitigations or assurance activities are presented",
+        "No meaningful consideration of data privacy, security or misuse",
+        "No explainability approach is described",
+        "No recognition of relevant regulations or standards"
+      ]
+    },
+
+    "question_14_criteria": {
+      "title": "Potential commercial impact and UK benefit",
+      "scores_9_10": [
+        "Commercial proposition is clear, strong and well supported",
+        "Evidence of demand or ROI is compelling",
+        "Route to adoption is credible and informed by real partnerships or testing",
+        "UK benefits are clearly articulated, specific and meaningful"
+      ],
+      "scores_7_8": [
+        "Commercial case is strong but some areas may lack detail",
+        "Evidence of demand reasonable though not comprehensive",
+        "UK benefits described but less fully developed"
+      ],
+      "scores_5_6": [
+        "Commercial case present but generic or thinly evidenced",
+        "Adoption route unclear or high-level",
+        "UK benefits limited or vague"
+      ],
+      "scores_3_4": [
+        "Weak or unrealistic commercial case",
+        "Little supporting evidence",
+        "UK benefits unclear or unconvincing"
+      ],
+      "scores_1_2": [
+        "No credible commercial potential",
+        "No meaningful benefit to the UK"
+      ]
+    },
+
+    "question_15_criteria": {
+      "title": "Future potential and scalability",
+      "scores_9_10": [
+        "Roadmap is clear, evidence-informed and realistic",
+        "Strong potential for wider application or generalisation",
+        "Scaling considerations are well understood and addressed",
+        "Next steps, partnerships or milestones are credible and aligned to opportunity"
+      ],
+      "scores_7_8": [
+        "Roadmap reasonable with some evidence",
+        "Some discussion of generalisation or scale though less detailed",
+        "Next steps clear but modest"
+      ],
+      "scores_5_6": [
+        "Roadmap present but speculative or high-level",
+        "Limited articulation of scalability or constraints",
+        "Next steps unclear or generic"
+      ],
+      "scores_3_4": [
+        "Roadmap lacks credibility or detail",
+        "Scalability unexplored or unrealistic",
+        "No meaningful next steps"
+      ],
+      "scores_1_2": [
+        "No viable future development described",
+        "No consideration of scale"
+      ]
+    }
+  },
+
+  "interview_requirements": {
+    "format": {
+      "location": "Central London (venue TBC)",
+      "dates": {
+        "start": "2026-03-16",
+        "end": "2026-03-18"
+      },
+      "presentation_duration_minutes": 30,
+      "qa_duration_minutes": 20,
+      "max_attendees": 3
+    },
+
+    "presentation_constraints": [
+      "Must include LIVE DEMONSTRATION within 30-minute slot",
+      "Must not include video or embedded web links",
+      "Cannot change presentation after submission",
+      "Cannot bring additional materials on day"
+    ],
+
+    "demonstration_must": [
+      "Use realistic scenario reflecting challenge statement and target users",
+      "Show how agents, models and data interact to complete meaningful task",
+      "Highlight most important capabilities (decision support, automation, quality improvements, safety features)",
+      "Make clear what is running live vs pre-configured/simulated",
+      "Illustrate how typical user would interact including human-in-loop steps"
+    ],
+
+    "technical_requirements": [
+      "Bring everything needed (laptop, pre-loaded data, test cases)",
+      "Must not rely on external services that may be blocked/unreliable",
+      "If sensitive data needed, prepare anonymised/synthetic examples"
+    ],
+
+    "panel_will_focus_on": [
+      "How clearly demo connects to problem and users described",
+      "Evidence of performance, reliability and workflow fit",
+      "How risks are managed and outputs explained to users",
+      "Supports claims made in written application"
+    ],
+
+    "pre_interview_submissions": {
+      "required": [
+        "List of attendees",
+        "Presentation slides"
+      ],
+      "optional": [
+        "Written response to assessors' feedback"
+      ],
+      "deadline": "Stated in invitation email"
+    },
+
+    "reasonable_adjustments": {
+      "contact": "support@iuk.ukri.org",
+      "deadline": "Within 3 days of receiving invitation"
+    }
+  },
+
+  "applicant_reference": {
+    "lead_organisation": {
+      "name": "Proaptus Ltd",
+      "address": "1 Derwent Business Centre, Clarke Street, Derby, England, DE1 2BU",
+      "type": "Business"
+    },
+    "key_personnel": {
+      "founder_ceo": "Chinedu Achara",
+      "email": "chinedu@proaptus.co.uk"
+    },
+    "phase1_application_name": "ProAgentic: Multi-Agent AI Ecosystem",
+    "eoi_application_number": "TO BE ADDED"
+  }
+}

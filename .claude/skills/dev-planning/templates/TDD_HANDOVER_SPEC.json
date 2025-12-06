@@ -1,0 +1,354 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TDD Handover Specification",
+  "description": "Structured specification for handing off development plans from planning agent to TDD/implementation agent. Based on research-backed planning methodologies (Microsoft Research, Anthropic, Routine framework, Planning-Driven Programming).",
+  "type": "object",
+  "required": ["meta", "goal", "context", "tdd_plan", "steps", "tooling", "done_definition"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "description": "Metadata about this specification. NO TIMESTAMPS, DATES, OR TIMELINE INFORMATION.",
+      "required": ["task_id", "repo", "commit"],
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "description": "Unique identifier for this task",
+          "examples": ["bug-123-pagination-duplicates", "feat-456-metrics-dashboard"]
+        },
+        "repo": {
+          "type": "string",
+          "description": "Repository identifier",
+          "examples": ["org/project", "github.com/user/repo"]
+        },
+        "commit": {
+          "type": "string",
+          "description": "Git commit hash at time of planning",
+          "examples": ["abc123def456"]
+        }
+      }
+    },
+    "goal": {
+      "type": "object",
+      "description": "High-level goal and scope definition",
+      "required": ["type", "summary", "scope"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["bugfix", "feature", "refactor"],
+          "description": "Type of change being planned"
+        },
+        "summary": {
+          "type": "string",
+          "description": "One-sentence summary of the goal",
+          "examples": ["Fix off-by-one error in pagination causing item duplication"]
+        },
+        "scope": {
+          "type": "array",
+          "description": "What is included in this change",
+          "items": {
+            "type": "string"
+          },
+          "examples": [["Fix pagination slicing logic", "Add reproduction test", "Add unit tests for edge cases"]]
+        },
+        "non_goals": {
+          "type": "array",
+          "description": "What is explicitly NOT included (important for scope management)",
+          "items": {
+            "type": "string"
+          },
+          "examples": [["Performance optimization", "UI redesign", "Backward compatibility with v1 API"]]
+        },
+        "constraints": {
+          "type": "array",
+          "description": "Constraints that must be honored",
+          "items": {
+            "type": "string"
+          },
+          "examples": [["Backward compatible", "Response time <200ms", "No breaking changes to public API"]]
+        }
+      }
+    },
+    "context": {
+      "type": "object",
+      "description": "Contextual information from repo analysis",
+      "required": ["entry_points", "impacted_files"],
+      "properties": {
+        "entry_points": {
+          "type": "array",
+          "description": "Primary entry points for the change (file:line or symbol references)",
+          "items": {
+            "type": "string"
+          },
+          "examples": [["api/pager.py:42 - Paginator.page()", "ui/components/PaginationControl.tsx:18"]]
+        },
+        "impacted_files": {
+          "type": "array",
+          "description": "Files that will be created or modified",
+          "items": {
+            "type": "string"
+          },
+          "examples": [["api/pager.py", "tests/api/test_pager.py", "tests/api/test_pagination_bug_123.py"]]
+        },
+        "key_invariants": {
+          "type": "array",
+          "description": "Key invariants/contracts that must be preserved",
+          "items": {
+            "type": "string"
+          },
+          "examples": [["Page numbers are 1-indexed", "No item appears on multiple pages", "Empty dataset returns empty list, not error"]]
+        },
+        "related_issues_docs": {
+          "type": "array",
+          "description": "Related GitHub issues, docs, or external references",
+          "items": {
+            "type": "string"
+          },
+          "examples": [["GitHub issue #123", "docs/api/pagination.md", "RFC-456"]]
+        }
+      }
+    },
+    "tdd_plan": {
+      "type": "object",
+      "description": "Test-first design specifications (tests BEFORE implementation)",
+      "required": ["acceptance_criteria"],
+      "properties": {
+        "acceptance_criteria": {
+          "type": "array",
+          "description": "Acceptance criteria in Gherkin format (Given/When/Then)",
+          "items": {
+            "type": "object",
+            "required": ["id", "gherkin"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "examples": ["AC1", "AC2"]
+              },
+              "gherkin": {
+                "type": "string",
+                "description": "Gherkin scenario in Given/When/Then format",
+                "examples": ["Feature: Pagination\n  Scenario: No duplicates across boundaries\n    Given a dataset of 51 items\n    When I request page 1 and page 2\n    Then no items should appear on both pages"]
+              }
+            }
+          }
+        },
+        "unit_tests": {
+          "type": "array",
+          "description": "Unit test specifications",
+          "items": {
+            "type": "object",
+            "required": ["name", "target"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Test function name",
+                "examples": ["test_pagination_no_duplicates"]
+              },
+              "target": {
+                "type": "string",
+                "description": "Module.function or Class.method being tested",
+                "examples": ["api.pager.Paginator.page"]
+              },
+              "cases": {
+                "type": "array",
+                "description": "Specific test cases to cover",
+                "items": {
+                  "type": "string"
+                },
+                "examples": [["Empty dataset", "51 items / 10 per page", "Invalid page_num"]]
+              },
+              "fixtures": {
+                "type": "array",
+                "description": "Test fixtures needed",
+                "items": {
+                  "type": "string"
+                },
+                "examples": [["sample_dataset", "empty_dataset"]]
+              },
+              "mocks": {
+                "type": "array",
+                "description": "Mocks/stubs needed",
+                "items": {
+                  "type": "string"
+                },
+                "examples": [["mock_database", "mock_api_client"]]
+              }
+            }
+          }
+        },
+        "integration_tests": {
+          "type": "array",
+          "description": "Integration test specifications",
+          "items": {
+            "type": "object",
+            "required": ["name", "scope"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Test name",
+                "examples": ["test_pagination_api_to_ui"]
+              },
+              "scope": {
+                "type": "string",
+                "description": "What components/layers are integrated",
+                "examples": ["API endpoint → Service → Database", "Frontend component → API client → Backend"]
+              },
+              "env": {
+                "type": "string",
+                "description": "Environment setup needed",
+                "examples": ["docker-compose with test database", "mock server"]
+              }
+            }
+          }
+        },
+        "coverage_targets": {
+          "type": "object",
+          "description": "Code coverage goals",
+          "properties": {
+            "globs": {
+              "type": "array",
+              "description": "File patterns to measure coverage",
+              "items": {
+                "type": "string"
+              },
+              "examples": [["api/pager.py", "src/components/dashboards/**/*.tsx"]]
+            },
+            "thresholds": {
+              "type": "object",
+              "description": "Minimum coverage percentages",
+              "properties": {
+                "line": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "examples": [80, 100]
+                },
+                "branch": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "examples": [70, 100]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "steps": {
+      "type": "array",
+      "description": "Step-by-step implementation plan with ReAct pattern (reasoning + actions)",
+      "items": {
+        "type": "object",
+        "required": ["id", "intent", "commands", "expected_final_result"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Step identifier",
+            "examples": ["S1", "S2", "S3"]
+          },
+          "intent": {
+            "type": "string",
+            "description": "What this step accomplishes",
+            "examples": ["Create failing reproduction test", "Apply minimal fix to slicing logic", "Verify coverage"]
+          },
+          "files_to_add": {
+            "type": "array",
+            "description": "New files to create in this step",
+            "items": {
+              "type": "string"
+            },
+            "examples": [["tests/test_pagination_bug_123.py"]]
+          },
+          "files_to_edit": {
+            "type": "array",
+            "description": "Existing files to modify in this step",
+            "items": {
+              "type": "string"
+            },
+            "examples": [["api/pager.py"]]
+          },
+          "commands": {
+            "type": "array",
+            "description": "Exact commands to execute (with expected output)",
+            "items": {
+              "type": "string"
+            },
+            "examples": [["pytest tests/test_pagination_bug_123.py::test_repro -v"]]
+          },
+          "expected_initial_result": {
+            "type": "string",
+            "description": "Expected result BEFORE this step's changes (often FAIL for TDD)",
+            "examples": ["FAIL (AssertionError: Found duplicate items)", "Test does not exist yet"]
+          },
+          "expected_final_result": {
+            "type": "string",
+            "description": "Expected result AFTER this step's changes (often PASS)",
+            "examples": ["PASS", "All tests pass", "Coverage 100%"]
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional context, fixtures needed, edge cases to consider",
+            "examples": ["Use 51 items to trigger boundary condition", "Mock external API calls"]
+          }
+        }
+      }
+    },
+    "tooling": {
+      "type": "object",
+      "description": "Tooling and commands reference",
+      "required": ["language", "test"],
+      "properties": {
+        "language": {
+          "type": "string",
+          "description": "Primary programming language",
+          "examples": ["python", "typescript", "javascript", "go", "rust"]
+        },
+        "build": {
+          "type": "array",
+          "description": "Build commands",
+          "items": {
+            "type": "string"
+          },
+          "examples": [["npm run build", "cargo build", "mvn package"]]
+        },
+        "test": {
+          "type": "array",
+          "description": "Test commands",
+          "items": {
+            "type": "string"
+          },
+          "examples": [["pytest", "npm test", "go test ./...", "cargo test"]]
+        },
+        "lint_format": {
+          "type": "array",
+          "description": "Linting and formatting commands",
+          "items": {
+            "type": "string"
+          },
+          "examples": [["flake8", "black", "eslint", "prettier", "rustfmt"]]
+        }
+      }
+    },
+    "risks": {
+      "type": "array",
+      "description": "Identified risks and mitigations",
+      "items": {
+        "type": "string"
+      },
+      "examples": [["Breaking change if existing code depends on buggy behavior - Check all usages before deploying", "Performance impact on large datasets - Add benchmark test"]]
+    },
+    "rollback": {
+      "type": "string",
+      "description": "How to revert/rollback changes if needed",
+      "examples": ["git revert <commit-hash>", "Restore api/pager.py from main branch", "kubectl rollout undo deployment/app"]
+    },
+    "done_definition": {
+      "type": "array",
+      "description": "Explicit criteria for considering this task complete",
+      "items": {
+        "type": "string"
+      },
+      "examples": [["All acceptance criteria pass", "Unit tests pass (100%)", "Coverage ≥80% line, ≥70% branch", "Linting clean", "CI green", "No performance regression"]]
+    }
+  }
+}

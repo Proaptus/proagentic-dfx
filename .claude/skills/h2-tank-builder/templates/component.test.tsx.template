@@ -1,0 +1,183 @@
+/**
+ * Tests for [ComponentName]
+ * 
+ * RTM Coverage:
+ * - REQ-XXX: [Requirement description]
+ * - REQ-XXX: [Requirement description]
+ * 
+ * @see frontend-implementation-plan.md Screen X
+ */
+
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { [ComponentName] } from '@/components/[path]/[ComponentName]';
+
+// Mock API client
+jest.mock('@/lib/api/client', () => ({
+  apiClient: jest.fn(),
+}));
+
+import { apiClient } from '@/lib/api/client';
+
+const mockApiClient = apiClient as jest.MockedFunction<typeof apiClient>;
+
+// Test utilities
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        cacheTime: 0,
+      },
+    },
+  });
+
+const renderWithProviders = (ui: React.ReactElement) => {
+  const queryClient = createTestQueryClient();
+  return render(
+    <QueryClientProvider client={queryClient}>
+      {ui}
+    </QueryClientProvider>
+  );
+};
+
+// Mock data matching API schema
+const mockData = {
+  id: 'C',
+  // ... add fields matching your data structure
+};
+
+describe('[ComponentName]', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockApiClient.mockResolvedValue(mockData);
+  });
+
+  // Basic rendering tests
+  describe('rendering', () => {
+    it('should render loading state initially', () => {
+      mockApiClient.mockImplementation(() => new Promise(() => {})); // Never resolves
+      
+      renderWithProviders(<[ComponentName] designId="C" />);
+      
+      expect(screen.getByRole('status')).toBeInTheDocument(); // Loading spinner
+    });
+
+    it('should render data when loaded', async () => {
+      renderWithProviders(<[ComponentName] designId="C" />);
+      
+      await waitFor(() => {
+        expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      });
+      
+      // Verify component rendered with data
+      expect(screen.getByTestId('[component-test-id]')).toBeInTheDocument();
+    });
+
+    it('should render error state on API failure', async () => {
+      mockApiClient.mockRejectedValue(new Error('API Error'));
+      
+      renderWithProviders(<[ComponentName] designId="C" />);
+      
+      await waitFor(() => {
+        expect(screen.getByText(/error/i)).toBeInTheDocument();
+      });
+    });
+  });
+
+  // RTM requirement tests
+  describe('RTM Requirements', () => {
+    // REQ-XXX: [Requirement description]
+    it('should [expected behavior for REQ-XXX]', async () => {
+      renderWithProviders(<[ComponentName] designId="C" />);
+      
+      await waitFor(() => {
+        // Assert requirement is satisfied
+        expect(screen.getByTestId('[feature-test-id]')).toBeInTheDocument();
+      });
+    });
+
+    // REQ-XXX: [Requirement description]
+    it('should [expected behavior for REQ-XXX]', async () => {
+      renderWithProviders(<[ComponentName] designId="C" />);
+      
+      await waitFor(() => {
+        expect(screen.getByText(/expected text/)).toBeInTheDocument();
+      });
+    });
+  });
+
+  // Interaction tests
+  describe('interactions', () => {
+    it('should handle [interaction] correctly', async () => {
+      renderWithProviders(<[ComponentName] designId="C" />);
+      
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /action/i })).toBeInTheDocument();
+      });
+      
+      fireEvent.click(screen.getByRole('button', { name: /action/i }));
+      
+      await waitFor(() => {
+        // Assert expected result of interaction
+      });
+    });
+  });
+
+  // API integration tests
+  describe('API integration', () => {
+    it('should call API with correct parameters', async () => {
+      renderWithProviders(<[ComponentName] designId="C" />);
+      
+      await waitFor(() => {
+        expect(mockApiClient).toHaveBeenCalledWith(
+          expect.stringContaining('/api/designs/C/[endpoint]'),
+          expect.any(Object)
+        );
+      });
+    });
+
+    it('should refetch on designId change', async () => {
+      const { rerender } = renderWithProviders(<[ComponentName] designId="C" />);
+      
+      await waitFor(() => {
+        expect(mockApiClient).toHaveBeenCalledTimes(1);
+      });
+      
+      rerender(
+        <QueryClientProvider client={createTestQueryClient()}>
+          <[ComponentName] designId="A" />
+        </QueryClientProvider>
+      );
+      
+      await waitFor(() => {
+        expect(mockApiClient).toHaveBeenCalledWith(
+          expect.stringContaining('/api/designs/A/'),
+          expect.any(Object)
+        );
+      });
+    });
+  });
+
+  // Accessibility tests
+  describe('accessibility', () => {
+    it('should have accessible labels', async () => {
+      renderWithProviders(<[ComponentName] designId="C" />);
+      
+      await waitFor(() => {
+        // Check for accessible elements
+        expect(screen.getByRole('heading')).toBeInTheDocument();
+      });
+    });
+
+    it('should support keyboard navigation', async () => {
+      renderWithProviders(<[ComponentName] designId="C" />);
+      
+      await waitFor(() => {
+        const button = screen.getByRole('button');
+        button.focus();
+        expect(document.activeElement).toBe(button);
+      });
+    });
+  });
+});

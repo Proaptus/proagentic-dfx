@@ -1,0 +1,68 @@
+# ProAgentic Deployment Configuration
+# 
+# Production deployment configuration for ProAgentic project
+# Copy to project root as: deployment.config.yml
+#
+# Environment Variables Required:
+#   export OPENROUTER_API_KEY="sk-or-v1-..."
+#   export SUPABASE_URL="https://qyomydbmtndkprjmsdin.supabase.co"
+#   export SUPABASE_SERVICE_KEY="eyJ..."
+#   export NETLIFY_AUTH_TOKEN="netlify_xxx"
+
+project: proagentic
+
+backend:
+  gcloud_project: novae-compare
+  service_name: proagentic-server
+  region: europe-west2
+  docker_registry: gcr.io
+  dockerfile: Dockerfile.backend
+  port: 8080
+
+staging:
+  # Important: Staging must use the correct Netlify alias
+  # Incorrect domain will cause CORS/CSP failures
+  netlify_site: proagentic1
+  netlify_alias: staging--proagentic1
+  cors_domain: https://staging--proagentic1.netlify.app
+  build_command: npm run build:staging
+  publish_dir: dist
+
+production:
+  # Production uses custom domain
+  domain: https://proagentic.ai
+  cors_domain: https://proagentic.ai
+  build_command: npm run build
+  publish_dir: dist
+
+uat:
+  enabled: true
+  smoke_scope:
+    - auth
+    - dashboard
+  full_scope:
+    - auth
+    - dashboard
+    - workflow
+    - export
+  timeout: 600
+  fail_on_error: true
+
+validation:
+  check_cors: true
+  check_csp: true
+  health_endpoint: /api/health
+  health_timeout: 30
+  allow_self_signed: false
+
+logging:
+  log_dir: .deployment/logs
+  log_level: info
+  retention_days: 90
+
+advanced:
+  skip_pre_checks: false
+  parallel_execution: true
+  auto_rollback: true
+  max_retries: 3
+  retry_delay: 5

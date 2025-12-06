@@ -1,0 +1,315 @@
+--- .claude/skills/tdd/SKILL.md.original
++++ .claude/skills/tdd/SKILL.md.fixed
+@@ -124,7 +124,55 @@
+
+-### Step 1: Turn Task Into Tests (Test-First with Integration Tests PRIMARY)
++### Step 1: Turn Task Into Tests → 🔴 RED VALIDATION GATE (MANDATORY)
++
++**🚨 CRITICAL: YOU MUST COMPLETE THIS ENTIRE STEP BEFORE STEP 2. NO EXCEPTIONS.**
++
++**🚨 YOU CANNOT DO STEP 1 AND STEP 2 TOGETHER. THEY MUST BE SEQUENTIAL.**
++
++#### Step 1A: Write Tests ONLY (No Implementation Code)
+
+ **Always generate tests BEFORE implementation.**
++
++**RULES FOR STEP 1A**:
++1. ✅ Write ONLY the test file
++2. ❌ Do NOT write any implementation code
++3. ❌ Do NOT edit the component/function being tested
++4. ❌ Do NOT run implementation commands
++
++**What you create in Step 1A**:
++- ONE test file (e.g., `tests/integration/ComponentName.test.tsx`)
++- Test cases that describe expected behavior
++- Assertions for what should happen
++
++**What you DO NOT create in Step 1A**:
++- Implementation code
++- Component changes
++- Function changes
++- Any fixes to make tests pass
++
++---
++
++#### Step 1B: 🔴 RED VALIDATION GATE - MANDATORY STOP POINT
++
++**🛑 YOU MUST RUN TESTS AND PROVE RED STATE BEFORE PROCEEDING TO STEP 2**
++
++**MANDATORY ACTIONS** (cannot be skipped):
++
++1. **RUN the test file you just created**:
++   ```bash
++   npm test -- tests/integration/YourTest.test.tsx --run
++   ```
++
++2. **CAPTURE the failure output** - Tests MUST FAIL:
++   ```
++   Expected output:
++   ❌ FAIL tests/integration/YourTest.test.tsx
++     ✗ your test name
++       Expected: [something]
++       Received: [current broken state]
++
++   Test Files  1 failed (1)
++   Tests  X failed (X)
++   ```
++
++3. **SHOW the evidence to the user**:
++   - Display the actual command you ran
++   - Display the actual failure output
++   - Point out which tests failed
++   - Explain why they failed (bug doesn't exist yet / feature not implemented)
++
++4. **STOP and CONFIRM RED state**:
++   - ✅ Tests have been executed
++   - ✅ Tests FAILED (RED confirmed)
++   - ✅ Evidence shown to user
++   - ✅ User can see the RED state
++
++**⚠️ IF TESTS PASS AT THIS POINT**: You wrote the tests incorrectly. Tests should FAIL because the bug/feature doesn't exist yet. Fix the tests to actually validate the requirement.
++
++**❌ FORBIDDEN ACTIONS**:
++- Do NOT proceed to Step 2 without proving RED
++- Do NOT claim "tests would fail" without running them
++- Do NOT write implementation code yet
++- Do NOT assume RED state without evidence
++
++---
++
++**🛑 MANDATORY CHECKPOINT: You CANNOT proceed to Step 2 until RED state is proven above with actual command output shown to the user**
++
++---
+
+ ⚠️ **FOR REACT COMPONENTS: Integration tests must be Step 1A, unit tests Step 1B**
+
+@@ -246,7 +294,54 @@
+
+-### Step 2: Implement to Green (Integration Tests FIRST, Then Unit Tests)
++### Step 2: Implement to Green → 🟢 GREEN VALIDATION GATE (MANDATORY)
++
++**🚨 CRITICAL: YOU MUST HAVE COMPLETED STEP 1 RED GATE BEFORE STARTING THIS STEP**
++
++**🚨 VERIFY BEFORE PROCEEDING**: Did you prove RED state in Step 1? If not, go back to Step 1B.
++
++#### Step 2A: Implement Minimal Fix (Only After RED Confirmed)
+
+ **Fix ONE failing test at a time** using the self-debugging loop.
++
++**RULES FOR STEP 2A**:
++1. ✅ Now (and only now) edit the implementation file
++2. ✅ Make the SMALLEST change to fix the failing test
++3. ❌ Do NOT refactor yet (that's Step 4)
++4. ❌ Do NOT add extra features
++
++**What you change in Step 2A**:
++- The component/function being tested
++- ONLY what's needed to make test pass
++- Minimal code changes
++
++---
++
++#### Step 2B: 🟢 GREEN VALIDATION GATE - MANDATORY STOP POINT
++
++**🛑 YOU MUST RUN TESTS AND PROVE GREEN STATE**
++
++**MANDATORY ACTIONS** (cannot be skipped):
++
++1. **RUN the SAME test file again**:
++   ```bash
++   npm test -- tests/integration/YourTest.test.tsx --run
++   ```
++
++2. **CAPTURE the success output** - Tests MUST PASS:
++   ```
++   Expected output:
++   ✓ PASS tests/integration/YourTest.test.tsx
++     ✓ your test name (XXXms)
++
++   Test Files  1 passed (1)
++   Tests  X passed (X)
++   ```
++
++3. **SHOW the evidence to the user**:
++   - Display the actual command you ran
++   - Display the actual success output
++   - Show that tests now PASS
++   - Explain the RED→GREEN transition
++
++4. **STOP and CONFIRM GREEN state**:
++   - ✅ Tests have been executed
++   - ✅ Tests PASSED (GREEN confirmed)
++   - ✅ Evidence shown to user
++   - ✅ User can verify RED→GREEN transition
++
++**⚠️ IF TESTS STILL FAIL**: Use self-debug loop (max 3 iterations), then show results. Do not proceed until GREEN.
++
++**❌ FORBIDDEN ACTIONS**:
++- Do NOT proceed to Step 4 without proving GREEN
++- Do NOT claim "tests pass" without running them
++- Do NOT skip showing evidence
++- Do NOT assume GREEN state without proof
++
++---
++
++**🛑 MANDATORY CHECKPOINT: You CANNOT proceed to Step 4 until GREEN state is proven above with actual command output shown to the user**
++
++---
+
+ ⚠️ **FOR REACT COMPONENTS: Fix integration tests BEFORE unit tests**
+
+@@ -379,7 +474,50 @@
+
+-### Step 4: Refactor While Staying Green
++### Step 4: Refactor While Staying Green → 🟢 GREEN MAINTENANCE GATE (MANDATORY)
++
++**🚨 CRITICAL: YOU MUST HAVE COMPLETED STEP 2 GREEN GATE BEFORE REFACTORING**
++
++**🚨 VERIFY BEFORE PROCEEDING**: Did you prove GREEN state in Step 2? If not, go back to Step 2B.
++
++#### Step 4A: Make ONE Refactor at a Time
+
+ **With tests passing**, improve code quality without breaking tests.
++
++**RULES FOR STEP 4A**:
++1. ✅ Identify ONE code smell or improvement
++2. ✅ Make ONE small refactor (do not batch changes)
++3. ✅ Do NOT change behavior
++4. ❌ Do NOT make multiple refactors before testing
++
++---
++
++#### Step 4B: 🟢 GREEN MAINTENANCE GATE - MANDATORY STOP POINT
++
++**🛑 AFTER EACH REFACTOR, YOU MUST RUN TESTS AND PROVE STILL GREEN**
++
++**MANDATORY ACTIONS** (cannot be skipped, MUST repeat after EACH refactor):
++
++1. **RUN tests after this ONE refactor**:
++   ```bash
++   npm test -- tests/integration/YourTest.test.tsx --run
++   ```
++
++2. **CAPTURE the output** - Tests MUST STILL PASS:
++   ```
++   Expected output:
++   ✓ PASS tests/integration/YourTest.test.tsx
++     ✓ your test name (XXXms)
++
++   Test Files  1 passed (1)
++   Tests  X passed (X)
++   ```
++
++3. **VERIFY no regressions**:
++   - Tests still pass after refactor
++   - No new failures introduced
++   - Behavior unchanged
++
++4. **IF TESTS FAIL**: Revert the refactor immediately, it broke something
++
++5. **REPEAT this gate** for next refactor (one refactor → one test run → repeat)
++
++**❌ FORBIDDEN ACTIONS**:
++- Do NOT make multiple refactors before testing
++- Do NOT batch refactors together
++- Do NOT skip testing after each refactor
++- Do NOT assume tests still pass without running them
++
++---
++
++**🛑 MANDATORY CHECKPOINT: After EACH refactor, prove tests still GREEN. Repeat this checkpoint for every refactor.**
++
++---
+
+ #### Refactoring Rules:
+ - ✅ Tests must stay GREEN throughout
+@@ -412,7 +560,50 @@
+
+-### Step 5: Quality Gates & Regressions
++### Step 5: Quality Gates & Regressions → 📊 QUALITY VALIDATION GATE (MANDATORY)
++
++**🚨 CRITICAL: YOU MUST HAVE COMPLETED STEP 4 BEFORE RUNNING QUALITY GATES**
++
++**🚨 VERIFY BEFORE PROCEEDING**: Did all your refactors maintain GREEN state? If not, go back to Step 4B.
++
++#### Step 5A: Run Full Test Suite
+
+ **Before merging**, validate code quality with automated gates.
++
++**MANDATORY: Run ENTIRE test suite (not just your new tests)**
++
++```bash
++npm test --run
++```
++
++---
++
++#### Step 5B: 📊 QUALITY VALIDATION GATE - MANDATORY STOP POINT
++
++**🛑 YOU MUST RUN FULL TEST SUITE AND PROVE PASS_TO_PASS**
++
++**MANDATORY ACTIONS** (cannot be skipped):
++
++1. **RUN full test suite**:
++   ```bash
++   npm test --run
++   ```
++
++2. **CAPTURE the full suite output**:
++   ```
++   Expected output:
++   Test Files  XX passed (XX)
++   Tests  XXX passed (XXX)
++   Duration  XXXXms
++
++   All tests passing
++   ```
++
++3. **VERIFY PASS_TO_PASS validation**:
++   - All existing tests still pass
++   - No regressions introduced
++   - New tests pass
++   - Full suite GREEN
++
++4. **SHOW evidence to user**:
++   - Display full test summary
++   - Confirm all tests pass
++   - Show no regressions
++
++5. **STOP and CONFIRM quality gates**:
++   - ✅ Full test suite executed
++   - ✅ All tests pass (PASS_TO_PASS confirmed)
++   - ✅ Evidence shown to user
++   - ✅ Ready for PR
++
++**❌ FORBIDDEN ACTIONS**:
++- Do NOT create PR without running full suite
++- Do NOT skip PASS_TO_PASS validation
++- Do NOT assume existing tests still pass
++- Do NOT proceed if any tests fail
++
++---
++
++**🛑 MANDATORY CHECKPOINT: You CANNOT create PR until quality gates proven above with full test suite output shown to user**
++
++---
+
+ #### Use `tdd-quality-gatekeeper` subagent:
+ ```
+@@ -618,9 +809,12 @@
+
+ This TDD skill **extends** the NOVAE workflow defined in CLAUDE.md:
+
++**🚨 CRITICAL CHANGE: REMOVE ALL PARALLEL EXECUTION**
++
+ ### Before TDD Loop:
+ 1. **Sequential Thinking**: Analyze task, plan test strategy
+ 2. **Context7**: Verify testing best practices for frameworks
+
+ ### During TDD Loop:
+-3. **Task Tool**: Parallelize test generation for multiple scenarios
+-4. **Sequential Thinking**: Self-debug loop (analyze → fix → verify)
++3. **Sequential Execution ONLY**: NO parallel task execution
++4. **Mandatory Gates**: STOP at each validation gate
+ 5. **Context7**: Validate implementations against library patterns
+

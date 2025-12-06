@@ -1,0 +1,64 @@
+{
+  "session_started": "2025-11-28T19:29:00.273018",
+  "last_activity": "2025-11-28T19:29:21.513872",
+  "orchestrations": [
+    {
+      "timestamp": "2025-11-28T19:29:00.273035",
+      "description": "Copy the proswarm-template directory to projects/luna-listens as a new project"
+    }
+  ],
+  "main_task_id": "task-1764358140",
+  "active_subtasks": [],
+  "completed_subtasks": [],
+  "current_phase": "execution",
+  "memory_operations": [
+    {
+      "tool": "mcp__proswarm-neural__memory_store",
+      "key": "main_task_id",
+      "timestamp": "2025-11-28T19:29:07.548961",
+      "value": "task-1764358140"
+    },
+    {
+      "tool": "mcp__proswarm-neural__memory_store",
+      "key": "orchestration_plan",
+      "timestamp": "2025-11-28T19:29:07.669694",
+      "value": "{\"id\":\"task-1764358140\",\"description\":\"Copy proswarm-template to projects/luna-listens\",\"categories\""
+    },
+    {
+      "tool": "mcp__proswarm-neural__memory_store",
+      "key": "subtask_copy",
+      "timestamp": "2025-11-28T19:29:07.788860",
+      "value": "status: in_progress - copying template directory"
+    },
+    {
+      "tool": "mcp__proswarm-neural__memory_store",
+      "key": "subtask_copy",
+      "timestamp": "2025-11-28T19:29:21.513861",
+      "value": "status: completed - template copied successfully"
+    }
+  ],
+  "standard_keys_used": [
+    "main_task_id"
+  ],
+  "work_tools_used": [
+    {
+      "tool": "Bash",
+      "timestamp": "2025-11-28T19:29:12.376004",
+      "associated_subtasks": [
+        "copy"
+      ]
+    },
+    {
+      "tool": "Bash",
+      "timestamp": "2025-11-28T19:29:17.521690",
+      "associated_subtasks": [
+        "copy"
+      ]
+    }
+  ],
+  "orphaned_work": [],
+  "proswarm_plan_pending": false,
+  "plan_execution_started": false,
+  "proswarm_plan_captured": true,
+  "plan_stored_at": "2025-11-28T19:29:07.669708"
+}

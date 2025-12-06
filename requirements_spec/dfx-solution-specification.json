@@ -1,0 +1,1068 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "document_type": "solution_specification",
+  "document_version": "1.0.0",
+  "created_at": "2025-12-05T00:00:00Z",
+  "last_updated": "2025-12-05T00:00:00Z",
+  "status": "draft",
+  
+  "project_identity": {
+    "codename": "DFX-AGENTS",
+    "project_code": "PROAPTUS-DFX-2025",
+    "full_name": "DFX-Agents: Agentic Design for X System",
+    "competition_challenge": "Advanced Manufacturing: Detailed Design for X Agents"
+  },
+
+  "executive_summary": {
+    "one_liner": "An agentic AI system that transforms natural language requirements into production-ready mechanical component designs with full engineering analysis and documentation.",
+    "problem": "Engineers spend hours to days designing 'standard boring but critical' mechanical parts. The knowledge exists in textbooks, standards, and heuristics, but applying it is tedious and repetitive.",
+    "solution": "Multi-agent pipeline that automates requirements parsing, concept generation, parametric CAD, FEA analysis, manufacturing assessment, cost estimation, and documentation.",
+    "differentiation": "Real FEA integration (not just geometry), founder's engineering domain expertise (CAD training, manufacturing patents, satellite/subsea experience), ProAgentic 3x development speed.",
+    "target_outcome": "Input requirements in natural language, receive production-ready STEP files, analysis reports, and design rationale in minutes instead of hours."
+  },
+
+  "project_charter": {
+    "vision": "Compress mechanical component design workflow from hours/days to minutes, outputting production-ready CAD, analysis reports, and design rationale.",
+    
+    "mission": "Build a multi-agent system that takes natural language requirements for standard mechanical components and automatically generates optimised designs with full engineering justification.",
+    
+    "objectives": [
+      {
+        "id": "OBJ-1",
+        "description": "Generate valid production-ready CAD files from natural language",
+        "success_measure": "STEP files open correctly in standard CAD viewers"
+      },
+      {
+        "id": "OBJ-2",
+        "description": "Perform automated structural analysis",
+        "success_measure": "FEA results within 10% of manual analysis for benchmark cases"
+      },
+      {
+        "id": "OBJ-3",
+        "description": "Apply Design for X principles",
+        "success_measure": "System considers manufacturability, cost, assembly in decisions"
+      },
+      {
+        "id": "OBJ-4",
+        "description": "Provide explainable design rationale",
+        "success_measure": "Every decision logged with justification and standards citations"
+      },
+      {
+        "id": "OBJ-5",
+        "description": "Support iterative refinement",
+        "success_measure": "User can request changes, system regenerates automatically"
+      },
+      {
+        "id": "OBJ-6",
+        "description": "Deliver compelling competition demo",
+        "success_measure": "End-to-end demo runs in under 5 minutes"
+      }
+    ],
+    
+    "key_differentiators": [
+      {
+        "differentiator": "Engineering domain expertise",
+        "detail": "Founder has CAD training, mechanical engineering degree, manufacturing patents, satellite/subsea/laser machining experience"
+      },
+      {
+        "differentiator": "Real FEA integration",
+        "detail": "Not just geometry generation - actual structural analysis with CalculiX solver"
+      },
+      {
+        "differentiator": "SPR Module for standards",
+        "detail": "Existing capability to inject ISO, AS9100, DNV standards into agent context"
+      },
+      {
+        "differentiator": "ProAgentic build velocity",
+        "detail": "3x faster development validated across Innovate UK studies"
+      }
+    ],
+    
+    "constraints": [
+      "3-month development window (Dec 2025 - Feb 2026)",
+      "Must demonstrate live at interview (no pre-recorded videos)",
+      "Must be built on proprietary IP-owned codebase",
+      "All development within UK"
+    ],
+    
+    "assumptions": [
+      "Open source FEA tools (CalculiX, Gmsh) sufficient for demo-level analysis",
+      "CadQuery can generate sufficiently complex parametric geometry",
+      "Web-based 3D viewing (Three.js) provides adequate CAD visualisation",
+      "LLMs have sufficient knowledge of standard mechanical component patterns"
+    ],
+    
+    "risks": [
+      {
+        "id": "RISK-1",
+        "risk": "FEA integration complexity",
+        "likelihood": "Medium",
+        "impact": "High",
+        "mitigation": "Start FEA integration early, have fallback to hand-calc validation"
+      },
+      {
+        "id": "RISK-2",
+        "risk": "Geometry generation failures",
+        "likelihood": "Medium",
+        "impact": "High",
+        "mitigation": "Constrain to well-defined parametric patterns, extensive test cases"
+      },
+      {
+        "id": "RISK-3",
+        "risk": "Demo reliability on interview day",
+        "likelihood": "Low",
+        "impact": "Critical",
+        "mitigation": "Offline-capable demo, pre-loaded test cases, redundant hardware"
+      },
+      {
+        "id": "RISK-4",
+        "risk": "Scope creep beyond 3 months",
+        "likelihood": "High",
+        "impact": "Medium",
+        "mitigation": "Strict scope boundaries, MVP-first approach"
+      }
+    ]
+  },
+
+  "scope_definition": {
+    "in_scope": {
+      "component_types": [
+        {
+          "type": "Brackets and mounts",
+          "rationale": "Clear load paths, standard patterns, straightforward FEA",
+          "priority": "P1 - Core"
+        },
+        {
+          "type": "Plates and stiffeners",
+          "rationale": "Essentially 2D problems, hand-calc validation available",
+          "priority": "P1 - Core"
+        },
+        {
+          "type": "Enclosures and housings",
+          "rationale": "Geometry-driven, clear DfM rules",
+          "priority": "P2 - Extended"
+        },
+        {
+          "type": "Flanges and covers",
+          "rationale": "Pressure/bolt calculations well-codified (ASME, EN)",
+          "priority": "P2 - Extended"
+        },
+        {
+          "type": "Pipe supports and clamps",
+          "rationale": "Standard catalog patterns, clear load cases",
+          "priority": "P2 - Extended"
+        },
+        {
+          "type": "Frames and skids",
+          "rationale": "Beam-based analysis, welded construction",
+          "priority": "P3 - Stretch"
+        },
+        {
+          "type": "Guards and covers",
+          "rationale": "Simple structural, mostly stiffness-driven",
+          "priority": "P2 - Extended"
+        },
+        {
+          "type": "Adapters and interfaces",
+          "rationale": "Geometric constraints, moderate analysis",
+          "priority": "P2 - Extended"
+        },
+        {
+          "type": "Fixtures and jigs",
+          "rationale": "Clear functional requirements, founder specialty",
+          "priority": "P1 - Core"
+        }
+      ],
+      
+      "manufacturing_processes": [
+        {
+          "process": "CNC machining",
+          "dfm_rules": ["tool_access", "setups", "minimum_radii", "tolerances"],
+          "priority": "P1"
+        },
+        {
+          "process": "Sheet metal",
+          "dfm_rules": ["bend_radii", "k_factors", "flat_patterns", "minimum_flange"],
+          "priority": "P1"
+        },
+        {
+          "process": "Welded fabrication",
+          "dfm_rules": ["weld_access", "distortion", "inspection_access"],
+          "priority": "P2"
+        },
+        {
+          "process": "Additive manufacturing",
+          "dfm_rules": ["overhangs", "support_structures", "build_orientation"],
+          "priority": "P3"
+        }
+      ],
+      
+      "materials": [
+        {
+          "category": "Carbon steel",
+          "grades": ["S275", "S355"],
+          "priority": "P1"
+        },
+        {
+          "category": "Stainless steel",
+          "grades": ["304", "316L"],
+          "priority": "P1"
+        },
+        {
+          "category": "Aluminium",
+          "grades": ["6061-T6", "5083-H116", "7075-T6"],
+          "priority": "P1"
+        },
+        {
+          "category": "Titanium",
+          "grades": ["Ti-6Al-4V"],
+          "priority": "P3"
+        }
+      ],
+      
+      "analysis_types": [
+        {
+          "type": "Static stress (von Mises, principal)",
+          "method": "FEA - CalculiX",
+          "priority": "P1"
+        },
+        {
+          "type": "Deflection/stiffness",
+          "method": "FEA - CalculiX",
+          "priority": "P1"
+        },
+        {
+          "type": "Basic fatigue life (S-N curve)",
+          "method": "Post-processing of FEA results",
+          "priority": "P2"
+        },
+        {
+          "type": "Modal analysis (natural frequencies)",
+          "method": "FEA - CalculiX eigenvalue",
+          "priority": "P2"
+        },
+        {
+          "type": "Linear buckling",
+          "method": "FEA - CalculiX",
+          "priority": "P3"
+        }
+      ],
+      
+      "standards": [
+        {
+          "standard": "ISO 9001",
+          "scope": "Quality management",
+          "priority": "P1"
+        },
+        {
+          "standard": "AS9100",
+          "scope": "Aerospace quality",
+          "priority": "P2"
+        },
+        {
+          "standard": "DNV rules",
+          "scope": "Marine/offshore",
+          "priority": "P1"
+        },
+        {
+          "standard": "EN 1993 (Eurocode 3)",
+          "scope": "Steel structures",
+          "priority": "P1"
+        },
+        {
+          "standard": "ISO 12944",
+          "scope": "Corrosion protection",
+          "priority": "P2"
+        },
+        {
+          "standard": "ISO 1101 (GD&T)",
+          "scope": "Tolerancing",
+          "priority": "P1"
+        }
+      ]
+    },
+    
+    "out_of_scope": {
+      "component_types": [
+        {
+          "type": "Gears and transmissions",
+          "reason": "Specialised contact analysis, tight tolerancing requirements"
+        },
+        {
+          "type": "Pressure vessels",
+          "reason": "Code-stamped, requires PE certification"
+        },
+        {
+          "type": "Mechanisms and linkages",
+          "reason": "Kinematic analysis, different toolchain"
+        },
+        {
+          "type": "Rotating machinery",
+          "reason": "Dynamics, balancing, bearing analysis"
+        },
+        {
+          "type": "Composite structures",
+          "reason": "Layup optimisation, different FEA approach"
+        },
+        {
+          "type": "Complex castings",
+          "reason": "Foundry-specific DfM"
+        }
+      ],
+      
+      "analysis_types": [
+        "Non-linear FEA (plasticity, large deformation)",
+        "Contact analysis",
+        "CFD (fluid dynamics)",
+        "Thermal-structural coupling",
+        "Explicit dynamics (crash/impact)"
+      ]
+    }
+  },
+
+  "technical_architecture": {
+    "overview": "Multi-agent pipeline transforming natural language requirements into production-ready mechanical component designs with analysis and documentation.",
+    
+    "technology_stack": {
+      "orchestration": {
+        "component": "MAS Hub",
+        "status": "Existing ProAgentic component",
+        "purpose": "Agent discovery, registration, message routing"
+      },
+      "llm_integration": {
+        "primary": "Claude API",
+        "fallback": "GPT-4",
+        "purpose": "Requirements parsing, concept generation, explanation generation"
+      },
+      "standards_injection": {
+        "component": "SPR Module",
+        "status": "Existing - needs extension for engineering standards",
+        "purpose": "Inject ISO, DNV, EN standards into agent context"
+      },
+      "parametric_cad": {
+        "component": "CadQuery",
+        "version": "2.4+",
+        "language": "Python",
+        "output_formats": ["STEP", "IGES", "STL", "glTF"],
+        "purpose": "Programmatic CAD generation"
+      },
+      "meshing": {
+        "component": "Gmsh",
+        "interface": "Python API",
+        "purpose": "Generate FEA meshes from geometry"
+      },
+      "fea_solver": {
+        "component": "CalculiX (CCX)",
+        "status": "Open source, industry-proven",
+        "capabilities": ["Static", "Modal", "Buckling"],
+        "purpose": "Structural analysis"
+      },
+      "post_processing": {
+        "component": "PyVista / VTK",
+        "purpose": "Visualisation, result extraction"
+      },
+      "optimisation": {
+        "component": "SciPy / Optuna",
+        "purpose": "Parameter optimisation, trade-off analysis"
+      },
+      "report_generation": {
+        "component": "ReportLab / WeasyPrint",
+        "output_formats": ["PDF", "HTML"],
+        "purpose": "Generate documentation"
+      },
+      "frontend": {
+        "framework": "React + TypeScript",
+        "cad_viewer": "Three.js via @react-three/fiber",
+        "fea_viewer": "vtk.js or PyVista HTML export"
+      }
+    },
+    
+    "agent_pipeline": [
+      {
+        "order": 1,
+        "agent_id": "REQ-AGENT",
+        "name": "Requirements Engineering Agent",
+        "inputs": [
+          "Natural language requirements",
+          "Reference to similar parts (optional)"
+        ],
+        "outputs": [
+          "Structured requirements specification (JSON)"
+        ],
+        "responsibilities": [
+          "Parse functional requirements (loads, environment, life)",
+          "Extract interface constraints (mounting, mating parts)",
+          "Identify applicable standards",
+          "Flag ambiguities, request clarification",
+          "Validate completeness"
+        ],
+        "tools_used": ["LLM", "SPR Module"],
+        "priority": "P1"
+      },
+      {
+        "order": 2,
+        "agent_id": "CONCEPT-AGENT",
+        "name": "Concept Generation Agent",
+        "inputs": [
+          "Structured requirements"
+        ],
+        "outputs": [
+          "Candidate concepts (2-5 options)",
+          "Concept rationale"
+        ],
+        "responsibilities": [
+          "Select appropriate design patterns for part type",
+          "Generate candidate topologies",
+          "Initial material selection",
+          "Rough sizing based on engineering heuristics"
+        ],
+        "tools_used": ["LLM", "Material Database", "Design Pattern Library"],
+        "priority": "P1"
+      },
+      {
+        "order": 3,
+        "agent_id": "GEOM-AGENT",
+        "name": "Parametric Geometry Agent",
+        "inputs": [
+          "Candidate concepts",
+          "Constraints",
+          "Material selection"
+        ],
+        "outputs": [
+          "STEP files",
+          "glTF files (for viewing)",
+          "Parametric model definitions"
+        ],
+        "responsibilities": [
+          "Convert concepts to parametric CAD models",
+          "Apply GD&T and tolerancing rules",
+          "Generate variations for trade studies"
+        ],
+        "tools_used": ["CadQuery", "LLM for code generation"],
+        "priority": "P1"
+      },
+      {
+        "order": 4,
+        "agent_id": "FEA-AGENT",
+        "name": "Analysis Agent",
+        "inputs": [
+          "CAD geometry (STEP)",
+          "Load cases",
+          "Material properties",
+          "Boundary conditions"
+        ],
+        "outputs": [
+          "FEA results (stress, displacement)",
+          "Pass/fail against requirements",
+          "Visualisation files"
+        ],
+        "responsibilities": [
+          "Mesh generation (Gmsh)",
+          "FEA solve (CalculiX)",
+          "Static stress analysis",
+          "Deflection/stiffness check",
+          "Modal analysis (if required)",
+          "Compare against allowables"
+        ],
+        "tools_used": ["Gmsh", "CalculiX", "PyVista"],
+        "priority": "P1"
+      },
+      {
+        "order": 5,
+        "agent_id": "DFM-AGENT",
+        "name": "Manufacturing Assessment Agent",
+        "inputs": [
+          "CAD geometry",
+          "Target manufacturing process"
+        ],
+        "outputs": [
+          "DfM report",
+          "Manufacturability score",
+          "Suggested modifications"
+        ],
+        "responsibilities": [
+          "Evaluate DfM for target process",
+          "Check tool access, setups, tolerances",
+          "Flag difficult/expensive features",
+          "Suggest design modifications"
+        ],
+        "tools_used": ["LLM", "DfM Rule Engine"],
+        "priority": "P1"
+      },
+      {
+        "order": 6,
+        "agent_id": "COST-AGENT",
+        "name": "Cost Estimation Agent",
+        "inputs": [
+          "CAD geometry",
+          "Material",
+          "Manufacturing process",
+          "Quantity"
+        ],
+        "outputs": [
+          "Cost breakdown",
+          "Cost drivers identified"
+        ],
+        "responsibilities": [
+          "Material cost calculation",
+          "Manufacturing cost (parametric models)",
+          "Tooling cost (if applicable)",
+          "Assembly/finishing cost"
+        ],
+        "tools_used": ["Cost Model Database", "LLM"],
+        "priority": "P2"
+      },
+      {
+        "order": 7,
+        "agent_id": "OPT-AGENT",
+        "name": "Optimisation Agent",
+        "inputs": [
+          "All candidate designs with results"
+        ],
+        "outputs": [
+          "Ranked options",
+          "Pareto frontier",
+          "Trade-off analysis"
+        ],
+        "responsibilities": [
+          "Compare candidates against requirements",
+          "Run parameter sweeps",
+          "Multi-objective optimisation",
+          "Generate recommendations"
+        ],
+        "tools_used": ["SciPy", "Optuna"],
+        "priority": "P2"
+      },
+      {
+        "order": 8,
+        "agent_id": "DOC-AGENT",
+        "name": "Documentation Agent",
+        "inputs": [
+          "All design data and decisions"
+        ],
+        "outputs": [
+          "Design rationale PDF",
+          "Analysis report PDF",
+          "Trade-off matrix",
+          "Standards compliance checklist"
+        ],
+        "responsibilities": [
+          "Compile design rationale",
+          "Generate analysis summary",
+          "Create compliance checklist",
+          "Produce manufacturing notes"
+        ],
+        "tools_used": ["ReportLab", "LLM"],
+        "priority": "P1"
+      }
+    ],
+    
+    "data_schemas": {
+      "requirements_input": {
+        "description": "Structured requirements extracted from natural language",
+        "schema": {
+          "part_type": "string",
+          "functional": {
+            "loads": {
+              "static": [{"direction": "string", "magnitude_N": "number"}],
+              "dynamic": [{"type": "string", "frequency_hz": "number", "magnitude_g": "number"}],
+              "cyclic": {"count": "number", "load_range_N": "number"}
+            },
+            "environment": {
+              "temperature_range_c": {"min": "number", "max": "number"},
+              "corrosivity_class": "string",
+              "humidity": "string"
+            },
+            "design_life_years": "number"
+          },
+          "interface": {
+            "mounting": {
+              "type": "string",
+              "hole_pattern": "string",
+              "bolt_sizes": ["string"]
+            },
+            "envelope": {
+              "max_dimensions_mm": {"x": "number", "y": "number", "z": "number"},
+              "keep_out_zones": ["object"]
+            }
+          },
+          "performance": {
+            "weight": {"target_kg": "number", "max_kg": "number"},
+            "stiffness": {"min_frequency_hz": "number", "max_deflection_mm": "number"},
+            "cost": {"target_gbp": "number", "max_gbp": "number"},
+            "quantity": "number"
+          },
+          "standards": ["string"],
+          "preferences": {
+            "material_preference": "string",
+            "process_preference": "string"
+          }
+        }
+      },
+      
+      "material_database_entry": {
+        "material_id": "string",
+        "name": "string",
+        "category": "string",
+        "grade": "string",
+        "properties": {
+          "density_kg_m3": "number",
+          "youngs_modulus_gpa": "number",
+          "poissons_ratio": "number",
+          "yield_strength_mpa": "number",
+          "ultimate_strength_mpa": "number",
+          "fatigue_limit_mpa": "number",
+          "thermal_expansion_per_k": "number"
+        },
+        "cost_per_kg_gbp": "number",
+        "environment_compatibility": ["string"],
+        "manufacturing_compatibility": ["string"]
+      },
+      
+      "analysis_result": {
+        "geometry_id": "string",
+        "analysis_type": "string",
+        "solver": "string",
+        "mesh_info": {
+          "nodes": "number",
+          "elements": "number",
+          "element_type": "string"
+        },
+        "results": {
+          "max_von_mises_mpa": "number",
+          "max_displacement_mm": "number",
+          "natural_frequencies_hz": ["number"],
+          "safety_factor": "number"
+        },
+        "pass_fail": {
+          "stress": "boolean",
+          "deflection": "boolean",
+          "frequency": "boolean"
+        },
+        "output_files": {
+          "vtk": "string",
+          "png": "string"
+        }
+      }
+    },
+    
+    "frontend_design": {
+      "framework": "React + TypeScript",
+      "key_components": [
+        {
+          "component": "RequirementsInput",
+          "purpose": "Capture requirements via form or natural language",
+          "features": ["NL parsing", "form validation", "requirement preview"]
+        },
+        {
+          "component": "CADViewer",
+          "purpose": "Interactive 3D view of generated geometry",
+          "library": "Three.js via @react-three/fiber",
+          "features": ["rotate", "zoom", "pan", "section view", "measurements"]
+        },
+        {
+          "component": "FEAViewer",
+          "purpose": "Display analysis results on geometry",
+          "library": "vtk.js",
+          "features": ["stress contours", "displacement", "legend", "probe values"]
+        },
+        {
+          "component": "DesignComparison",
+          "purpose": "Compare multiple design options",
+          "features": ["side-by-side view", "trade-off table", "Pareto chart"]
+        },
+        {
+          "component": "DownloadPanel",
+          "purpose": "Export all outputs",
+          "formats": ["STEP", "PDF reports", "spreadsheets"]
+        },
+        {
+          "component": "IterationPanel",
+          "purpose": "Request design changes",
+          "features": ["modification input", "regenerate trigger", "history"]
+        }
+      ]
+    }
+  },
+
+  "demo_scenario": {
+    "title": "Sensor Mounting Bracket for Offshore Wind Turbine",
+    "purpose": "Primary demonstration scenario for competition interview",
+    
+    "input_requirements": "Design a sensor mounting bracket for offshore wind turbine nacelle. Sensor mass: 35kg. Vibration environment: 0-50Hz, 1g RMS. Salt spray environment (C5-M corrosivity). Must bolt to existing M12 hole pattern (4x, 150mm PCD). Avoid resonance in operating range. Design life: 25 years. Minimise weight without exceeding £200 unit cost at qty 100.",
+    
+    "expected_flow": [
+      {
+        "step": 1,
+        "action": "Requirements parsed",
+        "output": "Structured requirements JSON shown to user"
+      },
+      {
+        "step": 2,
+        "action": "Standards identified",
+        "output": "EN 1993, ISO 12944, DNV-ST-0126 cited"
+      },
+      {
+        "step": 3,
+        "action": "Concepts generated",
+        "output": "3 options: welded plate, machined billet, sheet metal"
+      },
+      {
+        "step": 4,
+        "action": "CAD generated",
+        "output": "3D models visible in viewer"
+      },
+      {
+        "step": 5,
+        "action": "FEA completed",
+        "output": "Stress contours displayed, natural frequencies listed"
+      },
+      {
+        "step": 6,
+        "action": "Comparison shown",
+        "output": "Trade-off table with recommendation"
+      }
+    ],
+    
+    "expected_outputs": {
+      "design_options": [
+        {
+          "name": "Welded plate",
+          "weight_kg": 2.8,
+          "cost_gbp": 145,
+          "first_mode_hz": 68,
+          "max_stress_mpa": 89,
+          "stress_margin": 2.1,
+          "frequency_pass": true,
+          "recommendation": "RECOMMENDED"
+        },
+        {
+          "name": "Machined billet",
+          "weight_kg": 3.4,
+          "cost_gbp": 210,
+          "first_mode_hz": 72,
+          "max_stress_mpa": 76,
+          "stress_margin": 2.5,
+          "frequency_pass": true,
+          "recommendation": "Exceeds cost target"
+        },
+        {
+          "name": "Sheet metal",
+          "weight_kg": 2.1,
+          "cost_gbp": 95,
+          "first_mode_hz": 52,
+          "max_stress_mpa": 112,
+          "stress_margin": 1.7,
+          "frequency_pass": false,
+          "recommendation": "Fails frequency requirement"
+        }
+      ],
+      "files": [
+        "bracket_welded.step",
+        "bracket_machined.step", 
+        "bracket_sheetmetal.step",
+        "analysis_report.pdf",
+        "design_rationale.pdf"
+      ]
+    },
+    
+    "target_runtime_minutes": 3,
+    
+    "fallback_scenarios": [
+      {
+        "name": "Simple L-bracket",
+        "complexity": "Low",
+        "purpose": "Quick demo if time constrained"
+      },
+      {
+        "name": "Equipment mounting frame",
+        "complexity": "High",
+        "purpose": "Show capability for complex parts"
+      }
+    ]
+  },
+
+  "development_plan": {
+    "total_duration_weeks": 12,
+    "methodology": "Agile sprints with continuous integration",
+    
+    "phases": [
+      {
+        "phase": 1,
+        "name": "Foundation",
+        "duration_weeks": 3,
+        "dates": {
+          "start": "2025-12-09",
+          "end": "2025-12-29"
+        },
+        "objectives": [
+          "Set up development environment",
+          "Integrate CadQuery for parametric CAD",
+          "Integrate Gmsh for meshing",
+          "Integrate CalculiX for FEA",
+          "Create basic pipeline proof-of-concept",
+          "Validate CAD → Mesh → FEA → Results flow"
+        ],
+        "deliverables": [
+          "Working CAD generation for simple bracket",
+          "Working FEA analysis pipeline",
+          "Basic results extraction and visualisation"
+        ],
+        "success_criteria": [
+          "Generate STEP file from parameters",
+          "Mesh STEP file successfully",
+          "Run static FEA and extract stress values"
+        ]
+      },
+      {
+        "phase": 2,
+        "name": "Agent Development",
+        "duration_weeks": 4,
+        "dates": {
+          "start": "2025-12-30",
+          "end": "2026-01-26"
+        },
+        "objectives": [
+          "Build Requirements Engineering Agent",
+          "Build Concept Generation Agent",
+          "Build Parametric Geometry Agent",
+          "Build Analysis Agent",
+          "Build Manufacturing Assessment Agent",
+          "Build Cost Estimation Agent",
+          "Build Documentation Agent",
+          "Integrate agents via MAS Hub"
+        ],
+        "deliverables": [
+          "All P1 agents operational",
+          "End-to-end pipeline working",
+          "At least 3 component types supported"
+        ],
+        "success_criteria": [
+          "NL input → structured requirements",
+          "Requirements → CAD → FEA → Report",
+          "Multiple design options generated"
+        ]
+      },
+      {
+        "phase": 3,
+        "name": "Frontend & Integration",
+        "duration_weeks": 3,
+        "dates": {
+          "start": "2026-01-27",
+          "end": "2026-02-16"
+        },
+        "objectives": [
+          "Build React frontend",
+          "Integrate Three.js CAD viewer",
+          "Integrate FEA visualisation",
+          "Build comparison and trade-off UI",
+          "Polish user experience",
+          "End-to-end testing"
+        ],
+        "deliverables": [
+          "Complete web application",
+          "Interactive 3D viewers",
+          "Full demo capability"
+        ],
+        "success_criteria": [
+          "Demo scenario runs end-to-end in UI",
+          "All outputs downloadable",
+          "Iteration workflow functional"
+        ]
+      },
+      {
+        "phase": 4,
+        "name": "Validation & Documentation",
+        "duration_weeks": 2,
+        "dates": {
+          "start": "2026-02-17",
+          "end": "2026-02-23"
+        },
+        "objectives": [
+          "Validate against benchmark analyses",
+          "Create test case library",
+          "Write application answers",
+          "Create appendices",
+          "Prepare demo scenarios",
+          "Rehearse presentation",
+          "Submit application"
+        ],
+        "deliverables": [
+          "Validated system with benchmarks",
+          "Complete application submission",
+          "Demo-ready system",
+          "Presentation draft"
+        ],
+        "success_criteria": [
+          "FEA results within 10% of benchmarks",
+          "10 consecutive demo runs without failure",
+          "Application submitted before deadline"
+        ]
+      }
+    ]
+  },
+
+  "success_metrics": {
+    "competition": {
+      "primary_goal": "Win Advanced Manufacturing category (£250k)",
+      "stretch_goal": "Win overall prize (+£250k)",
+      "minimum_acceptable": "Reach interview stage, demonstrate working system"
+    },
+    
+    "technical": [
+      {
+        "metric": "CAD generation success rate",
+        "target": ">95%",
+        "measurement": "Valid STEP files that open in standard viewers"
+      },
+      {
+        "metric": "FEA accuracy",
+        "target": "Within 10% of manual analysis",
+        "measurement": "Benchmark against hand calculations and commercial FEA"
+      },
+      {
+        "metric": "End-to-end time",
+        "target": "<5 minutes for typical bracket",
+        "measurement": "From requirements input to all outputs generated"
+      },
+      {
+        "metric": "Demo reliability",
+        "target": "100% success rate on 10 consecutive runs",
+        "measurement": "Full demo scenario without errors"
+      }
+    ],
+    
+    "application_scoring_targets": {
+      "Q10_technical": "8-10",
+      "Q11_workflow": "8-10",
+      "Q12_mvp": "8-10",
+      "Q13_risks": "7-9",
+      "Q14_commercial": "8-10",
+      "Q15_scalability": "8-10"
+    }
+  },
+
+  "application_strategy": {
+    "Q10_technical_approach": {
+      "key_messages": [
+        "Real FEA integration (CalculiX) - not just geometry",
+        "Multi-agent architecture with clear roles",
+        "Validated against engineering benchmarks",
+        "Novel: automated design-analysis loop with optimisation"
+      ],
+      "evidence_to_include": [
+        "Architecture diagram showing agent pipeline",
+        "FEA validation results vs hand calculations",
+        "Performance metrics (time, accuracy)"
+      ]
+    },
+    "Q11_user_workflow": {
+      "key_messages": [
+        "Target user: design engineers at manufacturing SMEs",
+        "Fits after concept phase, before detailed drawings",
+        "Human-in-loop: engineer approves before manufacturing",
+        "Reduces design time from hours to minutes"
+      ],
+      "evidence_to_include": [
+        "Workflow diagram showing integration point",
+        "Time savings quantified",
+        "Interoperability: STEP output to any CAD system"
+      ]
+    },
+    "Q12_mvp": {
+      "key_messages": [
+        "Working end-to-end system",
+        "Supports brackets, mounts, fixtures",
+        "CAD generation + FEA analysis + documentation",
+        "Web-based interface with 3D viewer"
+      ],
+      "evidence_to_include": [
+        "Screenshot of working UI",
+        "Sample outputs (STEP file, analysis report)",
+        "Verification results table"
+      ]
+    },
+    "Q13_risks": {
+      "key_messages": [
+        "Engineering validation: FEA vs hand-calc benchmarks",
+        "Human-in-loop for all safety-critical decisions",
+        "Decision audit trail with standards citations",
+        "SPR module ensures regulatory compliance"
+      ],
+      "evidence_to_include": [
+        "Risk register with mitigations",
+        "Example of explainability output",
+        "Standards compliance matrix"
+      ]
+    },
+    "Q14_commercial": {
+      "key_messages": [
+        "Target: UK manufacturing SMEs (thousands of potential users)",
+        "Value prop: compress design time 10x, reduce costs",
+        "Route: SaaS subscription model",
+        "UK benefit: productivity improvement in key sector"
+      ],
+      "evidence_to_include": [
+        "Market size estimate",
+        "Time/cost savings quantified",
+        "Existing customer traction (if any)"
+      ]
+    },
+    "Q15_scalability": {
+      "key_messages": [
+        "Roadmap: brackets → assemblies → complex structures",
+        "Cross-sector: marine, aerospace, energy",
+        "Integration path to enterprise CAD/PLM",
+        "UK IP ownership, exploit from UK"
+      ],
+      "evidence_to_include": [
+        "Technical roadmap diagram",
+        "Generalisability examples",
+        "Partnership targets"
+      ]
+    }
+  },
+
+  "existing_assets_to_leverage": {
+    "from_proagentic": [
+      {
+        "asset": "MAS Hub",
+        "use": "Core orchestration for agent pipeline"
+      },
+      {
+        "asset": "BMAS framework",
+        "use": "Rapid development of new agents"
+      },
+      {
+        "asset": "SPR Module",
+        "use": "Standards injection - extend for engineering standards"
+      },
+      {
+        "asset": "Memory Bank",
+        "use": "Reuse design patterns across component types"
+      },
+      {
+        "asset": "DocIntel patterns",
+        "use": "Report generation approach"
+      }
+    ],
+    "from_founder_experience": [
+      {
+        "asset": "CAD training",
+        "use": "Parametric modelling patterns"
+      },
+      {
+        "asset": "FEA programming (25 years ago)",
+        "use": "Understanding of analysis workflow"
+      },
+      {
+        "asset": "Manufacturing patents",
+        "use": "DfM knowledge, credibility"
+      },
+      {
+        "asset": "Satellite/subsea experience",
+        "use": "Complex engineering domain expertise"
+      }
+    ]
+  }
+}
