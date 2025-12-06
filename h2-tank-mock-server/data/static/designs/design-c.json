@@ -1,0 +1,205 @@
+{
+  "id": "C",
+  "trade_off_category": "recommended",
+  "recommendation_reason": "Best balance of weight, cost, and reliability within targets. Weight is 1% under target with 20% stress margin and excellent reliability.",
+  "summary": {
+    "weight_kg": 79.3,
+    "cost_eur": 13500,
+    "burst_pressure_bar": 1720,
+    "burst_ratio": 2.46,
+    "p_failure": 6e-7,
+    "fatigue_life_cycles": 58000,
+    "permeation_rate": 32,
+    "volumetric_efficiency": 0.91
+  },
+  "geometry": {
+    "dimensions": {
+      "inner_radius_mm": 175,
+      "outer_radius_mm": 204,
+      "cylinder_length_mm": 1200,
+      "total_length_mm": 1560,
+      "wall_thickness_mm": 28.1,
+      "internal_volume_liters": 150.3
+    },
+    "dome": {
+      "type": "isotensoid",
+      "parameters": {
+        "alpha_0_deg": 14.2,
+        "r_0_mm": 175,
+        "depth_mm": 180,
+        "boss_id_mm": 25,
+        "boss_od_mm": 80
+      },
+      "profile_points": [
+        {"r": 40, "z": 180},
+        {"r": 60, "z": 175},
+        {"r": 80, "z": 165},
+        {"r": 100, "z": 145},
+        {"r": 120, "z": 115},
+        {"r": 140, "z": 75},
+        {"r": 160, "z": 35},
+        {"r": 175, "z": 0}
+      ]
+    },
+    "thickness_distribution": {
+      "cylinder_mm": 28.1,
+      "dome_apex_mm": 22.4,
+      "boss_region_mm": 38.5,
+      "transition_mm": 31.2,
+      "contour_data": [
+        {"r": 0, "z": 180, "t": 22.4},
+        {"r": 50, "z": 172, "t": 24.2},
+        {"r": 100, "z": 145, "t": 25.8},
+        {"r": 150, "z": 55, "t": 27.5},
+        {"r": 175, "z": 0, "t": 28.1}
+      ]
+    },
+    "layup": {
+      "total_layers": 42,
+      "helical_count": 18,
+      "hoop_count": 24,
+      "fiber_volume_fraction": 0.64,
+      "liner_thickness_mm": 3.2,
+      "layers": [
+        {"layer": 1, "type": "helical", "angle_deg": 14.2, "thickness_mm": 0.34, "coverage": "full"},
+        {"layer": 2, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.55, "coverage": "cylinder"},
+        {"layer": 3, "type": "helical", "angle_deg": 15.0, "thickness_mm": 0.34, "coverage": "full"},
+        {"layer": 4, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.55, "coverage": "cylinder"},
+        {"layer": 5, "type": "helical", "angle_deg": 14.5, "thickness_mm": 0.34, "coverage": "full"},
+        {"layer": 6, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.55, "coverage": "cylinder"},
+        {"layer": 7, "type": "helical", "angle_deg": 14.8, "thickness_mm": 0.34, "coverage": "full"},
+        {"layer": 8, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.55, "coverage": "cylinder"},
+        {"layer": 9, "type": "helical", "angle_deg": 14.3, "thickness_mm": 0.34, "coverage": "full"},
+        {"layer": 10, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.55, "coverage": "cylinder"}
+      ]
+    }
+  },
+  "stress": {
+    "max_von_mises_mpa": 2127,
+    "max_location": "dome_cylinder_transition",
+    "allowable_mpa": 2550,
+    "margin_percent": 20,
+    "per_layer": [
+      {"layer": 1, "type": "helical", "sigma1_mpa": 2127, "sigma2_mpa": 28, "tau12_mpa": 12, "tsai_wu": 0.84},
+      {"layer": 2, "type": "hoop", "sigma1_mpa": 1890, "sigma2_mpa": 35, "tau12_mpa": 8, "tsai_wu": 0.75},
+      {"layer": 3, "type": "helical", "sigma1_mpa": 2050, "sigma2_mpa": 30, "tau12_mpa": 10, "tsai_wu": 0.81}
+    ]
+  },
+  "failure": {
+    "predicted_mode": "fiber_breakage",
+    "is_preferred": true,
+    "confidence": 0.92,
+    "explanation": "Design fails by fiber breakage in hoop layers. This is PREFERRED because it is predictable, progressive, and not catastrophic.",
+    "first_ply_failure": {
+      "layer": 3,
+      "layer_type": "helical",
+      "angle_deg": 15.0,
+      "location": "dome_cylinder_transition",
+      "pressure_bar": 1050,
+      "mode": "matrix_microcracking"
+    },
+    "progressive_sequence": [
+      {"pressure_bar": 1050, "event": "First matrix cracking", "layers_affected": [3]},
+      {"pressure_bar": 1280, "event": "Matrix cracking propagates", "layers_affected": [1,2,3,4,5]},
+      {"pressure_bar": 1450, "event": "Delamination initiation", "interface": "3/4"},
+      {"pressure_bar": 1620, "event": "Fiber breakage begins", "region": "hoop_layers"},
+      {"pressure_bar": 1720, "event": "Ultimate failure (fiber rupture)", "layers_affected": [18,19,20,21,22,23,24]}
+    ],
+    "hashin": {
+      "at_test": {"fiber_tension": 0.72, "fiber_compression": 0.08, "matrix_tension": 0.89, "matrix_compression": 0.15},
+      "at_burst": {"fiber_tension": 1.02, "fiber_compression": 0.12, "matrix_tension": 1.31, "matrix_compression": 0.22}
+    }
+  },
+  "thermal": {
+    "fast_fill": {
+      "scenario": "Fill from 20 bar to 700 bar in 3 minutes",
+      "peak_gas_temp_c": 95,
+      "peak_wall_temp_c": 72,
+      "peak_liner_temp_c": 68,
+      "time_to_peak_seconds": 180,
+      "liner_limit_c": 85,
+      "status": "pass"
+    },
+    "thermal_stress": {
+      "max_mpa": 52,
+      "location": "inner_liner_surface",
+      "components": {"hoop_mpa": 45, "axial_mpa": 28, "radial_mpa": 12},
+      "combined_with_pressure_max_mpa": 2179
+    },
+    "extreme_temperature": [
+      {"condition": "cold_soak", "temp_c": -40, "max_stress_mpa": 2310, "margin_percent": 10, "status": "pass"},
+      {"condition": "hot_soak", "temp_c": 85, "max_stress_mpa": 2095, "margin_percent": 22, "status": "pass"},
+      {"condition": "hot_fill", "temp_c": 95, "max_stress_mpa": 2179, "margin_percent": 17, "status": "pass"}
+    ]
+  },
+  "reliability": {
+    "monte_carlo": {
+      "samples": 1000000,
+      "p_failure": 6e-7,
+      "interpretation": "1 in 1.7 million chance of burst below working pressure over service life",
+      "comparison_to_requirement": "17× better than 10⁻⁵ typical requirement"
+    },
+    "burst_distribution": {
+      "mean_bar": 1720,
+      "std_bar": 52,
+      "cov": 0.030,
+      "percentile_5": 1635,
+      "percentile_95": 1805
+    },
+    "uncertainty_breakdown": [
+      {"source": "Fiber strength variability", "cov": 0.08, "variance_contribution": 0.52},
+      {"source": "Thickness variability", "cov": 0.05, "variance_contribution": 0.28},
+      {"source": "Fiber volume fraction", "cov": 0.03, "variance_contribution": 0.15},
+      {"source": "Angle variability", "cov": 0.02, "variance_contribution": 0.05}
+    ],
+    "key_insight": "Fiber strength dominates uncertainty. Tighter QC on incoming fiber would improve reliability most effectively.",
+    "sensitivity": [
+      {"parameter": "Fiber strength", "effect_bar_per_percent": 17.2},
+      {"parameter": "Hoop layer thickness", "effect_bar_per_percent": 12.1},
+      {"parameter": "Helical layer thickness", "effect_bar_per_percent": 8.4},
+      {"parameter": "Fiber volume fraction", "effect_bar_per_percent": 5.2},
+      {"parameter": "Helical angle", "effect_bar_per_percent": -2.8},
+      {"parameter": "Liner thickness", "effect_bar_per_percent": 0.3}
+    ]
+  },
+  "cost": {
+    "unit_cost_eur": 13500,
+    "breakdown": [
+      {"component": "Carbon fiber", "cost_eur": 6300, "percentage": 47},
+      {"component": "Resin", "cost_eur": 540, "percentage": 4},
+      {"component": "Liner", "cost_eur": 360, "percentage": 3},
+      {"component": "Boss", "cost_eur": 450, "percentage": 3},
+      {"component": "Labor", "cost_eur": 1750, "percentage": 13},
+      {"component": "Overhead", "cost_eur": 2290, "percentage": 17},
+      {"component": "Margin", "cost_eur": 1480, "percentage": 11}
+    ],
+    "physics": {
+      "hoop_stress_mpa": 436,
+      "axial_stress_mpa": 218,
+      "hoop_to_axial_ratio": 2.0,
+      "stored_energy_mj": 17.2,
+      "permeation_rate": 32,
+      "permeation_limit": 46
+    }
+  },
+  "compliance": {
+    "overall_status": "pass",
+    "standards": [
+      {"id": "ISO_11119_3", "status": "pass"},
+      {"id": "UN_R134", "status": "pass"},
+      {"id": "EC_79_2009", "status": "pass"}
+    ]
+  },
+  "sentry": {
+    "critical_points": [
+      {"id": 1, "region": "dome_boss_interface", "reason": "Highest stress concentration", "interval_months": 6},
+      {"id": 2, "region": "cylinder_hoop", "reason": "Fatigue critical zone", "interval_months": 12},
+      {"id": 3, "region": "liner_composite_interface", "reason": "Delamination monitoring", "interval_months": 24}
+    ],
+    "sensors": [
+      {"type": "acoustic_emission", "count": 2, "purpose": "Crack/delamination detection"},
+      {"type": "strain_gauge", "count": 1, "purpose": "Fatigue monitoring"},
+      {"type": "temperature", "count": 1, "purpose": "Thermal monitoring"}
+    ]
+  }
+}

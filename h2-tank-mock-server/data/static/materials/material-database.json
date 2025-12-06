@@ -1,0 +1,161 @@
+{
+  "fibers": [
+    {
+      "id": "T700S",
+      "name": "Toray T700S Carbon",
+      "properties": {
+        "E1_gpa": 135,
+        "E2_gpa": 10,
+        "G12_gpa": 5,
+        "nu12": 0.3,
+        "sigma1_ult_mpa": 2550,
+        "sigma2_ult_mpa": 50,
+        "tau12_ult_mpa": 75,
+        "density_kg_m3": 1600,
+        "cost_eur_kg": 25
+      },
+      "recommendation": "Best price/performance ratio. Industry standard for automotive hydrogen tanks."
+    },
+    {
+      "id": "T800S",
+      "name": "Toray T800S Carbon",
+      "properties": {
+        "E1_gpa": 155,
+        "E2_gpa": 10,
+        "G12_gpa": 5,
+        "nu12": 0.3,
+        "sigma1_ult_mpa": 2860,
+        "sigma2_ult_mpa": 55,
+        "tau12_ult_mpa": 80,
+        "density_kg_m3": 1600,
+        "cost_eur_kg": 45
+      },
+      "recommendation": "12% stronger but 80% more expensive. Consider for weight-critical applications."
+    },
+    {
+      "id": "IM7",
+      "name": "Hexcel IM7 Carbon",
+      "properties": {
+        "E1_gpa": 165,
+        "E2_gpa": 12,
+        "G12_gpa": 5.5,
+        "nu12": 0.3,
+        "sigma1_ult_mpa": 2760,
+        "sigma2_ult_mpa": 58,
+        "tau12_ult_mpa": 82,
+        "density_kg_m3": 1570,
+        "cost_eur_kg": 55
+      },
+      "recommendation": "Aerospace-grade. Highest stiffness but significantly more expensive."
+    },
+    {
+      "id": "E_GLASS",
+      "name": "E-Glass",
+      "properties": {
+        "E1_gpa": 72,
+        "E2_gpa": 72,
+        "G12_gpa": 30,
+        "nu12": 0.22,
+        "sigma1_ult_mpa": 1500,
+        "sigma2_ult_mpa": 1500,
+        "tau12_ult_mpa": 50,
+        "density_kg_m3": 2550,
+        "cost_eur_kg": 3
+      },
+      "recommendation": "Low cost option for outer protective layers in hybrid designs."
+    }
+  ],
+  "matrices": [
+    {
+      "id": "epoxy_aerospace",
+      "name": "Aerospace Epoxy",
+      "properties": {
+        "E_gpa": 3.5,
+        "sigma_ult_mpa": 80,
+        "Tg_c": 180,
+        "cost_eur_kg": 15
+      }
+    },
+    {
+      "id": "epoxy_standard",
+      "name": "Standard Epoxy",
+      "properties": {
+        "E_gpa": 3.2,
+        "sigma_ult_mpa": 70,
+        "Tg_c": 150,
+        "cost_eur_kg": 8
+      }
+    },
+    {
+      "id": "vinyl_ester",
+      "name": "Vinyl Ester",
+      "properties": {
+        "E_gpa": 3.0,
+        "sigma_ult_mpa": 75,
+        "Tg_c": 120,
+        "cost_eur_kg": 6
+      }
+    }
+  ],
+  "liners": [
+    {
+      "id": "HDPE",
+      "name": "High-Density Polyethylene",
+      "properties": {
+        "E_gpa": 1.0,
+        "permeability_mol_m_s_pa": 1.2e-12,
+        "cost_eur_kg": 2
+      }
+    },
+    {
+      "id": "PA6",
+      "name": "Polyamide 6 (Nylon)",
+      "properties": {
+        "E_gpa": 2.8,
+        "permeability_mol_m_s_pa": 0.8e-12,
+        "cost_eur_kg": 4
+      }
+    },
+    {
+      "id": "AL6061",
+      "name": "Aluminum 6061-T6",
+      "properties": {
+        "E_gpa": 70,
+        "permeability_mol_m_s_pa": 0,
+        "cost_eur_kg": 5
+      }
+    }
+  ],
+  "bosses": [
+    {
+      "id": "316L_SS",
+      "name": "316L Stainless Steel",
+      "properties": {
+        "E_gpa": 193,
+        "sigma_yield_mpa": 290,
+        "cost_eur_kg": 6
+      },
+      "suitable_for": ["marine", "corrosive", "standard"]
+    },
+    {
+      "id": "AL7075",
+      "name": "Aluminum 7075-T6",
+      "properties": {
+        "E_gpa": 71,
+        "sigma_yield_mpa": 503,
+        "cost_eur_kg": 8
+      },
+      "suitable_for": ["standard", "weight_critical"]
+    },
+    {
+      "id": "TI6AL4V",
+      "name": "Titanium Ti-6Al-4V",
+      "properties": {
+        "E_gpa": 114,
+        "sigma_yield_mpa": 880,
+        "cost_eur_kg": 45
+      },
+      "suitable_for": ["aerospace", "extreme_weight_critical", "corrosive"]
+    }
+  ]
+}

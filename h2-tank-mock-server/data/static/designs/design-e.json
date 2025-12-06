@@ -1,0 +1,78 @@
+{
+  "id": "E",
+  "trade_off_category": "max_margin",
+  "summary": {
+    "weight_kg": 86.1,
+    "cost_eur": 12900,
+    "burst_pressure_bar": 1900,
+    "burst_ratio": 2.71,
+    "p_failure": 2e-8,
+    "fatigue_life_cycles": 72000,
+    "permeation_rate": 26,
+    "volumetric_efficiency": 0.93
+  },
+  "geometry": {
+    "dimensions": {
+      "inner_radius_mm": 175,
+      "outer_radius_mm": 209,
+      "cylinder_length_mm": 1200,
+      "total_length_mm": 1600,
+      "wall_thickness_mm": 32.8,
+      "internal_volume_liters": 150.3
+    },
+    "dome": {
+      "type": "isotensoid",
+      "parameters": {
+        "alpha_0_deg": 14.8,
+        "r_0_mm": 175,
+        "depth_mm": 200,
+        "boss_id_mm": 25,
+        "boss_od_mm": 80
+      },
+      "profile_points": [
+        {"r": 40, "z": 200},
+        {"r": 60, "z": 194},
+        {"r": 80, "z": 182},
+        {"r": 100, "z": 160},
+        {"r": 120, "z": 128},
+        {"r": 140, "z": 85},
+        {"r": 160, "z": 40},
+        {"r": 175, "z": 0}
+      ]
+    },
+    "thickness_distribution": {
+      "cylinder_mm": 32.8,
+      "dome_apex_mm": 26.2,
+      "boss_region_mm": 44.5,
+      "transition_mm": 36.5
+    },
+    "layup": {
+      "total_layers": 48,
+      "helical_count": 20,
+      "hoop_count": 28,
+      "fiber_volume_fraction": 0.66,
+      "liner_thickness_mm": 3.5
+    }
+  },
+  "stress": {
+    "max_von_mises_mpa": 1920,
+    "max_location": "dome_cylinder_transition",
+    "allowable_mpa": 2550,
+    "margin_percent": 33
+  },
+  "failure": {
+    "predicted_mode": "fiber_breakage",
+    "is_preferred": true,
+    "first_ply_failure_bar": 1180
+  },
+  "thermal": {
+    "peak_liner_temp_c": 62,
+    "liner_limit_c": 85,
+    "status": "pass"
+  },
+  "reliability": {
+    "p_failure": 2e-8,
+    "mean_burst_bar": 1900,
+    "cov": 0.026
+  }
+}
