@@ -18,9 +18,10 @@ const eslintConfig = defineConfig([
   // Project-specific rules
   {
     rules: {
-      // Downgrade React 19 strict setState in effect rule to warning
-      // This is a common pattern for data fetching that works fine
-      "react-hooks/set-state-in-effect": "warn",
+      // Disable React 19 strict setState-in-effect rule
+      // This pattern is valid for data fetching with loading states
+      // See: https://react.dev/learn/synchronizing-with-effects#fetching-data
+      "react-hooks/set-state-in-effect": "off",
       // Unused vars as warnings during development
       "@typescript-eslint/no-unused-vars": ["warn", {
         "argsIgnorePattern": "^_",
