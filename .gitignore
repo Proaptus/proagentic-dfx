@@ -58,3 +58,22 @@ logs/
 
 # Jupyter
 .ipynb_checkpoints/
+
+# Node.js
+node_modules/
+.npm/
+npm-debug.log*
+
+# Turborepo
+.turbo/
+
+# Next.js
+.next/
+out/
+
+# Local utility scripts (contain machine-specific paths)
+create-vercel-token.mjs
+
+# Duplicate husky dirs (use root .husky/)
+proagentic-dfx/.husky/
+h2-tank-mock-server/.husky/
