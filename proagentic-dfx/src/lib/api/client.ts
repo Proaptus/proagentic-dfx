@@ -2,7 +2,9 @@
 
 import type { ParsedRequirements } from '@/lib/types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+// In production, use relative /api path (served by Next.js)
+// In development, set NEXT_PUBLIC_API_URL=http://localhost:3001/api for mock server
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${url}`, {
