@@ -1,0 +1,120 @@
+{
+  "id": "B",
+  "trade_off_category": "balanced",
+  "summary": {
+    "weight_kg": 77.1,
+    "cost_eur": 13800,
+    "burst_pressure_bar": 1650,
+    "burst_ratio": 2.36,
+    "p_failure": 2e-6,
+    "fatigue_life_cycles": 52000,
+    "permeation_rate": 35,
+    "volumetric_efficiency": 0.90
+  },
+  "geometry": {
+    "dimensions": {
+      "inner_radius_mm": 175,
+      "outer_radius_mm": 202,
+      "cylinder_length_mm": 1200,
+      "total_length_mm": 1540,
+      "wall_thickness_mm": 26.5,
+      "internal_volume_liters": 150.3
+    },
+    "dome": {
+      "type": "isotensoid",
+      "parameters": {
+        "alpha_0_deg": 14.0,
+        "r_0_mm": 175,
+        "depth_mm": 170,
+        "boss_id_mm": 25,
+        "boss_od_mm": 80
+      },
+      "profile_points": [
+        {"r": 40, "z": 170},
+        {"r": 60, "z": 165},
+        {"r": 80, "z": 155},
+        {"r": 100, "z": 136},
+        {"r": 120, "z": 108},
+        {"r": 140, "z": 72},
+        {"r": 160, "z": 34},
+        {"r": 175, "z": 0}
+      ]
+    },
+    "thickness_distribution": {
+      "cylinder_mm": 26.5,
+      "dome_apex_mm": 21.2,
+      "boss_region_mm": 36.5,
+      "transition_mm": 29.5
+    },
+    "layup": {
+      "total_layers": 40,
+      "helical_count": 17,
+      "hoop_count": 23,
+      "fiber_volume_fraction": 0.63,
+      "liner_thickness_mm": 3.1,
+      "layers": [
+        {"layer": 1, "type": "helical", "angle_deg": 14.0, "thickness_mm": 0.33, "coverage": "full"},
+        {"layer": 2, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"},
+        {"layer": 3, "type": "helical", "angle_deg": 14.3, "thickness_mm": 0.33, "coverage": "full"},
+        {"layer": 4, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"},
+        {"layer": 5, "type": "helical", "angle_deg": 13.8, "thickness_mm": 0.33, "coverage": "full"},
+        {"layer": 6, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"},
+        {"layer": 7, "type": "helical", "angle_deg": 14.1, "thickness_mm": 0.33, "coverage": "full"},
+        {"layer": 8, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"},
+        {"layer": 9, "type": "helical", "angle_deg": 14.0, "thickness_mm": 0.33, "coverage": "full"},
+        {"layer": 10, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"},
+        {"layer": 11, "type": "helical", "angle_deg": 14.2, "thickness_mm": 0.33, "coverage": "full"},
+        {"layer": 12, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"},
+        {"layer": 13, "type": "helical", "angle_deg": 13.9, "thickness_mm": 0.33, "coverage": "full"},
+        {"layer": 14, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"},
+        {"layer": 15, "type": "helical", "angle_deg": 14.0, "thickness_mm": 0.33, "coverage": "full"},
+        {"layer": 16, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"},
+        {"layer": 17, "type": "helical", "angle_deg": 14.4, "thickness_mm": 0.33, "coverage": "full"},
+        {"layer": 18, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"},
+        {"layer": 19, "type": "helical", "angle_deg": 13.7, "thickness_mm": 0.33, "coverage": "full"},
+        {"layer": 20, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"},
+        {"layer": 21, "type": "helical", "angle_deg": 14.1, "thickness_mm": 0.33, "coverage": "full"},
+        {"layer": 22, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"},
+        {"layer": 23, "type": "helical", "angle_deg": 14.0, "thickness_mm": 0.33, "coverage": "full"},
+        {"layer": 24, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"},
+        {"layer": 25, "type": "helical", "angle_deg": 14.2, "thickness_mm": 0.33, "coverage": "full"},
+        {"layer": 26, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"},
+        {"layer": 27, "type": "helical", "angle_deg": 13.8, "thickness_mm": 0.33, "coverage": "full"},
+        {"layer": 28, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"},
+        {"layer": 29, "type": "helical", "angle_deg": 14.0, "thickness_mm": 0.33, "coverage": "full"},
+        {"layer": 30, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"},
+        {"layer": 31, "type": "helical", "angle_deg": 14.3, "thickness_mm": 0.33, "coverage": "full"},
+        {"layer": 32, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"},
+        {"layer": 33, "type": "helical", "angle_deg": 14.1, "thickness_mm": 0.33, "coverage": "full"},
+        {"layer": 34, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"},
+        {"layer": 35, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"},
+        {"layer": 36, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"},
+        {"layer": 37, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"},
+        {"layer": 38, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"},
+        {"layer": 39, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"},
+        {"layer": 40, "type": "hoop", "angle_deg": 88, "thickness_mm": 0.53, "coverage": "cylinder"}
+      ]
+    }
+  },
+  "stress": {
+    "max_von_mises_mpa": 2195,
+    "max_location": "dome_cylinder_transition",
+    "allowable_mpa": 2550,
+    "margin_percent": 16
+  },
+  "failure": {
+    "predicted_mode": "fiber_breakage",
+    "is_preferred": true,
+    "first_ply_failure_bar": 1020
+  },
+  "thermal": {
+    "peak_liner_temp_c": 70,
+    "liner_limit_c": 85,
+    "status": "pass"
+  },
+  "reliability": {
+    "p_failure": 2e-6,
+    "mean_burst_bar": 1650,
+    "cov": 0.032
+  }
+}

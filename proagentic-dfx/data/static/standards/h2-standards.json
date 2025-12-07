@@ -1,0 +1,62 @@
+{
+  "standards": [
+    {
+      "id": "ISO_11119_3",
+      "name": "Gas cylinders - Composite construction",
+      "version": "2020",
+      "region": "international",
+      "requirements": {
+        "burst_ratio_min": 2.25,
+        "cycle_life_min": 11000,
+        "permeation_test": true,
+        "fire_test": true
+      }
+    },
+    {
+      "id": "UN_R134",
+      "name": "Hydrogen vehicles - Safety requirements",
+      "version": "2015",
+      "region": "EU",
+      "requirements": {
+        "temp_range_c": [-40, 85],
+        "bonfire_test": true,
+        "gunshot_test": true
+      }
+    },
+    {
+      "id": "EC_79_2009",
+      "name": "Type-approval of hydrogen-powered vehicles (superseded by R134)",
+      "version": "2009",
+      "region": "EU",
+      "requirements": {
+        "burst_ratio_min": 2.25,
+        "cycle_life_min": 5500,
+        "permeation_test": true
+      }
+    },
+    {
+      "id": "SAE_J2579",
+      "name": "Standard for Fuel Systems in Fuel Cell and Other Hydrogen Vehicles",
+      "version": "2018",
+      "region": "US",
+      "requirements": {
+        "burst_ratio_min": 2.25,
+        "cycle_life_min": 5500,
+        "temp_range_c": [-40, 85]
+      }
+    },
+    {
+      "id": "ISO_19881",
+      "name": "Gaseous hydrogen - Land vehicle fuel containers",
+      "version": "2018",
+      "region": "international",
+      "requirements": {
+        "burst_ratio_min": 2.25,
+        "cycle_life_min": 11000,
+        "permeation_test": true,
+        "fire_test": true,
+        "drop_test": true
+      }
+    }
+  ]
+}
