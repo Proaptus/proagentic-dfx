@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { generateIsotensoidDome } from '@/lib/physics/dome-geometry';
+import { getNettingTheoryAngle } from '@/lib/physics/pressure-vessel';
 
 // GET /api/designs/[id]/geometry - Get 3D geometry data
 export async function GET(
@@ -20,10 +22,37 @@ export async function GET(
     const fileContent = await fs.readFile(filePath, 'utf-8');
     const design = JSON.parse(fileContent);
 
-    // Return geometry data
+    // Generate real isotensoid dome profile using first-principles physics
+    const nettingAngle = getNettingTheoryAngle(); // 54.74°
+    const cylinderRadius = design.geometry.dimensions.inner_radius_mm;
+    const bossRadius = design.geometry.dome.parameters.boss_id_mm / 2;
+
+    // Generate isotensoid profile
+    const isotensoidProfile = generateIsotensoidDome(
+      cylinderRadius,
+      nettingAngle,
+      bossRadius,
+      50 // 50 points
+    );
+
+    // Update dome geometry with real physics-based profile
+    const geometryData = {
+      ...design.geometry,
+      dome: {
+        ...design.geometry.dome,
+        type: 'isotensoid' as const,
+        parameters: {
+          ...design.geometry.dome.parameters,
+          alpha_0_deg: Math.round(nettingAngle * 100) / 100,
+        },
+        profile_points: isotensoidProfile,
+      },
+    };
+
+    // Return geometry data with real isotensoid dome
     return NextResponse.json({
       design_id: design.id,
-      ...design.geometry
+      ...geometryData
     }, {
       headers: { 'Access-Control-Allow-Origin': '*' },
     });

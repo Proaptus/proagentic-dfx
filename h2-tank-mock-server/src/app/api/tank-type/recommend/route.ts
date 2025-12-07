@@ -92,14 +92,32 @@ function calculateTankTypeRecommendation(
       };
     });
 
+  // Format for frontend compatibility
+  const formattedAlternatives = type_comparison
+    .filter(t => t.feasible || ['III', 'IV', 'V'].includes(t.type))
+    .map(t => {
+      const pros: string[] = [];
+      const cons: string[] = [];
+
+      if (t.type === 'III') {
+        pros.push('Proven technology', 'Lower cost', 'Simpler manufacturing');
+        cons.push(`Heavier (~${t.est_weight} kg)`, 'Aluminum corrosion risk');
+      } else if (t.type === 'IV') {
+        pros.push('Excellent weight/performance', 'Proven certification', 'Good permeation barrier');
+        cons.push('Higher cost than Type III', 'Liner aging concerns');
+      } else if (t.type === 'V') {
+        pros.push('Lightest option', 'No liner aging', 'Maximum weight savings');
+        cons.push('Emerging technology', 'Limited certification history', 'Higher permeation risk');
+      }
+
+      return { type: t.type, pros, cons };
+    });
+
   return {
-    recommendation: {
-      type: recommendedType,
-      confidence,
-      rationale
-    },
-    alternatives,
-    type_comparison
+    recommended_type: recommendedType,
+    confidence,
+    reasoning: rationale,
+    alternatives: formattedAlternatives
   };
 }
 
@@ -107,8 +125,13 @@ function calculateTankTypeRecommendation(
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json() as TankTypeRequest;
+    const req = body.requirements;
 
-    const { pressure_bar, volume_liters, weight_max_kg, environment } = body.requirements;
+    // Support both old and new field names
+    const pressure_bar = req.working_pressure_bar || req.pressure_bar;
+    const volume_liters = req.internal_volume_liters || req.volume_liters;
+    const weight_max_kg = req.target_weight_kg || req.weight_max_kg;
+    const environment = req.environment;
 
     if (!pressure_bar || !volume_liters) {
       return NextResponse.json(

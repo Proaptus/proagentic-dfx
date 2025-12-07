@@ -8,101 +8,98 @@ import type {
   RegionType
 } from '@/lib/types';
 
-// Static response for demo purposes
-const STATIC_RESPONSE: ParsedRequirementsResponse = {
+// Static response for demo purposes - field names match frontend types exactly
+const STATIC_RESPONSE = {
   success: true,
   parsed_requirements: {
-    pressure_bar: 700,
-    pressure_type: 'working',
-    volume_liters: 150,
-    weight_max_kg: 80,
-    cost_target_eur: null,
-    application: 'automotive_hdt',
-    environment: 'marine',
-    service_life_years: 15,
-    region: 'EU'
+    internal_volume_liters: 150,
+    working_pressure_bar: 700,
+    target_weight_kg: 80,
+    target_cost_eur: 15000,
+    min_burst_ratio: 2.25,
+    max_permeation_rate: 46,
+    operating_temp_min_c: -40,
+    operating_temp_max_c: 85,
+    fatigue_cycles: 11000,
+    certification_region: 'EU'
   },
   derived_requirements: {
+    burst_pressure_bar: 1575,
     test_pressure_bar: 1050,
-    burst_pressure_min_bar: 1575,
-    burst_ratio_min: 2.25,
-    cycle_life_min: 11000,
-    permeation_max_nml_hr_l: 46,
-    temp_range_c: [-40, 85],
-    fire_test_required: true,
-    fire_test_type: 'bonfire'
+    min_wall_thickness_mm: 24.5,
+    applicable_standards: ['ISO_11119_3', 'UN_R134', 'EC_79_2009']
   },
   applicable_standards: [
-    { id: 'ISO_11119_3', name: 'Gas cylinders - Composite construction', selected: true },
-    { id: 'UN_R134', name: 'Hydrogen vehicles - Safety requirements', selected: true },
-    { id: 'EC_79_2009', name: 'Type-approval (superseded)', selected: true },
-    { id: 'SAE_J2579', name: 'US standard', selected: false }
+    { id: 'ISO_11119_3', name: 'Gas cylinders - Composite construction', region: 'International', relevance: 'Primary', key_requirements: ['Burst ratio ≥2.25', 'Permeation ≤46 NmL/hr/L'] },
+    { id: 'UN_R134', name: 'Hydrogen vehicles - Safety requirements', region: 'EU', relevance: 'Primary', key_requirements: ['Temperature -40°C to +85°C', 'Fire test'] },
+    { id: 'EC_79_2009', name: 'Type-approval (superseded)', region: 'EU', relevance: 'Legacy', key_requirements: ['Burst test', 'Pressure cycling'] }
   ],
   confidence: 0.94,
-  warnings: ['Cost target not specified - will optimize for weight/reliability'],
+  warnings: [],
   clarification_needed: []
 };
 
 // Simple NL parsing logic for simulated mode
-function parseNaturalLanguage(text: string): ParsedRequirementsResponse {
-  const result = JSON.parse(JSON.stringify(STATIC_RESPONSE)) as ParsedRequirementsResponse;
+function parseNaturalLanguage(text: string) {
+  const result = JSON.parse(JSON.stringify(STATIC_RESPONSE));
   const lowerText = text.toLowerCase();
 
   // Parse pressure
   const pressureMatch = lowerText.match(/(\d+)\s*bar/);
   if (pressureMatch) {
-    result.parsed_requirements.pressure_bar = parseInt(pressureMatch[1]);
-    result.derived_requirements.test_pressure_bar = result.parsed_requirements.pressure_bar * 1.5;
-    result.derived_requirements.burst_pressure_min_bar = result.parsed_requirements.pressure_bar * 2.25;
+    result.parsed_requirements.working_pressure_bar = parseInt(pressureMatch[1]);
+    result.derived_requirements.test_pressure_bar = result.parsed_requirements.working_pressure_bar * 1.5;
+    result.derived_requirements.burst_pressure_bar = result.parsed_requirements.working_pressure_bar * 2.25;
   }
 
   // Parse volume
   const volumeMatch = lowerText.match(/(\d+)\s*l(?:iter)?s?/);
   if (volumeMatch) {
-    result.parsed_requirements.volume_liters = parseInt(volumeMatch[1]);
+    result.parsed_requirements.internal_volume_liters = parseInt(volumeMatch[1]);
   }
 
   // Parse weight
-  const weightMatch = lowerText.match(/(?:max(?:imum)?|≤|<)\s*(\d+)\s*kg/);
+  const weightMatch = lowerText.match(/(\d+)\s*kg/);
   if (weightMatch) {
-    result.parsed_requirements.weight_max_kg = parseInt(weightMatch[1]);
+    result.parsed_requirements.target_weight_kg = parseInt(weightMatch[1]);
   }
 
-  // Parse application type
-  if (lowerText.includes('truck') || lowerText.includes('heavy-duty') || lowerText.includes('hdt')) {
-    result.parsed_requirements.application = 'automotive_hdt';
-  } else if (lowerText.includes('car') || lowerText.includes('passenger')) {
-    result.parsed_requirements.application = 'automotive_passenger';
-  } else if (lowerText.includes('aerospace') || lowerText.includes('aircraft')) {
-    result.parsed_requirements.application = 'aerospace';
-  } else if (lowerText.includes('marine') || lowerText.includes('ship') || lowerText.includes('boat')) {
-    result.parsed_requirements.application = 'marine';
+  // Parse cost
+  const costMatch = lowerText.match(/[€$]?\s*(\d+[,.]?\d*)\s*(?:maximum|max)?/);
+  if (costMatch && lowerText.includes('cost')) {
+    result.parsed_requirements.target_cost_eur = parseInt(costMatch[1].replace(/[,\.]/g, ''));
   }
 
-  // Parse environment
-  if (lowerText.includes('marine')) {
-    result.parsed_requirements.environment = 'marine';
-  } else if (lowerText.includes('arctic') || lowerText.includes('cold')) {
-    result.parsed_requirements.environment = 'arctic';
-  } else if (lowerText.includes('desert') || lowerText.includes('hot')) {
-    result.parsed_requirements.environment = 'desert';
-  } else if (lowerText.includes('corrosive')) {
-    result.parsed_requirements.environment = 'corrosive';
+  // Parse temperature range
+  const tempMatch = lowerText.match(/-(\d+)°?c?\s*to\s*\+?(\d+)°?c?/);
+  if (tempMatch) {
+    result.parsed_requirements.operating_temp_min_c = -parseInt(tempMatch[1]);
+    result.parsed_requirements.operating_temp_max_c = parseInt(tempMatch[2]);
   }
 
-  // Parse service life
-  const lifeMatch = lowerText.match(/(\d+)\s*year/);
-  if (lifeMatch) {
-    result.parsed_requirements.service_life_years = parseInt(lifeMatch[1]);
+  // Parse burst ratio
+  const burstMatch = lowerText.match(/burst\s*ratio[:\s]*(\d+\.?\d*)/);
+  if (burstMatch) {
+    result.parsed_requirements.min_burst_ratio = parseFloat(burstMatch[1]);
+  }
+
+  // Parse permeation
+  const permMatch = lowerText.match(/permeation[:\s]*(\d+)/);
+  if (permMatch) {
+    result.parsed_requirements.max_permeation_rate = parseInt(permMatch[1]);
+  }
+
+  // Parse fatigue cycles
+  const fatigueMatch = lowerText.match(/(\d+[,.]?\d*)\s*cycles/);
+  if (fatigueMatch) {
+    result.parsed_requirements.fatigue_cycles = parseInt(fatigueMatch[1].replace(/[,\.]/g, ''));
   }
 
   // Parse region
   if (lowerText.includes('eu') || lowerText.includes('europe')) {
-    result.parsed_requirements.region = 'EU';
-    result.applicable_standards[3].selected = false; // SAE not selected for EU
+    result.parsed_requirements.certification_region = 'EU';
   } else if (lowerText.includes('us') || lowerText.includes('america')) {
-    result.parsed_requirements.region = 'US';
-    result.applicable_standards[3].selected = true; // SAE selected for US
+    result.parsed_requirements.certification_region = 'US';
   }
 
   // Calculate confidence based on how much was parsed
@@ -110,17 +107,11 @@ function parseNaturalLanguage(text: string): ParsedRequirementsResponse {
   if (pressureMatch) confidence += 0.08;
   if (volumeMatch) confidence += 0.06;
   if (weightMatch) confidence += 0.05;
-  if (lifeMatch) confidence += 0.04;
+  if (costMatch) confidence += 0.05;
   result.confidence = Math.min(confidence + Math.random() * 0.07, 0.99);
 
   // Update warnings
   result.warnings = [];
-  if (!result.parsed_requirements.weight_max_kg) {
-    result.warnings.push('Weight target not specified - will optimize for cost/reliability');
-  }
-  if (!result.parsed_requirements.cost_target_eur) {
-    result.warnings.push('Cost target not specified - will include in multi-objective optimization');
-  }
 
   return result;
 }
@@ -136,33 +127,31 @@ export async function POST(request: NextRequest) {
       // Return static demo data
       response = STATIC_RESPONSE;
     } else {
-      // Parse the natural language input
-      if (body.input_mode === 'natural_language' && body.raw_text) {
+      // Parse the natural language input - support both input_mode and direct raw_text
+      if (body.raw_text || (body.input_mode === 'natural_language' && body.raw_text)) {
         response = parseNaturalLanguage(body.raw_text);
       } else if (body.input_mode === 'structured' && body.structured) {
-        // For structured input, derive requirements
+        // For structured input, derive requirements (matching frontend types)
+        const pressure = body.structured.pressure_bar || 700;
         response = {
           success: true,
           parsed_requirements: {
-            pressure_bar: body.structured.pressure_bar,
-            pressure_type: body.structured.pressure_type || 'working',
-            volume_liters: body.structured.volume_liters,
-            weight_max_kg: body.structured.weight_max_kg || null,
-            cost_target_eur: body.structured.cost_target_eur || null,
-            application: body.structured.application || 'automotive_hdt',
-            environment: body.structured.environment || 'standard',
-            service_life_years: body.structured.service_life_years || 15,
-            region: body.structured.region || 'EU'
+            internal_volume_liters: body.structured.volume_liters || 150,
+            working_pressure_bar: pressure,
+            target_weight_kg: body.structured.weight_max_kg || 80,
+            target_cost_eur: body.structured.cost_target_eur || 15000,
+            min_burst_ratio: 2.25,
+            max_permeation_rate: 46,
+            operating_temp_min_c: -40,
+            operating_temp_max_c: 85,
+            fatigue_cycles: 11000,
+            certification_region: body.structured.region || 'EU'
           },
           derived_requirements: {
-            test_pressure_bar: body.structured.pressure_bar * 1.5,
-            burst_pressure_min_bar: body.structured.pressure_bar * 2.25,
-            burst_ratio_min: 2.25,
-            cycle_life_min: 11000,
-            permeation_max_nml_hr_l: 46,
-            temp_range_c: [-40, 85],
-            fire_test_required: true,
-            fire_test_type: 'bonfire'
+            burst_pressure_bar: pressure * 2.25,
+            test_pressure_bar: pressure * 1.5,
+            min_wall_thickness_mm: 24.5,
+            applicable_standards: ['ISO_11119_3', 'UN_R134', 'EC_79_2009']
           },
           applicable_standards: STATIC_RESPONSE.applicable_standards,
           confidence: 0.99,

@@ -1,5 +1,6 @@
 {
   "name": "h2-tank-mock-server",
+  "description": "Mock server for H2 Tank Designer module",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -23,6 +24,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.0.7",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.0.15"
   }
 }

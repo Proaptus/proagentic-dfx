@@ -8,10 +8,17 @@ export async function GET(
 ) {
   const { id } = await params;
 
-  // Return the static Pareto results with the job ID
+  // Find the recommended design from pareto_designs
+  const designs = (paretoData as { pareto_designs: Array<{ id: string; [key: string]: unknown }> }).pareto_designs;
+  const recommendedId = (paretoData as { recommended_design_id: string }).recommended_design_id;
+  const recommendedDesign = designs.find(d => d.id === recommendedId) || designs[0];
+
+  // Return format expected by frontend: pareto_front and recommended (as object)
   const response = {
-    ...paretoData,
-    job_id: id
+    job_id: id,
+    status: 'completed',
+    pareto_front: designs,
+    recommended: recommendedDesign
   };
 
   return NextResponse.json(response, {

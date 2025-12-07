@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { gaussianRandom } from '@/lib/utils/noise';
+import {
+  calculateReliability,
+  generateBurstDistribution,
+  calculateDistributionStats,
+  gaussianRandom
+} from '@/lib/physics/reliability';
+import { calculateHoopStress } from '@/lib/physics/pressure-vessel';
 
 // Generate burst distribution histogram
 function generateHistogram(meanBurst: number, stdBurst: number): Array<{ bin_center: number; count: number }> {
@@ -10,7 +16,8 @@ function generateHistogram(meanBurst: number, stdBurst: number): Array<{ bin_cen
   const numSamples = 10000;
 
   for (let i = 0; i < numSamples; i++) {
-    const sample = gaussianRandom(meanBurst, stdBurst);
+    // Sample from normal distribution: mean + std * Z
+    const sample = meanBurst + stdBurst * gaussianRandom();
     const binCenter = Math.round(sample / binWidth) * binWidth;
     bins.set(binCenter, (bins.get(binCenter) || 0) + 1);
   }
@@ -38,26 +45,53 @@ export async function GET(
     const fileContent = await fs.readFile(filePath, 'utf-8');
     const design = JSON.parse(fileContent);
 
-    const meanBurst = design.reliability?.mean_burst_bar || design.summary.burst_pressure_bar;
-    const cov = design.reliability?.cov || 0.03;
-    const stdBurst = meanBurst * cov;
-    const pFailure = design.summary.p_failure;
+    // Calculate real reliability using Monte Carlo simulation
+    const workingPressure = design.summary.burst_pressure_bar / 2.25; // bar
+    const radiusM = design.geometry.dimensions.inner_radius_mm * 0.001;
+    const thicknessM = design.geometry.dimensions.wall_thickness_mm * 0.001;
+    const workingPressureMPa = workingPressure * 0.1;
+
+    const designStress = calculateHoopStress(workingPressureMPa, radiusM, thicknessM);
+    const materialStrength = 2500; // MPa for carbon fiber
+    const strengthCOV = 0.05; // 5% variation in strength
+    const stressCOV = 0.10; // 10% variation in stress
+
+    // Run Monte Carlo simulation with 100,000 samples
+    const mcResult = calculateReliability(
+      designStress,
+      materialStrength,
+      strengthCOV,
+      stressCOV,
+      100000
+    );
+
+    // Generate burst pressure distribution
+    const meanBurst = design.summary.burst_pressure_bar;
+    const burstCOV = 0.03;
+    const burstSamples = generateBurstDistribution(meanBurst, burstCOV, 10000);
+    const burstStats = calculateDistributionStats(burstSamples);
+
+    const pFailure = mcResult.pFailure;
 
     const response = {
       design_id: design.id,
-      monte_carlo: design.reliability?.monte_carlo || {
-        samples: 1000000,
-        p_failure: pFailure,
-        interpretation: `1 in ${Math.round(1 / pFailure).toLocaleString()} chance of burst below working pressure over service life`,
-        comparison_to_requirement: `${Math.round(1e-5 / pFailure)}× better than 10⁻⁵ typical requirement`
+      monte_carlo: {
+        samples: mcResult.samplesRun,
+        p_failure: Math.round(pFailure * 1e10) / 1e10, // Round to 10 decimal places
+        interpretation: pFailure > 0 ?
+          `1 in ${Math.round(1 / pFailure).toLocaleString()} chance of burst below working pressure over service life` :
+          'Extremely low probability of failure (< 1 in 100,000)',
+        comparison_to_requirement: pFailure > 0 ?
+          `${Math.round(1e-5 / pFailure)}× better than 10⁻⁵ typical requirement` :
+          '> 100,000× better than 10⁻⁵ typical requirement'
       },
       burst_distribution: {
-        mean_bar: meanBurst,
-        std_bar: Math.round(stdBurst),
-        cov: cov,
-        percentile_5: Math.round(meanBurst - 1.645 * stdBurst),
-        percentile_95: Math.round(meanBurst + 1.645 * stdBurst),
-        histogram: generateHistogram(meanBurst, stdBurst)
+        mean_bar: Math.round(burstStats.mean),
+        std_bar: Math.round(burstStats.std),
+        cov: Math.round(burstStats.cov * 1000) / 1000,
+        percentile_5: Math.round(burstStats.percentile5),
+        percentile_95: Math.round(burstStats.percentile95),
+        histogram: generateHistogram(burstStats.mean, burstStats.std)
       },
       uncertainty_breakdown: design.reliability?.uncertainty_breakdown || [
         { source: 'Fiber strength variability', cov: 0.08, variance_contribution: 0.52 },
