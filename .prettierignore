@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+out/
+build/
+dist/
+coverage/
+
+# Lock files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Generated
+*.d.ts
+next-env.d.ts
+
+# Test artifacts
+playwright-report/
+test-results/
+
+# IDE
+.idea/
+
+# Cache
+.cache/
+.turbo/

@@ -1,0 +1,47 @@
+{
+  "name": "proagentic-dfx-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ProAgentic DFX - AI-powered engineering design platform (monorepo)",
+  "workspaces": [
+    "packages/*",
+    "proagentic-dfx",
+    "h2-tank-mock-server"
+  ],
+  "scripts": {
+    "dev": "turbo run dev --filter=proagentic-dfx",
+    "dev:mock": "turbo run dev --filter=h2-tank-mock-server",
+    "dev:all": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage --filter=proagentic-dfx",
+    "test:e2e": "turbo run test:e2e --filter=proagentic-dfx",
+    "validate": "turbo run lint typecheck test",
+    "check:sizes": "node scripts/check-file-sizes.mjs all",
+    "check:sizes:staged": "node scripts/check-file-sizes.mjs staged",
+    "prepare": "husky",
+    "gen:domain": "turbo gen workspace --type domain",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.7.4",
+    "turbo": "^2.6.3"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write --ignore-unknown"
+    ]
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "npm@10.0.0"
+}

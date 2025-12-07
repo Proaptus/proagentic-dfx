@@ -20,11 +20,29 @@ concurrency:
 
 jobs:
   # ============================================
+  # Quality Gate 0: File Size Check
+  # ============================================
+  file-sizes:
+    name: File Size Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Check file sizes
+        run: node scripts/check-file-sizes.mjs all
+
+  # ============================================
   # Quality Gate 1: Lint & Type Check
   # ============================================
   lint:
     name: Lint & Type Check
     runs-on: ubuntu-latest
+    needs: file-sizes
     steps:
       - uses: actions/checkout@v4
 

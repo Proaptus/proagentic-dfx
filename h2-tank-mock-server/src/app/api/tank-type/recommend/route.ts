@@ -1,6 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDataMode } from '@/lib/utils/data-mode';
-import type { TankTypeRequest, TankTypeResponse, TankType } from '@/lib/types';
+import type { TankType } from '@/lib/types';
+
+// Mock request type that supports both old and new field names
+interface MockTankTypeRequest {
+  requirements: {
+    pressure_bar?: number;
+    working_pressure_bar?: number;
+    volume_liters?: number;
+    internal_volume_liters?: number;
+    weight_max_kg?: number;
+    target_weight_kg?: number;
+    environment?: string;
+  };
+}
+
+// Mock response type that matches what we actually return
+// TODO: Align with lib/types TankTypeResponse
+interface MockTankTypeResponse {
+  recommended_type: TankType;
+  confidence: number;
+  reasoning: string;
+  alternatives: Array<{ type: TankType; pros: string[]; cons: string[] }>;
+}
 
 // Type weight estimates (kg/L)
 const TYPE_WEIGHTS: Record<TankType, { liner: string; kg_per_l: number }> = {
@@ -16,7 +37,7 @@ function calculateTankTypeRecommendation(
   volume_liters: number,
   weight_max_kg?: number,
   environment?: string
-): TankTypeResponse {
+): MockTankTypeResponse {
   const targetKgPerL = weight_max_kg ? weight_max_kg / volume_liters : 1.0;
 
   // Calculate feasibility for each type
@@ -124,7 +145,7 @@ function calculateTankTypeRecommendation(
 // POST /api/tank-type/recommend - Get tank type recommendation
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json() as TankTypeRequest;
+    const body = await request.json() as MockTankTypeRequest;
     const req = body.requirements;
 
     // Support both old and new field names

@@ -1,0 +1,97 @@
+{
+  "generated_at": "2025-12-07T21:50:00Z",
+  "exclusions": [
+    "CLAUDE.md - Agent configuration (protected)",
+    "requirements_spec/* - RTM/SSOT (protected)"
+  ],
+  "total_files": 120,
+  "files": [
+    {
+      "path": "HANDOVER.md",
+      "has_frontmatter": false,
+      "doc_type": "readme",
+      "title": "ProSWARM Template Handover Document",
+      "status": "unknown"
+    },
+    {
+      "path": "docs/DEPLOYMENT.md",
+      "has_frontmatter": false,
+      "doc_type": "reference",
+      "title": "ProAgentic DFX - Deployment Guide",
+      "status": "unknown"
+    },
+    {
+      "path": "docs/MULTI-DOMAIN-ARCHITECTURE.md",
+      "has_frontmatter": false,
+      "doc_type": "explanation",
+      "title": "Multi-Domain Architecture - Implementation Summary",
+      "status": "unknown"
+    },
+    {
+      "path": ".claude/agents/*.md",
+      "has_frontmatter": true,
+      "doc_type": "agent",
+      "title": "26 Agent Definition Files",
+      "status": "active",
+      "count": 26
+    },
+    {
+      "path": ".claude/skills/*/SKILL.md",
+      "has_frontmatter": true,
+      "doc_type": "skill",
+      "title": "10 Skill Definition Files",
+      "status": "active",
+      "count": 10
+    },
+    {
+      "path": ".claude/skills/doc-manager/templates/*.md",
+      "has_frontmatter": true,
+      "doc_type": "template",
+      "title": "8 Document Templates",
+      "status": "active",
+      "count": 8
+    },
+    {
+      "path": "h2-tank-mock-server/README.md",
+      "has_frontmatter": false,
+      "doc_type": "readme",
+      "title": "H2 Tank Mock Server",
+      "status": "unknown"
+    },
+    {
+      "path": "proagentic-dfx/README.md",
+      "has_frontmatter": false,
+      "doc_type": "readme",
+      "title": "ProAgentic DFX Frontend",
+      "status": "unknown"
+    }
+  ],
+  "summary": {
+    "with_frontmatter": 44,
+    "without_frontmatter": 76,
+    "by_type": {
+      "agent": 26,
+      "skill": 10,
+      "template": 8,
+      "readme": 18,
+      "reference": 8,
+      "explanation": 5,
+      "howto": 5,
+      "checklist": 9,
+      "quick_reference": 9,
+      "usage_examples": 8,
+      "unknown": 14
+    }
+  },
+  "directories_created": [
+    "docs/_index",
+    "docs/feature",
+    "docs/howto",
+    "docs/reference",
+    "docs/explanation",
+    "docs/adr",
+    "docs/test-report",
+    "docs/runbook",
+    "docs/quarantine"
+  ]
+}

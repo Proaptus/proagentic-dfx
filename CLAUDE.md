@@ -146,6 +146,48 @@ Step 5: Quality Gates (≥80% coverage)
 - `kill`, `killall`, `pkill -f "node.*server"`
 - **EXCEPTION**: `pkill -f chrome` is ALLOWED
 
+## 📏 FILE SIZE LIMITS - AI-OPTIMIZED CODE
+
+**CRITICAL**: Keep files small for AI context efficiency. Large files degrade AI performance.
+
+### Hard Limits (Enforced by pre-commit hook)
+| File Type | Max Lines | Max Size |
+|-----------|-----------|----------|
+| Components/Routes | 500 | 35KB |
+| Type definitions | 800 | 35KB |
+| Test files | 800 | 35KB |
+
+### Recommended Limits (ESLint warnings)
+| Metric | Limit | Why |
+|--------|-------|-----|
+| Lines per file | 350 | Fits in AI context window |
+| Lines per function | 50 | Single responsibility |
+| Parameters | 5 | Cognitive load |
+| Nesting depth | 4 | Readability |
+| Complexity | 15 | Maintainability |
+
+### When You Hit Limits - Split Patterns
+
+```typescript
+// ❌ BAD: One huge component file (500+ lines)
+// src/components/Dashboard.tsx
+
+// ✅ GOOD: Split by concern
+// src/components/dashboard/
+//   ├── Dashboard.tsx           (< 200 lines - composition only)
+//   ├── DashboardHeader.tsx     (< 100 lines)
+//   ├── DashboardMetrics.tsx    (< 100 lines)
+//   ├── DashboardCharts.tsx     (< 100 lines)
+//   ├── useDashboardData.ts     (< 100 lines - custom hook)
+//   └── dashboard.types.ts      (< 50 lines)
+```
+
+### Commands
+```bash
+npm run check:sizes      # Check all files
+npm run check:sizes:staged  # Check staged files only (pre-commit)
+```
+
 ## 📊 MEMORY PROTOCOL
 
 ```javascript

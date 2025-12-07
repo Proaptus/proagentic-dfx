@@ -1,3 +1,20 @@
+---
+id: REF-DEPLOY-001
+doc_type: reference
+title: "Deployment Guide"
+status: accepted
+last_verified_at: 2025-12-07
+owner: "@proaptus"
+code_refs:
+  - path: ".github/workflows/ci.yml"
+  - path: "proagentic-dfx/.vercel/project.json"
+test_refs:
+  - ci_run: "gh-actions://runs/20009683134"
+evidence:
+  tests_passed: true
+keywords: ["deployment", "vercel", "ci", "cd", "github-actions", "local-dev"]
+---
+
 # ProAgentic DFX - Deployment Guide
 
 ## Overview

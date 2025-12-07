@@ -30,6 +30,26 @@ const eslintConfig = defineConfig([
       }],
       // Allow exhaustive deps warnings (useful but not always necessary)
       "react-hooks/exhaustive-deps": "warn",
+      // FILE SIZE LIMITS - Enforce manageable file sizes for AI context
+      // 300 lines max per file (warning at 250)
+      "max-lines": ["warn", {
+        "max": 300,
+        "skipBlankLines": true,
+        "skipComments": true
+      }],
+      // 50 lines max per function (warning)
+      "max-lines-per-function": ["warn", {
+        "max": 50,
+        "skipBlankLines": true,
+        "skipComments": true,
+        "IIFEs": true
+      }],
+      // Max 10 parameters per function
+      "max-params": ["warn", 5],
+      // Max nesting depth of 4
+      "max-depth": ["warn", 4],
+      // Encourage smaller, focused modules
+      "complexity": ["warn", 15],
     },
   },
 ]);

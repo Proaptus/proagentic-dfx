@@ -148,14 +148,14 @@ export function calculateMeanStress(
 }
 
 /**
- * Calculate stress ratio (R-ratio)
+ * Calculate stress ratio (R-ratio) for fatigue analysis
  * R = σ_min / σ_max
  *
  * @param minStress - Minimum stress (MPa)
  * @param maxStress - Maximum stress (MPa)
- * @returns Stress ratio (unitless)
+ * @returns R-ratio (unitless)
  */
-export function calculateStressRatio(
+export function calculateRRatio(
   minStress: number,
   maxStress: number
 ): number {

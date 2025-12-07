@@ -1,0 +1,99 @@
+{
+  "version": "1.0.0",
+  "generated_at": "2025-12-07T22:30:00Z",
+  "project": "proagentic-dfx",
+  "framework": "diataxis",
+  "protected_files": [
+    "CLAUDE.md",
+    "requirements_spec/*"
+  ],
+  "structure": {
+    "docs/": {
+      "description": "Main documentation directory",
+      "subdirectories": {
+        "_index/": "Indexes and manifests (machine-readable)",
+        "feature/": "Feature cards and capability documentation",
+        "howto/": "Step-by-step procedural guides",
+        "reference/": "API, configuration, and technical reference",
+        "explanation/": "Conceptual and architectural explanations",
+        "adr/": "Architectural Decision Records",
+        "test-report/": "Test execution reports",
+        "runbook/": "Operational procedures",
+        "quarantine/": "Docs pending review (timestamped)"
+      }
+    }
+  },
+  "documents": [
+    {
+      "id": "REF-CICD-001",
+      "path": "docs/reference/CICD_PIPELINE.md",
+      "doc_type": "reference",
+      "title": "CI/CD Pipeline Reference",
+      "status": "accepted",
+      "last_verified_at": "2025-12-07",
+      "owner": "@proaptus",
+      "code_refs": [".github/workflows/ci.yml"],
+      "keywords": ["ci", "cd", "github-actions", "vercel", "deployment"],
+      "search": {
+        "boost": 2,
+        "exclude": false
+      }
+    },
+    {
+      "id": "REF-DEPLOY-001",
+      "path": "docs/DEPLOYMENT.md",
+      "doc_type": "reference",
+      "title": "Deployment Guide",
+      "status": "accepted",
+      "last_verified_at": "2025-12-07",
+      "owner": "@proaptus",
+      "code_refs": [".github/workflows/ci.yml", "proagentic-dfx/.vercel/project.json"],
+      "keywords": ["deployment", "vercel", "ci", "cd", "github-actions", "local-dev"]
+    },
+    {
+      "id": "EXP-ARCH-001",
+      "path": "docs/MULTI-DOMAIN-ARCHITECTURE.md",
+      "doc_type": "explanation",
+      "title": "Multi-Domain Architecture",
+      "status": "accepted",
+      "last_verified_at": "2025-12-07",
+      "owner": "@proaptus",
+      "code_refs": [
+        "proagentic-dfx/src/lib/domains/types.ts",
+        "proagentic-dfx/src/lib/domains/h2-tank.ts",
+        "proagentic-dfx/src/lib/domains/index.ts",
+        "proagentic-dfx/src/lib/stores/domain-store.ts"
+      ],
+      "sources_of_truth": ["requirements_spec/moonshot-analysis.md"],
+      "keywords": ["architecture", "multi-domain", "h2-tank", "pressure-vessel", "domain-registry"]
+    }
+  ],
+  "external_docs": {
+    "agents": {
+      "path": ".claude/agents/",
+      "count": 26,
+      "has_frontmatter": true
+    },
+    "skills": {
+      "path": ".claude/skills/*/SKILL.md",
+      "count": 10,
+      "has_frontmatter": true
+    },
+    "templates": {
+      "path": ".claude/skills/doc-manager/templates/",
+      "count": 8,
+      "has_frontmatter": true
+    }
+  },
+  "statistics": {
+    "total_docs": 120,
+    "with_frontmatter": 47,
+    "without_frontmatter": 73,
+    "by_status": {
+      "accepted": 3,
+      "draft": 72,
+      "active": 44,
+      "unknown": 1
+    }
+  }
+}

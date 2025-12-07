@@ -1,0 +1,50 @@
+/**
+ * {{ titleCase displayName }} Domain Types
+ * Auto-generated from H2 Tank template
+ */
+
+import type { DesignCandidate } from '@proagentic/types';
+
+/**
+ * {{ titleCase displayName }}-specific requirements
+ */
+export interface {{ pascalCase name }}Requirements {
+  working_pressure_bar: number;
+  internal_volume_liters: number;
+  target_weight_kg?: number;
+  target_cost_eur?: number;
+  operating_temp_min_c?: number;
+  operating_temp_max_c?: number;
+  certification_region: 'EU' | 'US' | 'INTL';
+  // Add domain-specific fields here
+}
+
+/**
+ * {{ titleCase displayName }}-specific design candidate
+ */
+export interface {{ pascalCase name }}Design extends DesignCandidate {
+  // Add domain-specific properties here
+  domain_specific_field?: unknown;
+}
+
+/**
+ * {{ titleCase displayName }}-specific analysis results
+ */
+export interface {{ pascalCase name }}Analysis {
+  stress?: {
+    max_principal_mpa: number;
+    max_shear_mpa: number;
+    safety_factor: number;
+    critical_location: string;
+  };
+  fatigue?: {
+    predicted_life_cycles: number;
+    damage_accumulation: number;
+    safety_factor: number;
+  };
+  thermal?: {
+    max_temp_c: number;
+    min_temp_c: number;
+    thermal_stress_mpa: number;
+  };
+}

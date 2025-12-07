@@ -1,0 +1,30 @@
+{
+  "name": "{{ dashCase name }}-mock-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mock server for {{ titleCase displayName }}",
+  "scripts": {
+    "dev": "next dev --port {{ port }}",
+    "build": "next build",
+    "start": "next start --port {{ port }}",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "^15.3.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@proagentic/types": "*",
+    "@proagentic/physics-engine": "*",
+    "@proagentic/core-utils": "*"
+  },
+  "devDependencies": {
+    "@proagentic/typescript-config": "*",
+    "@proagentic/eslint-config": "*",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5.7.2"
+  }
+}

@@ -1,0 +1,12 @@
+import type { NextConfig } from 'next';
+
+const nextConfig: NextConfig = {
+  reactStrictMode: true,
+  transpilePackages: [
+    '@proagentic/types',
+    '@proagentic/physics-engine',
+    '@proagentic/core-utils',
+  ],
+};
+
+export default nextConfig;

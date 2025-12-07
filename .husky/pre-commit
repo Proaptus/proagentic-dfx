@@ -1,0 +1,5 @@
+# Check file sizes first (fast, blocks oversized files)
+node scripts/check-file-sizes.mjs staged
+
+# Run lint-staged (eslint fix + prettier)
+npx lint-staged

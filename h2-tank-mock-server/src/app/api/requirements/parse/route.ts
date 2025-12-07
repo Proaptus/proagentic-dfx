@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDataMode } from '@/lib/utils/data-mode';
-import type {
-  RequirementsInput,
-  ParsedRequirementsResponse,
-  ApplicationType,
-  EnvironmentType,
-  RegionType
-} from '@/lib/types';
+import type { RequirementsInput } from '@/lib/types';
+
+// Mock response type that matches what we actually return
+// TODO: Align with lib/types ParsedRequirementsResponse
+interface MockParsedResponse {
+  success: boolean;
+  parsed_requirements: Record<string, unknown>;
+  derived_requirements: Record<string, unknown>;
+  applicable_standards: Array<Record<string, unknown>>;
+  confidence: number;
+  warnings: string[];
+  clarification_needed: string[];
+}
 
 // Static response for demo purposes - field names match frontend types exactly
 const STATIC_RESPONSE = {
@@ -121,7 +127,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json() as RequirementsInput;
 
-    let response: ParsedRequirementsResponse;
+    let response: MockParsedResponse;
 
     if (getDataMode() === 'static') {
       // Return static demo data

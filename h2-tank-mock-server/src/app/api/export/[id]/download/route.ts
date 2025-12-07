@@ -89,7 +89,7 @@ export async function GET(
     // Generate ZIP
     const zipContent = generateZipWithMultipleFiles(files);
 
-    return new NextResponse(zipContent, {
+    return new NextResponse(new Uint8Array(zipContent), {
       headers: {
         'Content-Type': 'application/zip',
         'Content-Disposition': `attachment; filename="h2-tank-design-${designId}-export.zip"`,
@@ -222,7 +222,7 @@ function generateWindingSequence(design: Record<string, unknown>): string {
   seq += '-'.repeat(20) + '\n';
   seq += `Mandrel Diameter: ${(dims.inner_radius_mm as number) * 2} mm\n`;
   seq += `Cylinder Length: ${dims.cylinder_length_mm} mm\n`;
-  seq += `Total Dome Height: ${(geometry.dome as Record<string, unknown>).parameters?.depth_mm || 180} mm\n`;
+  seq += `Total Dome Height: ${((geometry.dome as Record<string, unknown>)?.parameters as Record<string, unknown>)?.depth_mm || 180} mm\n`;
   seq += '\n';
   seq += 'LAYER SEQUENCE\n';
   seq += '-'.repeat(20) + '\n';
