@@ -15,8 +15,9 @@ const eslintConfig = defineConfig([
     "coverage/**",
     "node_modules/**",
   ]),
-  // Project-specific rules
+  // Project-specific rules - must specify files for flat config
   {
+    files: ["**/*.{ts,tsx,js,jsx}"],
     rules: {
       // Disable React 19 strict setState-in-effect rule
       // This pattern is valid for data fetching with loading states
