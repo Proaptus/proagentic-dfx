@@ -51,10 +51,9 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: proagentic-dfx/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        working-directory: proagentic-dfx
         run: npm ci
 
       - name: Run ESLint
@@ -80,10 +79,9 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: proagentic-dfx/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        working-directory: proagentic-dfx
         run: npm ci
 
       - name: Run unit tests with coverage
@@ -112,10 +110,9 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: proagentic-dfx/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        working-directory: proagentic-dfx
         run: npm ci
 
       - name: Build application
@@ -146,10 +143,9 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: h2-tank-mock-server/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        working-directory: h2-tank-mock-server
         run: npm ci
 
       - name: Run mock server tests
@@ -172,17 +168,12 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: proagentic-dfx/package-lock.json
+          cache-dependency-path: package-lock.json
 
-      - name: Install Playwright browsers
-        working-directory: proagentic-dfx
+      - name: Install dependencies and Playwright browsers
         run: |
           npm ci
-          npx playwright install --with-deps chromium
-
-      - name: Install mock server dependencies
-        working-directory: h2-tank-mock-server
-        run: npm ci
+          cd proagentic-dfx && npx playwright install --with-deps chromium
 
       - name: Run E2E tests
         working-directory: proagentic-dfx
