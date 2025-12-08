@@ -77,3 +77,6 @@ create-vercel-token.mjs
 # Duplicate husky dirs (use root .husky/)
 proagentic-dfx/.husky/
 h2-tank-mock-server/.husky/
+
+.vercel
+.env*.local
