@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "Design for Excellence - AI-powered engineering design platform",
   "private": true,
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
