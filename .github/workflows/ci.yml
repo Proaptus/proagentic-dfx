@@ -112,12 +112,14 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
-      - name: Clean workspace node_modules (native module fix)
-        working-directory: proagentic-dfx
-        run: rm -rf node_modules
-
-      - name: Install dependencies (fresh install for native modules)
+      - name: Install root dependencies
         run: npm install
+
+      - name: Clean and reinstall workspace deps (native module fix)
+        working-directory: proagentic-dfx
+        run: |
+          rm -rf node_modules
+          npm install
 
       - name: Build application
         working-directory: proagentic-dfx
