@@ -112,12 +112,12 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
-      - name: Install dependencies
-        run: npm install --prefer-offline
-
-      - name: Install platform-specific native modules
+      - name: Clean workspace node_modules (native module fix)
         working-directory: proagentic-dfx
-        run: npm install lightningcss-linux-x64-gnu --no-save
+        run: rm -rf node_modules
+
+      - name: Install dependencies (fresh install for native modules)
+        run: npm install
 
       - name: Build application
         working-directory: proagentic-dfx
