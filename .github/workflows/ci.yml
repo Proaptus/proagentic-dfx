@@ -115,6 +115,10 @@ jobs:
       - name: Install dependencies
         run: npm install --prefer-offline
 
+      - name: Install platform-specific native modules
+        working-directory: proagentic-dfx
+        run: npm install lightningcss-linux-x64-gnu --no-save
+
       - name: Build application
         working-directory: proagentic-dfx
         run: npm run build
