@@ -109,16 +109,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
 
-      - name: Install root dependencies
-        run: npm install
-
-      - name: Clean and reinstall workspace deps (native module fix)
-        working-directory: proagentic-dfx
+      - name: Install dependencies (fresh for platform-specific native modules)
         run: |
-          rm -rf node_modules
+          rm -f package-lock.json
           npm install
 
       - name: Build application
