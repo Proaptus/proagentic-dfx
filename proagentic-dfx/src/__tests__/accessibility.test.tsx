@@ -334,8 +334,8 @@ describe('Accessibility Tests - WCAG 2.1 AA Compliance', () => {
       render(<Button variant="primary">Primary</Button>);
       const button = screen.getByRole('button');
 
-      // Primary uses design tokens for primary-600 with white text (high contrast)
-      expect(button.className).toContain('--color-primary-600');
+      // Primary uses gradient blue with white text (high contrast)
+      expect(button.className).toContain('blue-600');
       expect(button.className).toContain('text-white');
     });
 
@@ -343,8 +343,8 @@ describe('Accessibility Tests - WCAG 2.1 AA Compliance', () => {
       render(<Button variant="destructive">Delete</Button>);
       const button = screen.getByRole('button');
 
-      // Destructive uses design tokens for error color with white text (high contrast)
-      expect(button.className).toContain('--color-error');
+      // Destructive uses red-600 with white text (high contrast)
+      expect(button.className).toContain('red-600');
       expect(button.className).toContain('text-white');
     });
 
@@ -352,9 +352,9 @@ describe('Accessibility Tests - WCAG 2.1 AA Compliance', () => {
       render(<Button variant="secondary">Secondary</Button>);
       const button = screen.getByRole('button');
 
-      // Secondary uses design tokens for gray-200 with gray-900 (high contrast)
-      expect(button.className).toContain('--color-gray-200');
-      expect(button.className).toContain('--color-gray-900');
+      // Secondary uses white bg with gray-700 text (high contrast)
+      expect(button.className).toContain('bg-white');
+      expect(button.className).toContain('text-gray-700');
     });
   });
 

@@ -1,0 +1,6 @@
+19a20
+> import { SectionControls, type SectionDirection } from '@/components/viewer/SectionControls';
+44a46,48
+>   const [sectionDirection, setSectionDirection] = useState<SectionDirection>('z');
+>   const [sectionPosition, setSectionPosition] = useState(0);
+>   const [showInterior, setShowInterior] = useState(false);

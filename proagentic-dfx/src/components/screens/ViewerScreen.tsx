@@ -3,9 +3,10 @@
 import { useEffect, useState, useMemo, lazy, Suspense, useCallback } from 'react';
 import { useAppStore } from '@/lib/stores/app-store';
 import { getDesignGeometry, getDesignStress, getDesign } from '@/lib/api/client';
+import type { StressType, LoadCase } from '@/lib/api/client';
 import { Button } from '@/components/ui/Button';
 import type { DesignGeometry, DesignStress, DesignSummary, CompositeLayer } from '@/lib/types';
-import { Eye, Activity, ArrowRight } from 'lucide-react';
+import { Eye, Activity, ArrowRight, Camera } from 'lucide-react';
 import {
   MeasurementTools,
   type MeasurementMode,
@@ -16,6 +17,8 @@ import {
 } from '@/components/viewer/MeasurementTools';
 import { ViewModeControls } from '@/components/viewer/ViewModeControls';
 import { LayerControls } from '@/components/viewer/LayerControls';
+import { ExportDialog } from '@/components/viewer/ExportDialog';
+import { captureAndDownloadScreenshot, type ScreenshotOptions } from '@/lib/export/screenshot-utils';
 
 // Dynamic import for CAD viewer (client-side only)
 const CADTankViewer = lazy(() => import('@/components/cad/CADTankViewer'));
@@ -27,6 +30,12 @@ export function ViewerScreen() {
   const [stress, setStress] = useState<DesignStress | null>(null);
   const [summary, setSummary] = useState<DesignSummary | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Stress type selection state
+  const [selectedStressType, setSelectedStressType] = useState<StressType>('vonMises');
+  const [selectedLoadCase, setSelectedLoadCase] = useState<LoadCase>('test');
+  const [isLoadingStress, setIsLoadingStress] = useState(false);
+  const [stressError, setStressError] = useState<string | null>(null);
 
   // View controls
   const [showStress, setShowStress] = useState(false);
@@ -43,6 +52,10 @@ export function ViewerScreen() {
   const [measurementMode, setMeasurementMode] = useState<MeasurementMode>(null);
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
   const [pendingPoints, setPendingPoints] = useState<Array<{ x: number; y: number; z: number }>>([]);
+
+  // Export state
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [exportPreview, setExportPreview] = useState<string>('');
 
   // Auto-disable auto-rotate when measuring
   useEffect(() => {
@@ -109,28 +122,77 @@ export function ViewerScreen() {
     }
   }, [currentDesign, setCurrentDesign]);
 
-  // Load data
+  // Load geometry and summary data (not stress - that's handled separately)
   useEffect(() => {
     if (!currentDesign) return;
 
     setLoading(true);
     Promise.all([
       getDesignGeometry(currentDesign),
-      getDesignStress(currentDesign),
       getDesign(currentDesign),
     ])
-      .then(([geo, str, sum]) => {
+      .then(([geo, sum]) => {
         setGeometry(geo as DesignGeometry);
-        setStress(str as DesignStress);
         setSummary(sum as DesignSummary);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [currentDesign]);
 
+  // Load stress data when design, stress type, or load case changes
+  useEffect(() => {
+    if (!currentDesign) return;
+
+    // Reset stress data and error on new fetch
+    setIsLoadingStress(true);
+    setStressError(null);
+
+    getDesignStress(currentDesign, selectedStressType, selectedLoadCase)
+      .then((str) => {
+        setStress(str as DesignStress);
+      })
+      .catch((error) => {
+        console.error('Failed to fetch stress data:', error);
+        setStressError(error.message || 'Failed to load stress data');
+        // Keep previous stress data on error for better UX
+      })
+      .finally(() => setIsLoadingStress(false));
+  }, [currentDesign, selectedStressType, selectedLoadCase]);
+
   const handleAnalyze = useCallback(() => {
     setScreen('analysis');
   }, [setScreen]);
+
+  // Export screenshot handler
+  const handleExportClick = useCallback(() => {
+    // Get the canvas element from the CADTankViewer
+    const canvas = document.querySelector('canvas') as HTMLCanvasElement;
+    if (canvas) {
+      // Generate preview
+      try {
+        const previewUrl = canvas.toDataURL('image/png', 0.5);
+        setExportPreview(previewUrl);
+      } catch (error) {
+        console.warn('Failed to generate preview:', error);
+      }
+    }
+    setShowExportDialog(true);
+  }, []);
+
+  const handleExport = useCallback((options: ScreenshotOptions) => {
+    const canvas = document.querySelector('canvas') as HTMLCanvasElement;
+    if (!canvas) {
+      console.error('Canvas not found for export');
+      return;
+    }
+
+    try {
+      captureAndDownloadScreenshot(canvas, options);
+    } catch (error) {
+      console.error('Failed to export screenshot:', error);
+      alert('Failed to export screenshot. Please try again.');
+    }
+  }, []);
 
   // Available designs - memoized for performance
   const designs = useMemo(() => {
@@ -170,10 +232,22 @@ export function ViewerScreen() {
                 <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
                   3D Viewport
                 </h2>
-                <div className="flex items-center gap-2 text-xs text-gray-500" role="status" aria-live="polite">
-                  <span>Design {currentDesign}</span>
-                  <span className="w-1 h-1 rounded-full bg-gray-400" aria-hidden="true" />
-                  <span>{geometry ? 'Geometry Loaded' : 'No Data'}</span>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 text-xs text-gray-500" role="status" aria-live="polite">
+                    <span>Design {currentDesign}</span>
+                    <span className="w-1 h-1 rounded-full bg-gray-400" aria-hidden="true" />
+                    <span>{geometry ? 'Geometry Loaded' : 'No Data'}</span>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={handleExportClick}
+                    disabled={!geometry}
+                    icon={<Camera size={14} />}
+                    aria-label="Export screenshot"
+                  >
+                    Export
+                  </Button>
                 </div>
               </div>
             </div>
@@ -234,7 +308,23 @@ export function ViewerScreen() {
               onToggleCrossSection={() => setShowCrossSection(!showCrossSection)}
               onToggleAutoRotate={() => setAutoRotate(!autoRotate)}
               onToggleLiner={() => setShowLiner(!showLiner)}
+              selectedStressType={selectedStressType}
+              selectedLoadCase={selectedLoadCase}
+              onStressTypeChange={setSelectedStressType}
+              onLoadCaseChange={setSelectedLoadCase}
+              isLoadingStress={isLoadingStress}
             />
+
+            {/* Stress Error Alert */}
+            {stressError && showStress && (
+              <div
+                className="mt-2 bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700"
+                role="alert"
+              >
+                <strong className="font-medium">Error loading stress data: </strong>
+                {stressError}
+              </div>
+            )}
 
             {/* Layer Controls Section - Extracted Component */}
             {layers.length > 0 && (
@@ -373,9 +463,25 @@ export function ViewerScreen() {
                 <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center gap-2">
                   <Activity size={16} />
                   Stress Analysis
+                  {isLoadingStress && (
+                    <span className="ml-auto text-xs text-blue-600 animate-pulse">Loading...</span>
+                  )}
                 </h3>
               </div>
               <dl className="p-4 space-y-3 text-sm">
+                {/* Current stress type and load case info */}
+                <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+                  <dt className="text-gray-600">Stress Type:</dt>
+                  <dd className="font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded text-xs">
+                    {stress.stress_type || selectedStressType}
+                  </dd>
+                </div>
+                <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+                  <dt className="text-gray-600">Load Case:</dt>
+                  <dd className="font-semibold text-gray-900 text-xs">
+                    {stress.load_case} @ {stress.load_pressure_bar} bar
+                  </dd>
+                </div>
                 <div className="flex justify-between items-center pb-3 border-b border-gray-100">
                   <dt className="text-gray-600">Maximum Stress:</dt>
                   <dd className="font-semibold text-gray-900">{stress.max_stress.value_mpa} MPa</dd>
@@ -386,8 +492,12 @@ export function ViewerScreen() {
                 </div>
                 <div className="flex justify-between items-center pb-3 border-b border-gray-100">
                   <dt className="text-gray-600">Safety Margin:</dt>
-                  <dd className="font-semibold text-green-600 bg-green-50 px-2 py-1 rounded">
-                    +{stress.max_stress.margin_percent}%
+                  <dd className={`font-semibold px-2 py-1 rounded ${
+                    stress.max_stress.margin_percent >= 0
+                      ? 'text-green-600 bg-green-50'
+                      : 'text-red-600 bg-red-50'
+                  }`}>
+                    {stress.max_stress.margin_percent >= 0 ? '+' : ''}{stress.max_stress.margin_percent}%
                   </dd>
                 </div>
                 <div className="flex justify-between items-start">
@@ -401,6 +511,15 @@ export function ViewerScreen() {
           )}
         </aside>
       </div>
+
+      {/* Export Dialog */}
+      <ExportDialog
+        isOpen={showExportDialog}
+        onClose={() => setShowExportDialog(false)}
+        onExport={handleExport}
+        currentDesignId={currentDesign || undefined}
+        previewDataUrl={exportPreview}
+      />
     </div>
   );
 }

@@ -5,20 +5,20 @@
 
 SUMMARY
 -------
-Total Violations:  3
-Files Scanned:     116
-Files Affected:    1
+Total Violations:  4
+Files Scanned:     120
+Files Affected:    2
 
 SEVERITY BREAKDOWN
 ------------------
   CRITICAL:    0 ✓
   HIGH:        0 ✓
-  MEDIUM:      3
+  MEDIUM:      4
   LOW:         0
 
 CATEGORY BREAKDOWN
 ------------------
-  🟡 Filler Text:    3
+  🟡 Filler Text:    4
 
 ==========================================================================================
 DETAILED VIOLATIONS BY FILE
@@ -29,15 +29,24 @@ FILE: components\screens\AnalysisScreen.tsx
 VIOLATIONS: 3 (Critical: 0, High: 0)
 ----------------------------------------------------------------------
 
-  🟡 Line 212: [MEDIUM] Filler Text
+  🟡 Line 225: [MEDIUM] Filler Text
      Pattern: : 'N/A'
      Reason:  Filler/placeholder text
 
-  🟡 Line 216: [MEDIUM] Filler Text
+  🟡 Line 231: [MEDIUM] Filler Text
      Pattern: : 'N/A'
      Reason:  Filler/placeholder text
 
-  🟡 Line 222: [MEDIUM] Filler Text
+  🟡 Line 315: [MEDIUM] Filler Text
+     Pattern: : 'N/A'
+     Reason:  Filler/placeholder text
+
+----------------------------------------------------------------------
+FILE: components\analysis\ReliabilityPanel.tsx
+VIOLATIONS: 1 (Critical: 0, High: 0)
+----------------------------------------------------------------------
+
+  🟡 Line 183: [MEDIUM] Filler Text
      Pattern: : 'N/A'
      Reason:  Filler/placeholder text
 

@@ -42,11 +42,13 @@ export function TornadoChart({ data, title = 'Sensitivity Analysis', sortByMagni
 
   const processedData = useMemo(() => {
     const processed = data.map(item => {
+      // low_impact and high_impact are already percentage impacts, not absolute values
+      // Don't subtract baseline - baseline is for display context only
       const magnitude = Math.abs(item.high_impact - item.low_impact);
       return {
         parameter: item.label,
-        low: item.low_impact - item.baseline,
-        high: item.high_impact - item.baseline,
+        low: item.low_impact,  // Already a percentage (e.g., -12.5)
+        high: item.high_impact, // Already a percentage (e.g., +15.8)
         magnitude,
         baseline: item.baseline,
         unit: item.unit || '',

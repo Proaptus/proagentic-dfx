@@ -59,6 +59,9 @@ interface AppState extends StateSnapshot {
   reset: () => void;
 }
 
+// Valid design IDs from mock server
+const VALID_DESIGN_IDS = ['A', 'B', 'C', 'D', 'E'];
+
 const initialState: StateSnapshot = {
   currentScreen: 'requirements',
   requirements: null,
@@ -67,6 +70,12 @@ const initialState: StateSnapshot = {
   selectedDesigns: [],
   currentDesign: null,
   analysisTab: 'stress',
+};
+
+// Validate design ID
+const isValidDesignId = (id: string | null): boolean => {
+  if (!id) return true; // null is valid
+  return VALID_DESIGN_IDS.includes(id.toUpperCase());
 };
 
 // Helper to create snapshot from state
@@ -212,6 +221,22 @@ export const useAppStore = create<AppState>()(
         currentDesign: state.currentDesign,
         analysisTab: state.analysisTab,
       }),
+      onRehydrateStorage: () => (state) => {
+        // Validate persisted state after rehydration
+        if (state) {
+          // Validate currentDesign - reset to null if invalid
+          if (state.currentDesign && !isValidDesignId(state.currentDesign)) {
+            console.warn(`Invalid design ID "${state.currentDesign}" in localStorage, resetting to null`);
+            state.setCurrentDesign(null);
+          }
+          // Validate selectedDesigns - filter out invalid IDs
+          const validSelectedDesigns = state.selectedDesigns.filter(isValidDesignId);
+          if (validSelectedDesigns.length !== state.selectedDesigns.length) {
+            console.warn('Invalid design IDs in selectedDesigns, filtering');
+            state.setSelectedDesigns(validSelectedDesigns);
+          }
+        }
+      },
     }
   )
 );

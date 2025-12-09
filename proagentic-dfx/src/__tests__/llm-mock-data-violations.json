@@ -1,7 +1,7 @@
 [
   {
-    "file": "components\\screens\\AnalysisScreen.tsx",
-    "line": 212,
+    "file": "components\\analysis\\ReliabilityPanel.tsx",
+    "line": 183,
     "type": "filler_text",
     "category": "Filler Text",
     "match": ": 'N/A'",
@@ -10,7 +10,7 @@
   },
   {
     "file": "components\\screens\\AnalysisScreen.tsx",
-    "line": 216,
+    "line": 225,
     "type": "filler_text",
     "category": "Filler Text",
     "match": ": 'N/A'",
@@ -19,7 +19,16 @@
   },
   {
     "file": "components\\screens\\AnalysisScreen.tsx",
-    "line": 222,
+    "line": 231,
+    "type": "filler_text",
+    "category": "Filler Text",
+    "match": ": 'N/A'",
+    "severity": "medium",
+    "description": "Filler/placeholder text"
+  },
+  {
+    "file": "components\\screens\\AnalysisScreen.tsx",
+    "line": 315,
     "type": "filler_text",
     "category": "Filler Text",
     "match": ": 'N/A'",

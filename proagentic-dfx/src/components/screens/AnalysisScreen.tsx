@@ -49,7 +49,7 @@ interface KeyMetrics {
   reliability: string;
   totalCost: string;
   thermalStatus: 'Pass' | 'Fail' | 'N/A';
-  maxTemperature: number;
+  maxTemperature: number | null;
 }
 
 export function AnalysisScreen() {
@@ -182,21 +182,21 @@ export function AnalysisScreen() {
 
     switch (analysisTab) {
       case 'stress':
-        return stress ? <StressAnalysisPanel data={stress} /> : null;
+        return stress ? <StressAnalysisPanel data={stress} onStressDataChange={setStress} /> : null;
       case 'failure':
-        return failure ? <FailureAnalysisPanel data={failure} /> : null;
+        return failure ? <FailureAnalysisPanel data={failure} onFailureDataChange={setFailure} /> : null;
       case 'thermal':
-        return thermal ? <ThermalAnalysisPanel data={thermal} /> : null;
+        return thermal ? <ThermalAnalysisPanel data={thermal} onThermalDataChange={setThermal} /> : null;
       case 'reliability':
-        return reliability ? <ReliabilityPanel data={reliability} /> : null;
+        return reliability ? <ReliabilityPanel data={reliability} onReliabilityDataChange={setReliability} /> : null;
       case 'cost':
-        return cost ? <CostAnalysisPanel data={cost} /> : null;
+        return cost ? <CostAnalysisPanel data={cost} onCostDataChange={setCost} /> : null;
       case 'physics':
         return <PhysicsEquationsPanel />;
       default:
         return null;
     }
-  }, [loading, error, analysisTab, stress, failure, thermal, reliability, cost]);
+  }, [loading, error, analysisTab, stress, failure, thermal, reliability, cost, setStress, setFailure, setThermal, setReliability, setCost]);
 
   // Calculate key metrics for stat cards - memoized to prevent unnecessary recalculations
   const keyMetrics = useMemo<KeyMetrics>(() => {
@@ -204,12 +204,21 @@ export function AnalysisScreen() {
     const safetyMargin = stress?.max_stress.margin_percent ?? 0;
 
     // Calculate MTBF in years from p_failure
-    // MTBF (hours) ≈ 1 / (p_failure * cycles_per_year)
-    // Assuming ~100 cycles per year for hydrogen refueling
+    // MTBF = 1 / failure_rate. Service life = 15 years @ 1000 cycles/year
+    // p_failure is probability per 15-year service life
     const pFailure = reliability?.monte_carlo.p_failure;
-    const reliabilityYears = pFailure && pFailure > 0
-      ? `${(1 / (pFailure * 100) / 8760).toFixed(1)} years`
-      : 'N/A';
+    const cyclesPerYear = 1000;
+    let reliabilityYears = 'N/A';
+    if (pFailure && pFailure > 0) {
+      const mtbfYears = (1 / pFailure) / cyclesPerYear;
+      if (mtbfYears >= 1000) {
+        reliabilityYears = `${(mtbfYears / 1000).toFixed(0)}K years`;
+      } else if (mtbfYears >= 1) {
+        reliabilityYears = `${mtbfYears.toFixed(1)} years`;
+      } else {
+        reliabilityYears = `${(mtbfYears * 12).toFixed(1)} months`;
+      }
+    }
 
     const totalCost = cost?.unit_cost_eur
       ? `€${cost.unit_cost_eur.toLocaleString()}`
@@ -221,7 +230,8 @@ export function AnalysisScreen() {
         : 'Fail'
       : 'N/A';
 
-    const maxTemperature = thermal?.fast_fill.peak_wall_temp_c ?? 0;
+    // Use null to distinguish "not loaded" from actual 0 value
+    const maxTemperature = thermal?.fast_fill.peak_wall_temp_c ?? null;
 
     return {
       maxStress,
@@ -302,8 +312,8 @@ export function AnalysisScreen() {
         <StatCard
           icon={Thermometer}
           iconColor="orange"
-          value={keyMetrics.maxTemperature || '--'}
-          unit="°C"
+          value={keyMetrics.maxTemperature !== null ? keyMetrics.maxTemperature : 'N/A'}
+          unit={keyMetrics.maxTemperature !== null ? '°C' : ''}
           label="Maximum Temperature"
           badge={getThermalStatusBadge()}
         />

@@ -127,9 +127,8 @@ describe('ComparisonCard', () => {
     });
 
     it('should use semantic HTML for metrics (dl/dt/dd)', () => {
-      render(<ComparisonCard {...defaultProps} />);
-
-      const dl = screen.getByRole('list', { hidden: true });
+      const { container } = render(<ComparisonCard {...defaultProps} />);
+      const dl = container.querySelector('dl');
       expect(dl.tagName).toBe('DL');
     });
   });

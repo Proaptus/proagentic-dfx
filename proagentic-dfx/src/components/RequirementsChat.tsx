@@ -5,7 +5,7 @@ import { sendChatMessage } from '@/lib/api/client';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import type { ChatMessage, ExtractedRequirement, ChatRequirementsResponse } from '@/lib/types';
-import { Send, CheckCircle, Edit2, AlertTriangle, Sparkles, MessageSquare, Bot, User } from 'lucide-react';
+import { Send, CheckCircle, Edit2, AlertTriangle, Sparkles, MessageSquare, Bot, User, Car, Plane, Factory, Zap, ArrowRight } from 'lucide-react';
 
 interface RequirementsChatProps {
   onComplete?: (requirements: Record<string, unknown>) => void;
@@ -18,11 +18,47 @@ const generateMessageId = () => `msg-${messageIdCounter++}`;
 const INITIAL_MESSAGE: ChatMessage = {
   id: '1',
   role: 'assistant',
-  content: "Hello! I'm your hydrogen tank engineering assistant. I'll help you define the requirements for your tank design. Let's start with the basics - what type of application is this tank for? (e.g., automotive, aviation, stationary storage)",
+  content: "Hello! I'm your hydrogen tank engineering assistant. Select an application type below to get started quickly, or type your specific requirements.",
   timestamp: Date.now(),
 };
 
 const MIN_REQUIREMENTS_COUNT = 5;
+
+// Quick-start application presets for demo/testing
+const APPLICATION_PRESETS = [
+  {
+    id: 'automotive',
+    label: 'Automotive',
+    icon: Car,
+    description: '700 bar Type IV for fuel cell vehicles',
+    color: 'blue',
+    quickMessage: 'I need a hydrogen tank for automotive fuel cell application. 700 bar, 150 liters, target weight 80 kg, budget €15,000, -40°C to +85°C, EU certification, 11,000 cycles.',
+  },
+  {
+    id: 'aviation',
+    label: 'Aviation',
+    icon: Plane,
+    description: '350 bar lightweight for drones/aircraft',
+    color: 'purple',
+    quickMessage: 'I need a hydrogen tank for aviation application. 350 bar, 50 liters, maximum weight 25 kg, budget €20,000, -55°C to +70°C, international certification, 20,000 cycles.',
+  },
+  {
+    id: 'stationary',
+    label: 'Stationary',
+    icon: Factory,
+    description: '500 bar for energy storage',
+    color: 'green',
+    quickMessage: 'I need a hydrogen tank for stationary storage application. 500 bar, 500 liters, weight not critical, budget €8,000, -10°C to +50°C, EU certification, 45,000 cycles.',
+  },
+  {
+    id: 'custom',
+    label: 'Custom',
+    icon: Zap,
+    description: 'Define your own specifications',
+    color: 'amber',
+    quickMessage: null, // Will open chat input
+  },
+];
 
 export function RequirementsChat({ onComplete }: RequirementsChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE]);
@@ -32,6 +68,7 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<string>('');
+  const [showPresets, setShowPresets] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = useCallback(() => {
@@ -94,6 +131,15 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
   const handleSuggestionClick = useCallback((suggestion: string) => {
     handleSendMessage(suggestion);
     setSuggestions([]);
+  }, [handleSendMessage]);
+
+  const handlePresetClick = useCallback((preset: typeof APPLICATION_PRESETS[0]) => {
+    setShowPresets(false);
+    if (preset.quickMessage) {
+      // Send the quick message immediately
+      handleSendMessage(preset.quickMessage);
+    }
+    // For custom, just hide presets and let user type
   }, [handleSendMessage]);
 
   const handleEditRequirement = useCallback((field: string, currentValue: string | number | null) => {
@@ -186,37 +232,80 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4" role="log" aria-label="Chat messages" aria-live="polite">
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
-              >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  msg.role === 'user' ? 'bg-blue-500' : 'bg-gray-200'
-                }`} aria-hidden="true">
-                  {msg.role === 'user' ? (
-                    <User className="w-4 h-4 text-white" />
-                  ) : (
-                    <Bot className="w-4 h-4 text-gray-600" />
-                  )}
-                </div>
+            {messages.map((msg, index) => (
+              <div key={msg.id}>
                 <div
-                  className={`max-w-[80%] rounded-lg px-4 py-3 ${
-                    msg.role === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-900'
-                  }`}
+                  className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
                 >
-                  {msg.role === 'assistant' && (
-                    <div className="flex items-center gap-2 mb-1">
-                      <Sparkles size={14} className="text-blue-600" aria-hidden="true" />
-                      <span className="text-xs font-medium text-blue-600">
-                        Engineering Assistant
-                      </span>
-                    </div>
-                  )}
-                  <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                    msg.role === 'user' ? 'bg-blue-500' : 'bg-gray-200'
+                  }`} aria-hidden="true">
+                    {msg.role === 'user' ? (
+                      <User className="w-4 h-4 text-white" />
+                    ) : (
+                      <Bot className="w-4 h-4 text-gray-600" />
+                    )}
+                  </div>
+                  <div
+                    className={`max-w-[80%] rounded-lg px-4 py-3 ${
+                      msg.role === 'user'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-900'
+                    }`}
+                  >
+                    {msg.role === 'assistant' && (
+                      <div className="flex items-center gap-2 mb-1">
+                        <Sparkles size={14} className="text-blue-600" aria-hidden="true" />
+                        <span className="text-xs font-medium text-blue-600">
+                          Engineering Assistant
+                        </span>
+                      </div>
+                    )}
+                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                  </div>
                 </div>
+
+                {/* Quick-start Preset Cards - Show after initial message */}
+                {index === 0 && showPresets && msg.role === 'assistant' && (
+                  <div className="mt-4 ml-11">
+                    <p className="text-xs font-medium text-gray-500 mb-3 uppercase tracking-wide">
+                      Quick Start - Click to auto-fill requirements
+                    </p>
+                    <div className="grid grid-cols-2 gap-3">
+                      {APPLICATION_PRESETS.map((preset) => {
+                        const PresetIcon = preset.icon;
+                        const colorClasses = {
+                          blue: 'border-blue-200 hover:border-blue-400 hover:bg-blue-50 text-blue-700',
+                          purple: 'border-purple-200 hover:border-purple-400 hover:bg-purple-50 text-purple-700',
+                          green: 'border-green-200 hover:border-green-400 hover:bg-green-50 text-green-700',
+                          amber: 'border-amber-200 hover:border-amber-400 hover:bg-amber-50 text-amber-700',
+                        };
+                        const iconBgClasses = {
+                          blue: 'bg-blue-100',
+                          purple: 'bg-purple-100',
+                          green: 'bg-green-100',
+                          amber: 'bg-amber-100',
+                        };
+                        return (
+                          <button
+                            key={preset.id}
+                            onClick={() => handlePresetClick(preset)}
+                            className={`group p-4 rounded-xl border-2 transition-all text-left ${colorClasses[preset.color as keyof typeof colorClasses]}`}
+                          >
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className={`p-2 rounded-lg ${iconBgClasses[preset.color as keyof typeof iconBgClasses]}`}>
+                                <PresetIcon size={20} />
+                              </div>
+                              <span className="font-semibold">{preset.label}</span>
+                              <ArrowRight size={16} className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </div>
+                            <p className="text-xs text-gray-600">{preset.description}</p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
             {isLoading && (
@@ -236,20 +325,26 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Suggestions */}
+          {/* Suggestions - Enhanced with prominent clickable cards */}
           {suggestions.length > 0 && (
-            <div className="px-4 pb-3">
-              <p className="text-xs text-gray-500 mb-2">Suggested responses:</p>
-              <div className="flex flex-wrap gap-2">
-                {suggestions.map((suggestion) => (
-                  <button
-                    key={`suggestion-${suggestion}`}
-                    onClick={() => handleSuggestionClick(suggestion)}
-                    className="px-3 py-1.5 text-sm bg-blue-50 text-blue-700 rounded-full hover:bg-blue-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                  >
-                    {suggestion}
-                  </button>
-                ))}
+            <div className="px-4 pb-3 border-t border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+              <div className="pt-3">
+                <p className="text-xs font-semibold text-blue-700 mb-2 flex items-center gap-2">
+                  <Sparkles size={12} />
+                  CLICK TO RESPOND
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {suggestions.map((suggestion) => (
+                    <button
+                      key={`suggestion-${suggestion}`}
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      className="group flex items-center gap-2 px-4 py-2.5 text-sm bg-white text-blue-700 rounded-lg border-2 border-blue-200 hover:border-blue-400 hover:bg-blue-50 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    >
+                      <span className="font-medium">{suggestion}</span>
+                      <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}

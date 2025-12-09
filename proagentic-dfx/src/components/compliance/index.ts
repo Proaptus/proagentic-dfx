@@ -10,6 +10,7 @@ export { ComplianceAlert, type ComplianceAlertProps } from './ComplianceAlert';
 export { StandardCard, type StandardCardProps } from './StandardCard';
 export { TabButton, type TabButtonProps } from './TabButton';
 export { TestRequirementsPanel } from './TestRequirementsPanel';
+export { StandardsLibraryPanel } from './StandardsLibraryPanel';
 
 export type {
   ComplianceStatus,
@@ -25,4 +26,12 @@ export type {
   MatrixRequirement,
   ComplianceStats,
   ViewMode,
+  // Standards Library types
+  StandardApplicability,
+  KeyRequirement,
+  RegulatoryStandard,
+  IndustryStandard,
+  InternalPolicy,
+  CustomerRequirement,
+  StandardsLibrary,
 } from './types';

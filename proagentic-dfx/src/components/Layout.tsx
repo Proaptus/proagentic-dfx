@@ -56,48 +56,80 @@ const navSections = [
   },
 ];
 
-function DomainSelector() {
+// Module configuration with availability status
+const MODULE_CONFIG: Record<string, { available: boolean; icon: string }> = {
+  'h2-tank': { available: true, icon: 'H2' },
+  'pressure-vessel': { available: false, icon: 'PV' },
+};
+
+function ModuleSelector() {
   const { currentDomain, setDomain } = useDomainStore();
   const domains = listDomains();
   const [open, setOpen] = useState(false);
 
+  const getModuleConfig = (id: string) => MODULE_CONFIG[id] || { available: false, icon: '?' };
+
   return (
-    <div className="relative mb-6">
+    <div className="mb-4">
+      <label className="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">
+        Active Module
+      </label>
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-3 py-2.5 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors border border-slate-700"
+        className="w-full flex items-center justify-between px-3 py-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors border border-slate-600"
         aria-expanded={open}
         aria-haspopup="listbox"
       >
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-md flex items-center justify-center text-white text-sm font-bold shadow-sm">
-            {currentDomain.name.charAt(0)}
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-emerald-600 rounded flex items-center justify-center text-white text-xs font-bold">
+            {getModuleConfig(currentDomain.id).icon}
           </div>
-          <div className="text-left">
-            <div className="font-medium text-slate-100 text-sm">{currentDomain.name}</div>
-            <div className="text-xs text-slate-300">Engineering Domain</div>
-          </div>
+          <span className="font-medium text-slate-100 text-sm">{currentDomain.name}</span>
         </div>
-        <ChevronDown className={`w-4 h-4 text-slate-300 transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown className={cn('w-4 h-4 text-slate-300 transition-transform', open && 'rotate-180')} />
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50" role="listbox">
-          {domains.map((domain) => (
-            <button
-              key={domain.id}
-              onClick={() => { setDomain(domain.id); setOpen(false); }}
-              className={cn(
-                'w-full px-3 py-2.5 text-left hover:bg-slate-700 transition-colors first:rounded-t-lg last:rounded-b-lg',
-                domain.id === currentDomain.id ? 'bg-slate-700' : ''
-              )}
-              role="option"
-              aria-selected={domain.id === currentDomain.id}
-            >
-              <div className="font-medium text-slate-100 text-sm">{domain.name}</div>
-              <div className="text-xs text-slate-300">{domain.description}</div>
-            </button>
-          ))}
+        <div className="mt-2 rounded-lg overflow-hidden border border-slate-600">
+          {domains.map((domain) => {
+            const config = getModuleConfig(domain.id);
+            const isSelected = domain.id === currentDomain.id;
+            return (
+              <button
+                key={domain.id}
+                onClick={() => {
+                  if (config.available) {
+                    setDomain(domain.id);
+                    setOpen(false);
+                  }
+                }}
+                disabled={!config.available}
+                className={cn(
+                  'w-full px-3 py-2 text-left flex items-center gap-2',
+                  isSelected ? 'bg-slate-700' : 'bg-slate-800',
+                  config.available ? 'hover:bg-slate-700' : 'opacity-50 cursor-not-allowed'
+                )}
+              >
+                <div className={cn(
+                  'w-8 h-8 rounded flex items-center justify-center text-xs font-bold',
+                  config.available ? 'bg-emerald-600 text-white' : 'bg-slate-600 text-slate-400'
+                )}>
+                  {config.icon}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className={cn('text-sm', config.available ? 'text-slate-100' : 'text-slate-400')}>
+                      {domain.name}
+                    </span>
+                    {isSelected && <CheckCircle className="w-4 h-4 text-emerald-400" />}
+                    {!config.available && (
+                      <span className="text-[10px] px-1.5 py-0.5 bg-amber-500/20 text-amber-400 rounded">Soon</span>
+                    )}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
@@ -247,12 +279,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {/* Sidebar Header */}
             <div className="p-6 border-b border-slate-800">
               <h1 className="text-xl font-bold text-slate-100">ProAgentic DfX</h1>
-              <p className="text-sm text-slate-300 mt-1">Design Optimization Framework</p>
+              <p className="text-sm text-slate-300 mt-1">Agentic Manufacturing Design Platform</p>
             </div>
 
-            {/* Domain Selector */}
-            <div className="p-4">
-              <DomainSelector />
+            {/* Module Selector */}
+            <div className="px-4 py-3">
+              <ModuleSelector />
             </div>
 
             {/* Navigation Sections */}

@@ -8,6 +8,7 @@ import type { DesignStress } from '@/lib/types';
 interface StressAnalysisPanelProps {
   data: DesignStress;
   designId?: string;
+  onStressDataChange?: (data: DesignStress) => void;
 }
 
 type StressType = 'von_mises' | 'hoop' | 'axial' | 'shear';
@@ -45,7 +46,7 @@ const getLoadCaseParam = (loadCase: LoadCase): string => {
   return loadMap[loadCase];
 };
 
-export function StressAnalysisPanel({ data: initialData, designId = 'C' }: StressAnalysisPanelProps) {
+export function StressAnalysisPanel({ data: initialData, designId = 'C', onStressDataChange }: StressAnalysisPanelProps) {
   const [stressData, setStressData] = useState<DesignStress>(initialData);
   const [selectedStressType, setSelectedStressType] = useState<StressType>('von_mises');
   const [selectedLoadCase, setSelectedLoadCase] = useState<LoadCase>('test_pressure');
@@ -64,6 +65,8 @@ export function StressAnalysisPanel({ data: initialData, designId = 'C' }: Stres
         if (response.ok) {
           const newData = await response.json();
           setStressData(newData);
+          // Notify parent of data change so stats can update
+          onStressDataChange?.(newData);
         }
       } catch (error) {
         console.error('Failed to fetch stress data:', error);
@@ -73,7 +76,7 @@ export function StressAnalysisPanel({ data: initialData, designId = 'C' }: Stres
     };
 
     fetchStressData();
-  }, [selectedStressType, selectedLoadCase, designId]);
+  }, [selectedStressType, selectedLoadCase, designId, onStressDataChange]);
 
   return (
     <div className="space-y-4">

@@ -9,10 +9,10 @@
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useAppStore } from '@/lib/stores/app-store';
-import { getDesignCompliance, getDesignTestPlan } from '@/lib/api/client';
+import { getDesignCompliance, getDesignTestPlan, getStandardsLibrary } from '@/lib/api/client';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { LoadingState } from '@/components/ui/LoadingState';
-import { CheckCircle, XCircle, FileText, Beaker, TrendingUp } from 'lucide-react';
+import { CheckCircle, XCircle, FileText, Beaker, TrendingUp, Library } from 'lucide-react';
 import { ClauseBreakdown } from '@/components/compliance/ClauseBreakdown';
 import { ComplianceMatrix } from '@/components/compliance/ComplianceMatrix';
 import { ComplianceStatCard } from '@/components/compliance/ComplianceStatCard';
@@ -20,6 +20,7 @@ import { ComplianceAlert } from '@/components/compliance/ComplianceAlert';
 import { StandardCard } from '@/components/compliance/StandardCard';
 import { TabButton } from '@/components/compliance/TabButton';
 import { TestRequirementsPanel } from '@/components/compliance/TestRequirementsPanel';
+import { StandardsLibraryPanel } from '@/components/compliance/StandardsLibraryPanel';
 import {
   type DesignCompliance,
   type TestPlan,
@@ -27,6 +28,7 @@ import {
   type MatrixRequirement,
   type ComplianceStats,
   type ViewMode,
+  type StandardsLibrary,
 } from '@/components/compliance/types';
 
 // Type guard for DesignCompliance
@@ -53,12 +55,27 @@ function isTestPlan(data: unknown): data is TestPlan {
   );
 }
 
+// Type guard for StandardsLibrary
+function isStandardsLibrary(data: unknown): data is StandardsLibrary {
+  if (typeof data !== 'object' || data === null) return false;
+  const d = data as Record<string, unknown>;
+  return (
+    Array.isArray(d.regulatory_standards) &&
+    Array.isArray(d.industry_standards) &&
+    Array.isArray(d.internal_policies) &&
+    Array.isArray(d.customer_requirements) &&
+    typeof d.summary === 'object'
+  );
+}
+
 export function ComplianceScreenEnhanced() {
   const { currentDesign, setCurrentDesign } = useAppStore();
 
   const [compliance, setCompliance] = useState<DesignCompliance | null>(null);
   const [testPlan, setTestPlan] = useState<TestPlan | null>(null);
+  const [standardsLibrary, setStandardsLibrary] = useState<StandardsLibrary | null>(null);
   const [loading, setLoading] = useState(false);
+  const [libraryLoading, setLibraryLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('overview');
 
@@ -98,6 +115,24 @@ export function ComplianceScreenEnhanced() {
       })
       .finally(() => setLoading(false));
   }, [currentDesign]);
+
+  // Fetch standards library when library tab is selected
+  useEffect(() => {
+    if (viewMode !== 'library' || standardsLibrary) return;
+
+    setLibraryLoading(true);
+    getStandardsLibrary()
+      .then((data) => {
+        if (!isStandardsLibrary(data)) {
+          throw new Error('Invalid standards library data format');
+        }
+        setStandardsLibrary(data);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch standards library:', err);
+      })
+      .finally(() => setLibraryLoading(false));
+  }, [viewMode, standardsLibrary]);
 
   // Transform API data to enhanced format (memoized)
   const enhancedStandards: EnhancedStandard[] = useMemo(() => {
@@ -250,6 +285,7 @@ export function ComplianceScreenEnhanced() {
         <TabButton active={viewMode === 'breakdown'} onClick={() => handleViewModeChange('breakdown')} icon={FileText} label="Clause Breakdown" />
         <TabButton active={viewMode === 'matrix'} onClick={() => handleViewModeChange('matrix')} icon={CheckCircle} label="Compliance Matrix" />
         <TabButton active={viewMode === 'tests'} onClick={() => handleViewModeChange('tests')} icon={Beaker} label="Test Requirements" />
+        <TabButton active={viewMode === 'library'} onClick={() => handleViewModeChange('library')} icon={Library} label="Standards Library" />
       </div>
 
       {/* Compliance Summary Dashboard */}
@@ -341,6 +377,19 @@ export function ComplianceScreenEnhanced() {
       {viewMode === 'breakdown' && <ClauseBreakdown standards={enhancedStandards} />}
       {viewMode === 'matrix' && <ComplianceMatrix requirements={matrixRequirements} />}
       {viewMode === 'tests' && testPlan && <TestRequirementsPanel testPlan={testPlan} />}
+      {viewMode === 'library' && (
+        libraryLoading ? (
+          <div className="flex items-center justify-center h-96">
+            <LoadingState variant="spinner" size="lg" text="Loading standards library..." />
+          </div>
+        ) : standardsLibrary ? (
+          <StandardsLibraryPanel library={standardsLibrary} />
+        ) : (
+          <div className="flex items-center justify-center h-96 text-gray-500">
+            Failed to load standards library
+          </div>
+        )
+      )}
     </div>
   );
 }

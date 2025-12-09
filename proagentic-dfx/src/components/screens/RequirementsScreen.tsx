@@ -12,8 +12,9 @@ import { StandardsPanel } from '@/components/requirements/StandardsPanel';
 import { TankTypeComparison } from '@/components/requirements/TankTypeComparison';
 import { OptimizationConfig, type OptimizationConfiguration } from '@/components/requirements/OptimizationConfig';
 import { EnhancedProgress } from '@/components/requirements/EnhancedProgress';
+import { GuidedRequirementsWizard } from '@/components/requirements/GuidedRequirementsWizard';
 import type { ParseRequirementsResponse, TankTypeRecommendation, ProgressEvent, ParetoDesign } from '@/lib/types';
-import { CheckCircle, AlertCircle, MessageSquare, FileText } from 'lucide-react';
+import { CheckCircle, AlertCircle, MessageSquare, Wand2 } from 'lucide-react';
 
 type Step = 'input' | 'parsing' | 'parsed' | 'recommending' | 'recommended' | 'optimizing' | 'complete';
 type InputMode = 'text' | 'chat';
@@ -149,65 +150,96 @@ export function RequirementsScreen({ exampleRequirements = '' }: RequirementsScr
     handleRecommend();
   }, [setRequirements, handleRecommend]);
 
+  // Handle wizard completion - same logic as chat complete
+  const handleWizardComplete = useCallback(async (requirements: Record<string, unknown>) => {
+    const parsedReqs = {
+      internal_volume_liters: requirements.internal_volume_liters as number || 150,
+      working_pressure_bar: requirements.working_pressure_bar as number || 700,
+      target_weight_kg: requirements.target_weight_kg as number || 80,
+      target_cost_eur: requirements.target_cost_eur as number || 15000,
+      min_burst_ratio: requirements.min_burst_ratio as number || 2.25,
+      max_permeation_rate: requirements.max_permeation_rate as number || 46,
+      operating_temp_min_c: requirements.operating_temp_min_c as number || -40,
+      operating_temp_max_c: requirements.operating_temp_max_c as number || 85,
+      fatigue_cycles: requirements.fatigue_cycles as number || 11000,
+      certification_region: requirements.certification_region as string || 'EU',
+    };
+
+    setRequirements(parsedReqs);
+
+    // Auto-proceed to tank type recommendation
+    setStep('parsed');
+    setParsedResult({
+      success: true,
+      parsed_requirements: parsedReqs,
+      derived_requirements: {
+        burst_pressure_bar: Math.round(parsedReqs.working_pressure_bar * parsedReqs.min_burst_ratio),
+        test_pressure_bar: Math.round(parsedReqs.working_pressure_bar * 1.5),
+        min_wall_thickness_mm: 2.5,
+        applicable_standards: parsedReqs.certification_region === 'EU'
+          ? ['ISO 11119-3', 'UN R134', 'EC 79/2009']
+          : parsedReqs.certification_region === 'USA'
+          ? ['ASME Section X', 'ANSI/CSA HGV']
+          : ['ISO 11119-3', 'UN R134', 'ASME Section X'],
+      },
+      applicable_standards: [],
+      confidence: 1.0, // Wizard provides explicit values, so high confidence
+      warnings: [],
+      clarification_needed: [],
+    });
+
+    // Automatically get recommendation
+    handleRecommend();
+  }, [setRequirements, handleRecommend]);
+
   const handleModeChange = useCallback((mode: InputMode) => {
     setInputMode(mode);
   }, []);
 
   return (
-    <div className="max-w-7xl mx-auto h-full flex flex-col gap-8" role="main" aria-label="Requirements Input Screen">
-      {/* Professional Page Header */}
+    <div className="space-y-6" role="main" aria-label="Requirements Input Screen">
+      {/* Header */}
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Requirements Input</h1>
-          <p className="text-gray-600 mt-2 text-base max-w-3xl">
-            {inputMode === 'chat'
-              ? 'Chat with our AI assistant to define your requirements conversationally. The assistant will extract and validate specifications in real-time.'
-              : 'Enter your hydrogen tank requirements in natural language. Our AI will parse, validate, and structure them automatically.'}
-          </p>
+          <h1 className="text-2xl font-semibold text-gray-900">Requirements</h1>
+          <p className="text-gray-500 text-sm mt-1">Define tank specifications</p>
         </div>
-        {/* Professional Mode Toggle - Pill Buttons */}
-        <div className="flex gap-1 bg-gray-100 p-1 rounded-lg shadow-sm" role="tablist" aria-label="Input mode selection">
+        {/* Mode Toggle */}
+        <div className="flex border border-gray-200 rounded-lg overflow-hidden" role="tablist" aria-label="Input mode">
           <button
             onClick={() => handleModeChange('chat')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-md font-medium text-sm transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 text-sm transition-colors ${
               inputMode === 'chat'
-                ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-gray-900 text-white'
+                : 'bg-white text-gray-600 hover:bg-gray-50'
             }`}
             role="tab"
             aria-selected={inputMode === 'chat'}
-            aria-label="Chat mode"
           >
-            <MessageSquare size={18} aria-hidden="true" />
-            Chat Mode
+            <MessageSquare size={16} />
+            Chat
           </button>
           <button
             onClick={() => handleModeChange('text')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-md font-medium text-sm transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 text-sm transition-colors ${
               inputMode === 'text'
-                ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-gray-900 text-white'
+                : 'bg-white text-gray-600 hover:bg-gray-50'
             }`}
             role="tab"
             aria-selected={inputMode === 'text'}
-            aria-label="Text mode"
           >
-            <FileText size={18} aria-hidden="true" />
-            Text Mode
+            <Wand2 size={16} />
+            Wizard
           </button>
         </div>
       </header>
 
-      {/* Professional Error Alert */}
+      {/* Error Alert */}
       {error && (
-        <div role="alert" className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
-          <div className="flex-shrink-0">
-            <AlertCircle className="text-red-600" size={22} aria-hidden="true" />
-          </div>
-          <div className="flex-1">
-            <h4 className="text-sm font-semibold text-red-800 mb-0.5">Error</h4>
-            <p className="text-sm text-red-700">{error}</p>
-          </div>
+        <div role="alert" className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2 text-sm">
+          <AlertCircle className="text-red-600 flex-shrink-0" size={16} />
+          <span className="text-red-700">{error}</span>
         </div>
       )}
 
@@ -216,50 +248,9 @@ export function RequirementsScreen({ exampleRequirements = '' }: RequirementsScr
         <RequirementsChat onComplete={handleChatComplete} />
       )}
 
-      {/* Text Mode - Professional Input Card */}
-      {inputMode === 'text' && (
-        <Card padding="none">
-          <div className="p-6 border-b border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 bg-blue-50 rounded-lg" aria-hidden="true">
-                <span className="text-blue-600 font-bold text-lg">1</span>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Enter Requirements</h3>
-                <p className="text-sm text-gray-500 mt-0.5">
-                  Describe your hydrogen tank specifications in natural language
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="p-6">
-            <label htmlFor="requirements-input" className="sr-only">Requirements text input</label>
-            <textarea
-              id="requirements-input"
-              value={rawText}
-              onChange={(e) => setRawText(e.target.value)}
-              rows={12}
-              className="w-full border border-gray-300 rounded-lg p-4 font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow resize-none"
-              placeholder="Example: I need a Type IV hydrogen tank for automotive use. Working pressure should be 700 bar, with internal volume of 150 liters. Target weight is around 80 kg and cost should not exceed 15,000 EUR..."
-              disabled={step !== 'input'}
-              aria-describedby="char-count"
-            />
-            <div className="mt-6 flex justify-between items-center">
-              <p id="char-count" className="text-sm text-gray-500">
-                {rawText.length > 0 ? `${rawText.length} characters` : 'Start typing your requirements'}
-              </p>
-              <Button
-                onClick={handleParse}
-                loading={step === 'parsing'}
-                disabled={step !== 'input' && step !== 'parsing'}
-                className="px-6"
-                aria-label={step === 'parsing' ? 'Parsing requirements' : 'Parse requirements and extract specifications'}
-              >
-                {step === 'parsing' ? 'Parsing...' : 'Parse Requirements'}
-              </Button>
-            </div>
-          </div>
-        </Card>
+      {/* Guided Wizard Mode */}
+      {inputMode === 'text' && step === 'input' && (
+        <GuidedRequirementsWizard onComplete={handleWizardComplete} />
       )}
 
       {/* Step 2: Parsed Results - Professional Display */}

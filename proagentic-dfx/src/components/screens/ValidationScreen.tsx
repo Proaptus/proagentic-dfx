@@ -20,6 +20,11 @@ import {
   Clock,
   Play,
   BarChart3,
+  TrendingUp,
+  FlaskConical,
+  Radio,
+  ClipboardCheck,
+  Calendar,
 } from 'lucide-react';
 
 interface SensorLocation {
@@ -33,6 +38,101 @@ interface SensorLocation {
   inspection_interval_hours: number;
   rationale: string;
 }
+
+interface TestType {
+  id: string;
+  name: string;
+  standard: string;
+  articles: number;
+  cycles?: number;
+  pressure_range?: string;
+  temp_range?: string;
+  duration_days: number;
+  cost_eur: number;
+  critical: boolean;
+}
+
+// Mock test plan data for certification
+const DEFAULT_TEST_PLAN: TestType[] = [
+  {
+    id: 'burst',
+    name: 'Burst Test',
+    standard: 'UN R134 / ISO 19881',
+    articles: 3,
+    pressure_range: '1575-2100 bar',
+    duration_days: 5,
+    cost_eur: 25000,
+    critical: true,
+  },
+  {
+    id: 'cycle',
+    name: 'Pressure Cycling',
+    standard: 'UN R134 §6.2.4',
+    articles: 3,
+    cycles: 22000,
+    pressure_range: '2-700 bar',
+    duration_days: 45,
+    cost_eur: 35000,
+    critical: true,
+  },
+  {
+    id: 'permeation',
+    name: 'Permeation Test',
+    standard: 'ISO 19881 Annex B',
+    articles: 2,
+    temp_range: '15-85°C',
+    duration_days: 14,
+    cost_eur: 18000,
+    critical: true,
+  },
+  {
+    id: 'thermal',
+    name: 'Extreme Temperature',
+    standard: 'UN R134 §6.2.6',
+    articles: 2,
+    temp_range: '-40 to +85°C',
+    duration_days: 7,
+    cost_eur: 12000,
+    critical: true,
+  },
+  {
+    id: 'fire',
+    name: 'Bonfire Test',
+    standard: 'UN R134 §6.2.8',
+    articles: 1,
+    duration_days: 1,
+    cost_eur: 20000,
+    critical: true,
+  },
+  {
+    id: 'drop',
+    name: 'Drop Test',
+    standard: 'UN R134 §6.2.9',
+    articles: 2,
+    duration_days: 3,
+    cost_eur: 8000,
+    critical: false,
+  },
+  {
+    id: 'fatigue',
+    name: 'Accelerated Stress Rupture',
+    standard: 'ISO 11119-3',
+    articles: 3,
+    temp_range: '65°C sustained',
+    duration_days: 1000,
+    cost_eur: 45000,
+    critical: true,
+  },
+  {
+    id: 'impact',
+    name: 'Ballistic Impact',
+    standard: 'UN R134 §6.2.10',
+    articles: 1,
+    duration_days: 2,
+    cost_eur: 15000,
+    critical: false,
+  },
+];
 
 interface InspectionScheduleItem {
   interval: string;
@@ -138,21 +238,19 @@ export function ValidationScreen({
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex items-start justify-between">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Design Validation</h2>
-          <p className="text-gray-600 mt-1">
-            Comprehensive validation suite for design verification, testing, and compliance assurance
-          </p>
+          <h1 className="text-2xl font-semibold text-gray-900">Design Validation</h1>
+          <p className="text-gray-500 mt-1">Design {currentDesign || 'C'}</p>
         </div>
         <Button
           onClick={handleRunTests}
           disabled={isRunningTests}
-          className="bg-blue-600 hover:bg-blue-700 text-white"
+          variant="outline"
         >
           <Play size={16} className="mr-2" />
-          {isRunningTests ? 'Running Tests...' : 'Run All Tests'}
+          {isRunningTests ? 'Running...' : 'Run Tests'}
         </Button>
       </div>
 
@@ -238,17 +336,17 @@ export function ValidationScreen({
 
       {/* Tab Navigation */}
       <div className="border-b border-gray-200">
-        <nav className="flex gap-4" role="tablist" aria-label="Validation tabs">
+        <nav className="flex gap-6" role="tablist" aria-label="Validation tabs">
           <button
             role="tab"
             aria-selected={activeTab === 'surrogate'}
             aria-controls="surrogate-panel"
             id="surrogate-tab"
             onClick={() => setActiveTab('surrogate')}
-            className={`px-4 py-2 font-medium border-b-2 transition-colors ${
+            className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === 'surrogate'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
+                ? 'border-gray-900 text-gray-900'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
             Surrogate Confidence
@@ -259,10 +357,10 @@ export function ValidationScreen({
             aria-controls="testing-panel"
             id="testing-tab"
             onClick={() => setActiveTab('testing')}
-            className={`px-4 py-2 font-medium border-b-2 transition-colors ${
+            className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === 'testing'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
+                ? 'border-gray-900 text-gray-900'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
             Test Plan
@@ -273,10 +371,10 @@ export function ValidationScreen({
             aria-controls="sentry-panel"
             id="sentry-tab"
             onClick={() => setActiveTab('sentry')}
-            className={`px-4 py-2 font-medium border-b-2 transition-colors ${
+            className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === 'sentry'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
+                ? 'border-gray-900 text-gray-900'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
             Sentry Monitoring
@@ -287,10 +385,10 @@ export function ValidationScreen({
             aria-controls="verification-panel"
             id="verification-tab"
             onClick={() => setActiveTab('verification')}
-            className={`px-4 py-2 font-medium border-b-2 transition-colors ${
+            className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === 'verification'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
+                ? 'border-gray-900 text-gray-900'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
             Verification Checklist
@@ -314,7 +412,7 @@ export function ValidationScreen({
         aria-labelledby="testing-tab"
         hidden={activeTab !== 'testing'}
       >
-        {activeTab === 'testing' && <TestPlanPanel />}
+        {activeTab === 'testing' && <TestPlanPanel testPlan={DEFAULT_TEST_PLAN} />}
       </div>
 
       <div

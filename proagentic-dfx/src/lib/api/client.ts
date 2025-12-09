@@ -28,6 +28,11 @@ export async function getStandards() {
   return fetchJson('/standards');
 }
 
+// Standards Library - All available standards, policies, and requirements
+export async function getStandardsLibrary() {
+  return fetchJson('/standards/library');
+}
+
 // Materials
 export async function getMaterials() {
   return fetchJson('/materials');
@@ -95,8 +100,22 @@ export async function getDesignGeometry(designId: string) {
   return fetchJson(`/designs/${designId}/geometry`);
 }
 
-export async function getDesignStress(designId: string) {
-  return fetchJson(`/designs/${designId}/stress`);
+// Stress types supported by the API
+export type StressType = 'vonMises' | 'hoop' | 'axial' | 'shear' | 'tsaiWu';
+export type LoadCase = 'test' | 'burst';
+
+export async function getDesignStress(
+  designId: string,
+  stressType?: StressType,
+  loadCase?: LoadCase
+) {
+  const params = new URLSearchParams();
+  if (stressType) params.append('type', stressType);
+  if (loadCase) params.append('load_case', loadCase);
+
+  const queryString = params.toString();
+  const url = `/designs/${designId}/stress${queryString ? `?${queryString}` : ''}`;
+  return fetchJson(url);
 }
 
 export async function getDesignFailure(designId: string) {

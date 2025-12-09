@@ -20,6 +20,7 @@ interface PieChartEnhancedProps {
   showPercentages?: boolean;
   showValues?: boolean;
   innerRadius?: number;
+  compactMode?: boolean;
   onExport?: (format: 'png' | 'svg') => void;
 }
 
@@ -42,23 +43,26 @@ interface ActiveShapeProps {
 
 const renderActiveShape = (props: ActiveShapeProps): React.ReactElement => {
   const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload, percent, value, unit } = props;
+  const safeValue = value ?? 0;
+  const safePercent = percent ?? 0;
+  const safeName = payload?.name ?? '';
   return (
     <g>
-      <text x={cx} y={cy - 20} dy={8} textAnchor="middle" fill={fill} className="font-bold text-lg">{payload.name}</text>
-      <text x={cx} y={cy + 10} dy={8} textAnchor="middle" fill="#374151" className="text-base">{value.toLocaleString()} {unit}</text>
-      <text x={cx} y={cy + 30} dy={8} textAnchor="middle" fill="#6B7280" className="text-sm">({(percent * 100).toFixed(1)}%)</text>
+      <text x={cx} y={cy - 20} dy={8} textAnchor="middle" fill={fill} className="font-bold text-lg">{safeName}</text>
+      <text x={cx} y={cy + 10} dy={8} textAnchor="middle" fill="#374151" className="text-base">{safeValue.toLocaleString()} {unit}</text>
+      <text x={cx} y={cy + 30} dy={8} textAnchor="middle" fill="#6B7280" className="text-sm">({(safePercent * 100).toFixed(1)}%)</text>
       <Sector cx={cx} cy={cy} innerRadius={innerRadius} outerRadius={outerRadius + 10} startAngle={startAngle} endAngle={endAngle} fill={fill} />
     </g>
   );
 };
 
 export function PieChartEnhanced({
-  data, title = 'Distribution', unit = '', showPercentages = true, showValues: _showValues = true, innerRadius = 0, onExport
+  data, title = 'Distribution', unit = '', showPercentages = true, showValues: _showValues = true, innerRadius = 0, compactMode = false, onExport
 }: PieChartEnhancedProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [colorMode, setColorMode] = useState<PieColorMode>('default');
   const [displayMode, setDisplayMode] = useState<PieDisplayMode>(innerRadius > 0 ? 'donut' : 'pie');
-  const [showLegend, setShowLegend] = useState(true);
+  const [showLegend, setShowLegend] = useState(!compactMode);
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc' | 'none'>('desc');
 
   const getInnerRadius = useCallback(() => {
@@ -71,12 +75,16 @@ export function PieChartEnhanced({
   const getEndAngle = useCallback(() => displayMode === 'semi' ? 0 : 360, [displayMode]);
 
   const processedData = useMemo(() => {
-    const total = data.reduce((sum, item) => sum + item.value, 0);
-    const maxValue = Math.max(...data.map(d => d.value));
+    if (!data || data.length === 0) return [];
+    const validData = data.filter(item => item && typeof item.value === 'number');
+    if (validData.length === 0) return [];
+    const total = validData.reduce((sum, item) => sum + item.value, 0);
+    if (total === 0) return [];
+    const maxValue = Math.max(...validData.map(d => d.value));
 
-    let sorted = data.map((item, index) => {
+    const sorted = validData.map((item, index) => {
       let color = item.color || PRIMARY_COLORS[index % PRIMARY_COLORS.length];
-      const normalized = item.value / maxValue;
+      const normalized = maxValue > 0 ? item.value / maxValue : 0;
 
       if (colorMode === 'gradient') color = interpolateColor(SEQUENTIAL_SCALES.blue, normalized);
       else if (colorMode === 'sequential') color = interpolateColor(SEQUENTIAL_SCALES.purple, normalized);
@@ -103,6 +111,16 @@ export function PieChartEnhanced({
   const onPieEnter = (_: unknown, index: number) => setActiveIndex(index);
   const onPieLeave = () => setActiveIndex(null);
 
+  // Guard against empty data after processing
+  if (processedData.length === 0) {
+    return (
+      <div className="flex flex-col h-full items-center justify-center text-gray-500">
+        <div className="text-lg font-medium">{title}</div>
+        <div className="text-sm">No data available</div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-4 px-4">
@@ -115,40 +133,44 @@ export function PieChartEnhanced({
         )}
       </div>
 
-      {/* Display Mode Controls */}
-      <div className="flex items-center gap-4 mb-4 px-4">
-        <span className="text-sm font-medium text-gray-700">Display:</span>
-        <div className="flex gap-1 bg-gray-100 rounded-lg p-0.5">
-          {(['pie', 'donut', 'semi'] as PieDisplayMode[]).map(mode => (
-            <button key={mode} onClick={() => setDisplayMode(mode)}
-              className={`px-3 py-1 text-xs rounded-md transition-colors ${displayMode === mode ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}>
-              {mode.charAt(0).toUpperCase() + mode.slice(1)}
-            </button>
-          ))}
+      {/* Display Mode Controls - hidden in compact mode */}
+      {!compactMode && (
+        <div className="flex items-center gap-4 mb-4 px-4">
+          <span className="text-sm font-medium text-gray-700">Display:</span>
+          <div className="flex gap-1 bg-gray-100 rounded-lg p-0.5">
+            {(['pie', 'donut', 'semi'] as PieDisplayMode[]).map(mode => (
+              <button key={mode} onClick={() => setDisplayMode(mode)}
+                className={`px-3 py-1 text-xs rounded-md transition-colors ${displayMode === mode ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}>
+                {mode.charAt(0).toUpperCase() + mode.slice(1)}
+              </button>
+            ))}
+          </div>
+          <span className="text-sm font-medium text-gray-700 ml-4">Sort:</span>
+          <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value as typeof sortOrder)}
+            className="text-xs border border-gray-300 rounded px-2 py-1">
+            <option value="desc">Largest First</option>
+            <option value="asc">Smallest First</option>
+            <option value="none">Original Order</option>
+          </select>
         </div>
-        <span className="text-sm font-medium text-gray-700 ml-4">Sort:</span>
-        <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value as typeof sortOrder)}
-          className="text-xs border border-gray-300 rounded px-2 py-1">
-          <option value="desc">Largest First</option>
-          <option value="asc">Smallest First</option>
-          <option value="none">Original Order</option>
-        </select>
-      </div>
+      )}
 
       <div className="flex gap-6 flex-1">
         <div className="flex-1 relative">
-          <ChartControls<PieColorMode>
-            colorMode={colorMode}
-            availableColorModes={['default', 'gradient', 'sequential', 'warm', 'cool']}
-            onColorModeChange={setColorMode}
-            colorModeLabels={PIE_COLOR_MODE_LABELS}
-            showLegend={showLegend}
-            onToggleLegend={() => setShowLegend(!showLegend)}
-            position="top-right"
-            layout="compact"
-          />
+          {!compactMode && (
+            <ChartControls<PieColorMode>
+              colorMode={colorMode}
+              availableColorModes={['default', 'gradient', 'sequential', 'warm', 'cool']}
+              onColorModeChange={setColorMode}
+              colorModeLabels={PIE_COLOR_MODE_LABELS}
+              showLegend={showLegend}
+              onToggleLegend={() => setShowLegend(!showLegend)}
+              position="top-right"
+              layout="compact"
+            />
+          )}
 
-          {colorMode !== 'default' && <ColorScaleLegend colorMode="performance" position="bottom-left" />}
+          {!compactMode && colorMode !== 'default' && <ColorScaleLegend colorMode="performance" position="bottom-left" />}
 
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -185,9 +207,24 @@ export function PieChartEnhanced({
               </div>
             </div>
           )}
+
+          {/* Compact inline legend */}
+          {compactMode && (
+            <div className="absolute bottom-0 left-0 right-0 px-2 py-2 bg-white/90 border-t">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 justify-center text-xs">
+                {processedData.map((item, index) => (
+                  <div key={index} className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: item.color }} />
+                    <span className="text-gray-700">{item.name}</span>
+                    <span className="text-gray-500">({item.percentage.toFixed(1)}%)</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        {showLegend && (
+        {showLegend && !compactMode && (
           <div className="w-80 bg-gray-50 rounded-lg border border-gray-200 p-4 overflow-y-auto">
             <h4 className="text-sm font-semibold text-gray-900 mb-3">Breakdown Details</h4>
             <div className="mb-4 p-3 bg-white rounded-lg border border-gray-300">

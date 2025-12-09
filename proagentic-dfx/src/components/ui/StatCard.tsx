@@ -29,12 +29,13 @@ export interface StatCardProps {
   className?: string;
 }
 
+// Professional neutral styling - all icons use subtle gray tones
 const iconColorClasses = {
-  blue: 'bg-blue-100 text-blue-600',
-  green: 'bg-green-100 text-green-600',
-  orange: 'bg-orange-100 text-orange-600',
-  purple: 'bg-purple-100 text-purple-600',
-  red: 'bg-red-100 text-red-600',
+  blue: 'bg-gray-100 text-gray-600',
+  green: 'bg-gray-100 text-gray-600',
+  orange: 'bg-gray-100 text-gray-600',
+  purple: 'bg-gray-100 text-gray-600',
+  red: 'bg-gray-100 text-gray-600',
 };
 
 export function StatCard({
@@ -67,10 +68,10 @@ export function StatCard({
         </div>
         {badge && <div>{badge}</div>}
       </div>
-      <div className="text-3xl font-bold text-gray-900">
+      <div className="text-2xl font-semibold text-gray-900">
         {value}
         {unit && (
-          <span className="text-sm font-normal text-gray-500 ml-1">{unit}</span>
+          <span className="text-xs font-normal text-gray-500 ml-1">{unit}</span>
         )}
       </div>
       <p className="text-gray-500 text-sm mt-1">{label}</p>

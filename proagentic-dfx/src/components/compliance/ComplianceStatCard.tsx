@@ -25,41 +25,42 @@ export interface ComplianceStatCardProps {
   className?: string;
 }
 
+// Professional neutral styling - consistent with StatCard
 const variantStyles = {
   default: {
-    gradient: 'from-blue-50 to-white',
-    iconBg: 'bg-blue-100',
-    iconColor: 'text-blue-600',
-    valueColor: 'text-blue-600',
-    progressColor: 'bg-gradient-to-r from-blue-500 to-blue-600',
+    gradient: '',
+    iconBg: 'bg-gray-100',
+    iconColor: 'text-gray-600',
+    valueColor: 'text-gray-900',
+    progressColor: 'bg-gray-500',
   },
   success: {
-    gradient: 'from-green-50 to-white',
-    iconBg: 'bg-green-100',
-    iconColor: 'text-green-600',
-    valueColor: 'text-green-600',
-    progressColor: 'bg-gradient-to-r from-green-500 to-green-600',
+    gradient: '',
+    iconBg: 'bg-gray-100',
+    iconColor: 'text-gray-600',
+    valueColor: 'text-gray-900',
+    progressColor: 'bg-gray-500',
   },
   warning: {
-    gradient: 'from-yellow-50 to-white',
-    iconBg: 'bg-yellow-100',
-    iconColor: 'text-yellow-600',
-    valueColor: 'text-yellow-600',
-    progressColor: 'bg-gradient-to-r from-yellow-500 to-yellow-600',
+    gradient: '',
+    iconBg: 'bg-gray-100',
+    iconColor: 'text-gray-600',
+    valueColor: 'text-gray-900',
+    progressColor: 'bg-gray-500',
   },
   error: {
-    gradient: 'from-red-50 to-white',
-    iconBg: 'bg-red-100',
-    iconColor: 'text-red-600',
-    valueColor: 'text-red-600',
-    progressColor: 'bg-gradient-to-r from-red-500 to-red-600',
+    gradient: '',
+    iconBg: 'bg-gray-100',
+    iconColor: 'text-gray-600',
+    valueColor: 'text-gray-900',
+    progressColor: 'bg-gray-500',
   },
   info: {
-    gradient: 'from-purple-50 to-white',
-    iconBg: 'bg-purple-100',
-    iconColor: 'text-purple-600',
-    valueColor: 'text-purple-600',
-    progressColor: 'bg-gradient-to-r from-purple-500 to-purple-600',
+    gradient: '',
+    iconBg: 'bg-gray-100',
+    iconColor: 'text-gray-600',
+    valueColor: 'text-gray-900',
+    progressColor: 'bg-gray-500',
   },
 };
 
@@ -80,23 +81,22 @@ export function ComplianceStatCard({
   return (
     <Card
       className={cn(
-        'bg-gradient-to-br hover:shadow-md transition-shadow',
-        styles.gradient,
+        'bg-white border border-gray-200 shadow-sm',
         className
       )}
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex-1">
-          <div className="text-sm font-medium text-gray-600 mb-1">{label}</div>
-          <div className={cn('text-4xl font-bold', styles.valueColor)}>
+          <div className="text-sm font-medium text-gray-500 mb-1">{label}</div>
+          <div className={cn('text-2xl font-semibold', styles.valueColor)}>
             {value}
           </div>
           {subtitle && (
             <div className="text-sm text-gray-500 mt-1">{subtitle}</div>
           )}
         </div>
-        <div className={cn('p-3 rounded-lg', styles.iconBg)}>
-          <Icon className={styles.iconColor} size={32} aria-hidden="true" />
+        <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center', styles.iconBg)}>
+          <Icon className={styles.iconColor} size={20} aria-hidden="true" />
         </div>
       </div>
 

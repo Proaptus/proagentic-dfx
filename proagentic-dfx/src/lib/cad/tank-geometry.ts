@@ -9,6 +9,15 @@
  */
 
 import type { DesignGeometry, CompositeLayer } from '@/lib/types';
+import {
+  type ColormapName,
+  type ColormapOptions,
+  getThreeColor
+} from './colormaps';
+
+// Re-export colormap types for consumers
+export type { ColormapName, ColormapOptions };
+export { getThreeColor, DEFAULT_STRESS_COLORMAP_OPTIONS, DEFAULT_THERMAL_COLORMAP_OPTIONS } from './colormaps';
 
 export interface TankMeshData {
   positions: Float32Array;
@@ -232,12 +241,20 @@ function createSimpleCylinderMesh(innerRadius: number, outerRadius: number, leng
 
 /**
  * Apply stress coloring to mesh
+ *
+ * @param mesh - Tank mesh data to apply colors to
+ * @param stressNodes - Array of stress nodes with positions and values
+ * @param minStress - Minimum stress value for colormap range
+ * @param maxStress - Maximum stress value for colormap range
+ * @param colormap - Colormap to use (default: 'jet')
+ * @returns New mesh data with colors applied
  */
 export function applyStressColors(
   mesh: TankMeshData,
   stressNodes: { x: number; y: number; z: number; value: number }[],
   minStress: number,
-  maxStress: number
+  maxStress: number,
+  colormap: ColormapName = 'jet'
 ): TankMeshData {
   const colors: number[] = [];
   const positions = mesh.positions;
@@ -262,10 +279,9 @@ export function applyStressColors(
       }
     }
 
-    // Map to jet colormap
-    const t = (nearestValue - minStress) / (maxStress - minStress || 1);
-    const color = jetColormap(t);
-    colors.push(color.r, color.g, color.b);
+    // Map to colormap using imported function
+    const [r, g, b] = getThreeColor(nearestValue, minStress, maxStress, colormap);
+    colors.push(r, g, b);
   }
 
   return {
@@ -274,37 +290,19 @@ export function applyStressColors(
   };
 }
 
-/**
- * Jet colormap (blue -> cyan -> green -> yellow -> red)
- */
-function jetColormap(t: number): { r: number; g: number; b: number } {
-  const clampedT = Math.max(0, Math.min(1, t));
-  let r = 0, g = 0, b = 0;
-
-  if (clampedT < 0.25) {
-    r = 0;
-    g = 4 * clampedT;
-    b = 1;
-  } else if (clampedT < 0.5) {
-    r = 0;
-    g = 1;
-    b = 1 - 4 * (clampedT - 0.25);
-  } else if (clampedT < 0.75) {
-    r = 4 * (clampedT - 0.5);
-    g = 1;
-    b = 0;
-  } else {
-    r = 1;
-    g = 1 - 4 * (clampedT - 0.75);
-    b = 0;
-  }
-
-  return { r, g, b };
-}
+// NOTE: jetColormap function removed - now using imported colormap from @/lib/cad/colormaps
+// For backward compatibility, use: import { jetColormap } from './colormaps';
 
 /**
  * Apply stress coloring using FEA 3D mesh data
  * Uses proper mesh interpolation instead of nearest-neighbor
+ *
+ * @param mesh - Tank mesh data to apply colors to
+ * @param feaMesh - FEA mesh with nodes and elements containing stress data
+ * @param minStress - Minimum stress value for colormap range
+ * @param maxStress - Maximum stress value for colormap range
+ * @param colormap - Colormap to use (default: 'jet')
+ * @returns New mesh data with colors applied
  */
 export function applyFEAStressColors(
   mesh: TankMeshData,
@@ -313,14 +311,14 @@ export function applyFEAStressColors(
     elements: Array<{ nodes: [number, number, number]; centroid_stress: number }>;
   },
   minStress: number,
-  maxStress: number
+  maxStress: number,
+  colormap: ColormapName = 'jet'
 ): TankMeshData {
   const colors: number[] = [];
   const positions = mesh.positions;
-  const stressRange = maxStress - minStress || 1;
 
-  // Build spatial index for FEA nodes (simple grid-based)
-  const nodeMap = new Map(feaMesh.nodes.map(n => [n.id, n]));
+  // Note: A spatial index (e.g., nodeMap) could optimize large meshes
+  // For now, we use direct iteration over nodes which is sufficient for most cases
 
   for (let i = 0; i < positions.length; i += 3) {
     const x = positions[i];
@@ -343,10 +341,9 @@ export function applyFEAStressColors(
       }
     }
 
-    // Map to jet colormap
-    const t = (nearestStress - minStress) / stressRange;
-    const color = jetColormap(t);
-    colors.push(color.r, color.g, color.b);
+    // Map to colormap using imported function
+    const [r, g, b] = getThreeColor(nearestStress, minStress, maxStress, colormap);
+    colors.push(r, g, b);
   }
 
   return {

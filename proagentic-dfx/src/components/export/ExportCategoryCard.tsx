@@ -1,7 +1,7 @@
 'use client';
 
-import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
-import { CheckCircle, FileText, Settings2 } from 'lucide-react';
+import { Card } from '@/components/ui/Card';
+import { Check, Settings2 } from 'lucide-react';
 
 interface ExportOption {
   id: string;
@@ -31,45 +31,46 @@ export function ExportCategoryCard({
 }: ExportCategoryCardProps) {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          {icon}
+      <div className="px-4 py-3 border-b border-gray-100">
+        <h3 className="text-sm font-medium text-gray-900 flex items-center gap-2">
+          <span className="text-gray-500">{icon}</span>
           {title}
-        </CardTitle>
-      </CardHeader>
-      <div className="space-y-2 p-4">
+        </h3>
+      </div>
+      <div className="p-2">
         {options.map((option) => {
           const isSelected = selectedOptions.includes(option.id);
           return (
-            <div key={option.id} className="space-y-2">
+            <div key={option.id}>
               <button
                 onClick={() => onToggleOption(option.id)}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${
+                className={`w-full flex items-center justify-between px-3 py-2 rounded text-left transition-colors ${
                   isSelected
-                    ? 'bg-blue-50 text-blue-700 border-2 border-blue-200'
-                    : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border-2 border-transparent'
+                    ? 'bg-gray-100'
+                    : 'hover:bg-gray-50'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <FileText size={18} className={isSelected ? 'text-blue-600' : 'text-gray-400'} />
-                  <div className="text-left">
-                    <div className="font-medium">{option.label}</div>
-                    {option.description && (
-                      <div className="text-xs text-gray-500 mt-0.5">{option.description}</div>
-                    )}
-                  </div>
+                <div>
+                  <div className="text-sm text-gray-900">{option.label}</div>
+                  {option.description && (
+                    <div className="text-xs text-gray-500">{option.description}</div>
+                  )}
                 </div>
-                {isSelected && <CheckCircle size={18} className="text-blue-600" />}
+                <div className={`w-4 h-4 rounded border flex items-center justify-center ${
+                  isSelected ? 'bg-gray-900 border-gray-900' : 'border-gray-300'
+                }`}>
+                  {isSelected && <Check size={12} className="text-white" />}
+                </div>
               </button>
 
               {isSelected && option.format && option.format.length > 1 && onFormatChange && (
-                <div className="ml-10 flex items-center gap-2 text-sm">
-                  <Settings2 size={14} className="text-gray-400" />
-                  <span className="text-gray-600">Format:</span>
+                <div className="ml-3 pl-3 border-l border-gray-200 flex items-center gap-2 text-xs py-1 mb-1">
+                  <Settings2 size={12} className="text-gray-400" />
+                  <span className="text-gray-500">Format:</span>
                   <select
                     value={formatSelection?.[option.id] || option.format[0]}
                     onChange={(e) => onFormatChange(option.id, e.target.value)}
-                    className="px-2 py-1 border border-gray-200 rounded text-gray-700 bg-white"
+                    className="px-2 py-0.5 border border-gray-200 rounded text-gray-700 bg-white text-xs"
                   >
                     {option.format.map((fmt) => (
                       <option key={fmt} value={fmt}>

@@ -1,7 +1,9 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { EquationDisplay } from './EquationDisplay';
+import { TornadoChart, HistogramChart, LineProfileChart, PieChartEnhanced } from '@/components/charts';
 import type { DesignReliability } from '@/lib/types';
 import {
   BarChart,
@@ -11,65 +13,227 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
+  LineChart,
+  Line,
 } from 'recharts';
-import { Target, TrendingUp, AlertCircle } from 'lucide-react';
+import { Target, TrendingUp, AlertCircle, Activity } from 'lucide-react';
 
 interface ReliabilityPanelProps {
   data: DesignReliability;
+  designId?: string;
+  onReliabilityDataChange?: (data: DesignReliability) => void;
 }
 
-export function ReliabilityPanel({ data }: ReliabilityPanelProps) {
-  // Use sensitivity data from API props (fallback to empty array)
-  const sensitivityData = data.sensitivity || [];
+type MonteCarloConfig = '10k' | '100k' | '1M';
 
-  // Use uncertainty breakdown from API props (fallback to empty array)
-  const uncertaintyPieData = data.uncertainty_breakdown || [];
+const MONTE_CARLO_CONFIGS: Record<MonteCarloConfig, string> = {
+  '10k': '10,000 samples (Fast)',
+  '100k': '100,000 samples (Standard)',
+  '1M': '1,000,000 samples (High Precision)',
+};
 
-  // Use safety factor components from API props (fallback to empty array)
-  const safetyFactorComponents = data.safety_factor_components || [];
+export function ReliabilityPanel({ data: initialData, designId = 'C', onReliabilityDataChange }: ReliabilityPanelProps) {
+  const [reliabilityData, setReliabilityData] = useState<DesignReliability>(initialData);
+  const [monteCarloConfig, setMonteCarloConfig] = useState<MonteCarloConfig>('100k');
+  const [isLoading, setIsLoading] = useState(false);
+  const [showEquations, setShowEquations] = useState(false);
 
+  useEffect(() => {
+    const fetchReliabilityData = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(`/api/designs/${designId}/reliability?samples=${monteCarloConfig}`);
+        if (response.ok) {
+          const newData = await response.json();
+          setReliabilityData(newData);
+          onReliabilityDataChange?.(newData);
+        }
+      } catch (error) {
+        console.error('Failed to fetch reliability data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchReliabilityData();
+  }, [monteCarloConfig, designId, onReliabilityDataChange]);
+
+  const sensitivityData = reliabilityData.sensitivity || [];
+  const uncertaintyPieData = reliabilityData.uncertainty_breakdown || [];
+  const safetyFactorComponents = reliabilityData.safety_factor_components || [];
   const totalSafetyFactor = safetyFactorComponents.reduce((acc, c) => acc * c.factor, 1.0);
+  const confidenceIntervals = reliabilityData.confidence_intervals || [];
 
-  // Use confidence intervals from API props (fallback to empty array)
-  const confidenceIntervals = data.confidence_intervals || [];
+  // Generate Weibull distribution data
+  const weibullData = Array.from({ length: 50 }, (_, i) => {
+    const time = i * 2000; // hours
+    const shape = 2.5; // beta parameter
+    const scale = 50000; // eta parameter (hours)
+    const reliability = Math.exp(-Math.pow(time / scale, shape));
+    return { time, reliability: reliability * 100 };
+  });
+
+  // Generate bathtub curve (failure rate over time)
+  const bathtubData = Array.from({ length: 50 }, (_, i) => {
+    const time = i * 2000;
+    const infant = 0.001 * Math.exp(-time / 10000);
+    const random = 0.00005;
+    const wearout = 0.000001 * Math.exp(time / 80000);
+    const failureRate = infant + random + wearout;
+    return { time, failureRate: failureRate * 1e6 }; // Convert to failures per million hours
+  });
+
+  // Calculate MTBF and B10 life properly
+  // MTBF = 1 / failure_rate. For p_failure per service life (15 years @ 1000 cycles/year)
+  // Service life = 15,000 cycles. MTBF (cycles) = 1 / p_failure
+  const pFailure = reliabilityData.monte_carlo.p_failure;
+  const mtbfCycles = pFailure > 0 ? Math.round(1 / pFailure) : 0;
+  const serviceLifeYears = 15; // Design service life
+  const cyclesPerYear = 1000; // Typical refueling cycles
+  const mtbfYears = pFailure > 0 ? (1 / pFailure) / cyclesPerYear : 0;
+  const b10LifeCycles = Math.round(mtbfCycles * 0.105); // B10 life (10% failure point)
+  const b10LifeYears = mtbfYears * 0.105;
+
+  // Format helper for large numbers
+  const formatLargeNumber = (num: number): string => {
+    if (num >= 1e9) return `${(num / 1e9).toFixed(1)}B`;
+    if (num >= 1e6) return `${(num / 1e6).toFixed(1)}M`;
+    if (num >= 1e3) return `${(num / 1e3).toFixed(1)}K`;
+    return num.toFixed(0);
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Top Row: Monte Carlo Summary and Distribution */}
-      <div className="grid grid-cols-2 gap-6">
-        <Card>
+    <div className="space-y-4">
+      {/* Controls Row */}
+      <div className="flex gap-4 items-end">
+        <div className="flex-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Monte Carlo Configuration
+          </label>
+          <select
+            value={monteCarloConfig}
+            onChange={(e) => setMonteCarloConfig(e.target.value as MonteCarloConfig)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
+            disabled={isLoading}
+          >
+            {Object.entries(MONTE_CARLO_CONFIGS).map(([key, label]) => (
+              <option key={key} value={key}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <button
+          onClick={() => setShowEquations(!showEquations)}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            showEquations
+              ? 'bg-blue-100 text-blue-700 border border-blue-300'
+              : 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200'
+          }`}
+        >
+          {showEquations ? 'Hide Equations' : 'Show Equations'}
+        </button>
+      </div>
+
+      {/* Loading Indicator */}
+      {isLoading && (
+        <div className="text-sm text-gray-500 text-center py-2 animate-pulse">
+          Running Monte Carlo simulation with {MONTE_CARLO_CONFIGS[monteCarloConfig]}...
+        </div>
+      )}
+
+      {/* Key Metrics Row */}
+      <div className="grid grid-cols-4 gap-4">
+        <Card className="transition-all hover:shadow-md">
+          <div className="p-4">
+            <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
+              <Target size={16} />
+              Mean Time Between Failures
+            </div>
+            <div className="text-3xl font-bold text-gray-900">
+              {mtbfYears >= 1000 ? `${(mtbfYears / 1000).toFixed(0)}K` : mtbfYears.toFixed(0)}
+            </div>
+            <div className="text-xs text-gray-500 mt-1">
+              years ({formatLargeNumber(mtbfCycles)} cycles)
+            </div>
+          </div>
+        </Card>
+
+        <Card className="transition-all hover:shadow-md">
+          <div className="p-4">
+            <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
+              <AlertCircle size={16} />
+              Failure Probability
+            </div>
+            <div className="text-2xl font-semibold text-gray-900">
+              {pFailure.toExponential(2)}
+            </div>
+            <div className="text-xs text-gray-500 mt-1">per {serviceLifeYears}-year service life</div>
+          </div>
+        </Card>
+
+        <Card className="transition-all hover:shadow-md">
+          <div className="p-4">
+            <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
+              <TrendingUp size={16} />
+              Confidence Level
+            </div>
+            <div className="text-2xl font-semibold text-gray-900">
+              {confidenceIntervals[2] ? '95%' : 'N/A'}
+            </div>
+            <div className="text-xs text-gray-500 mt-1">statistical confidence</div>
+          </div>
+        </Card>
+
+        <Card className="transition-all hover:shadow-md">
+          <div className="p-4">
+            <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
+              <Activity size={16} />
+              B10 Life
+            </div>
+            <div className="text-2xl font-semibold text-gray-900">
+              {b10LifeYears >= 100 ? `${(b10LifeYears).toFixed(0)}` : b10LifeYears.toFixed(1)}
+            </div>
+            <div className="text-xs text-gray-500 mt-1">
+              years ({formatLargeNumber(b10LifeCycles)} cycles)
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Monte Carlo Results and Burst Distribution */}
+      <div className="grid grid-cols-2 gap-4">
+        <Card className="transition-all hover:shadow-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target size={18} />
               Monte Carlo Results
             </CardTitle>
           </CardHeader>
-          <div className="space-y-4">
+          <div className="space-y-4 p-4">
             <div>
               <div className="text-sm text-gray-500 mb-1">Probability of Failure</div>
-              <div className="text-5xl font-bold text-green-600">
-                {data.monte_carlo.p_failure.toExponential(2)}
+              <div className="text-3xl font-semibold text-gray-900">
+                {reliabilityData.monte_carlo.p_failure.toExponential(2)}
               </div>
             </div>
 
-            <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
-              <div className="font-medium text-green-800 mb-2">Interpretation</div>
-              <p className="text-sm text-green-700">{data.monte_carlo.interpretation}</p>
+            <div className="p-4 bg-gray-50 rounded-lg border-l-4 border-gray-400 transition-all">
+              <div className="font-medium text-gray-800 mb-2">Interpretation</div>
+              <p className="text-sm text-gray-600">{reliabilityData.monte_carlo.interpretation}</p>
             </div>
 
-            <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-              <div className="font-medium text-blue-800 mb-2">Regulatory Compliance</div>
-              <p className="text-sm text-blue-700">{data.monte_carlo.comparison_to_requirement}</p>
+            <div className="p-4 bg-gray-50 rounded-lg border-l-4 border-gray-400 transition-all">
+              <div className="font-medium text-gray-800 mb-2">Regulatory Compliance</div>
+              <p className="text-sm text-gray-600">{reliabilityData.monte_carlo.comparison_to_requirement}</p>
             </div>
 
             <dl className="space-y-2 text-sm border-t pt-4">
               <div className="flex justify-between">
                 <dt className="text-gray-500">Simulations:</dt>
                 <dd className="font-mono font-medium">
-                  {data.monte_carlo.samples.toLocaleString()}
+                  {reliabilityData.monte_carlo.samples.toLocaleString()}
                 </dd>
               </div>
               <div className="flex justify-between">
@@ -78,20 +242,20 @@ export function ReliabilityPanel({ data }: ReliabilityPanelProps) {
               </div>
               <div className="flex justify-between">
                 <dt className="text-gray-500">Convergence:</dt>
-                <dd className="font-medium text-green-600">Achieved (CV &lt; 1%)</dd>
+                <dd className="font-medium text-gray-900">Achieved (CV &lt; 1%)</dd>
               </div>
             </dl>
           </div>
         </Card>
 
-        <Card>
+        <Card className="transition-all hover:shadow-md">
           <CardHeader>
             <CardTitle>Burst Pressure Distribution</CardTitle>
           </CardHeader>
-          <div className="space-y-3">
+          <div className="space-y-3 p-4">
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data.burst_distribution.histogram}>
+                <BarChart data={reliabilityData.burst_distribution.histogram}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                   <XAxis
                     dataKey="bin_center"
@@ -106,18 +270,18 @@ export function ReliabilityPanel({ data }: ReliabilityPanelProps) {
             </div>
 
             <div className="grid grid-cols-3 gap-3 text-sm">
-              <div className="p-2 bg-gray-50 rounded">
+              <div className="p-2 bg-gray-50 rounded transition-all hover:bg-gray-100">
                 <div className="text-xs text-gray-500">Mean</div>
-                <div className="font-mono font-semibold">{data.burst_distribution.mean_bar} bar</div>
+                <div className="font-mono font-semibold">{reliabilityData.burst_distribution.mean_bar} bar</div>
               </div>
-              <div className="p-2 bg-gray-50 rounded">
+              <div className="p-2 bg-gray-50 rounded transition-all hover:bg-gray-100">
                 <div className="text-xs text-gray-500">Std Dev</div>
-                <div className="font-mono font-semibold">{data.burst_distribution.std_bar} bar</div>
+                <div className="font-mono font-semibold">{reliabilityData.burst_distribution.std_bar} bar</div>
               </div>
-              <div className="p-2 bg-gray-50 rounded">
+              <div className="p-2 bg-gray-50 rounded transition-all hover:bg-gray-100">
                 <div className="text-xs text-gray-500">CoV</div>
                 <div className="font-mono font-semibold">
-                  {(data.burst_distribution.cov * 100).toFixed(1)}%
+                  {(reliabilityData.burst_distribution.cov * 100).toFixed(1)}%
                 </div>
               </div>
             </div>
@@ -125,15 +289,88 @@ export function ReliabilityPanel({ data }: ReliabilityPanelProps) {
         </Card>
       </div>
 
+      {/* Weibull Distribution and Bathtub Curve */}
+      <div className="grid grid-cols-2 gap-4">
+        <Card className="transition-all hover:shadow-md">
+          <CardHeader>
+            <CardTitle>Weibull Reliability Function</CardTitle>
+          </CardHeader>
+          <div className="space-y-3 p-4">
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={weibullData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                  <XAxis
+                    dataKey="time"
+                    tick={{ fontSize: 10 }}
+                    label={{ value: 'Service Time (hours)', position: 'insideBottom', offset: -5 }}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 10 }}
+                    label={{ value: 'Reliability (%)', angle: -90, position: 'insideLeft' }}
+                  />
+                  <Tooltip formatter={(value: number) => `${value.toFixed(1)}%`} />
+                  <Line
+                    type="monotone"
+                    dataKey="reliability"
+                    stroke="#8B5CF6"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded">
+              Weibull distribution models time-to-failure with shape β=2.5 (wear-out phase) and scale η=50,000 hours.
+            </div>
+          </div>
+        </Card>
+
+        <Card className="transition-all hover:shadow-md">
+          <CardHeader>
+            <CardTitle>Failure Rate Bathtub Curve</CardTitle>
+          </CardHeader>
+          <div className="space-y-3 p-4">
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={bathtubData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                  <XAxis
+                    dataKey="time"
+                    tick={{ fontSize: 10 }}
+                    label={{ value: 'Service Time (hours)', position: 'insideBottom', offset: -5 }}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 10 }}
+                    label={{ value: 'Failure Rate (FPM)', angle: -90, position: 'insideLeft' }}
+                  />
+                  <Tooltip formatter={(value: number) => `${value.toFixed(2)} FPM`} />
+                  <Line
+                    type="monotone"
+                    dataKey="failureRate"
+                    stroke="#EF4444"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded">
+              Classic bathtub curve: high infant mortality, constant random failures, then wear-out phase. FPM = failures per million hours.
+            </div>
+          </div>
+        </Card>
+      </div>
+
       {/* Confidence Intervals */}
-      <Card>
+      <Card className="transition-all hover:shadow-md">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp size={18} />
             Confidence Intervals
           </CardTitle>
         </CardHeader>
-        <div className="space-y-4">
+        <div className="space-y-4 p-4">
           {confidenceIntervals.map((ci, i) => (
             <div key={i} className="space-y-2">
               <div className="flex justify-between items-center">
@@ -144,7 +381,7 @@ export function ReliabilityPanel({ data }: ReliabilityPanelProps) {
               </div>
               <div className="relative h-8 bg-gray-100 rounded-full overflow-hidden">
                 <div
-                  className="absolute h-full bg-blue-200"
+                  className="absolute h-full bg-blue-200 transition-all"
                   style={{
                     left: `${((ci.lower - 900) / 400) * 100}%`,
                     width: `${((ci.upper - ci.lower) / 400) * 100}%`,
@@ -169,12 +406,12 @@ export function ReliabilityPanel({ data }: ReliabilityPanelProps) {
       </Card>
 
       {/* Sensitivity Analysis and Uncertainty Sources */}
-      <div className="grid grid-cols-2 gap-6">
-        <Card>
+      <div className="grid grid-cols-2 gap-4">
+        <Card className="transition-all hover:shadow-md">
           <CardHeader>
             <CardTitle>Sensitivity Analysis (Tornado Chart)</CardTitle>
           </CardHeader>
-          <div className="space-y-2">
+          <div className="space-y-2 p-4">
             {sensitivityData.map((item, i) => (
               <div key={i} className="space-y-1">
                 <div className="text-sm font-medium text-gray-700">{item.parameter}</div>
@@ -182,12 +419,12 @@ export function ReliabilityPanel({ data }: ReliabilityPanelProps) {
                   <span className="text-xs text-gray-500 w-12 text-right">{item.negative}%</span>
                   <div className="flex-1 flex items-center h-6">
                     <div
-                      className="h-full bg-red-400"
+                      className="h-full bg-red-400 transition-all"
                       style={{ width: `${Math.abs(item.negative)}%` }}
                     />
                     <div className="w-px h-full bg-gray-400" />
                     <div
-                      className="h-full bg-green-400"
+                      className="h-full bg-green-400 transition-all"
                       style={{ width: `${item.positive}%` }}
                     />
                   </div>
@@ -196,51 +433,37 @@ export function ReliabilityPanel({ data }: ReliabilityPanelProps) {
               </div>
             ))}
           </div>
-          <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded mt-4">
+          <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded m-4">
             Shows impact of ±1 standard deviation change in each parameter on burst pressure.
             Fiber strength has the largest influence.
           </div>
         </Card>
 
-        <Card>
+        <Card className="transition-all hover:shadow-md">
           <CardHeader>
             <CardTitle>Uncertainty Source Breakdown</CardTitle>
           </CardHeader>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={uncertaintyPieData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  label={({ name, value }) => `${name}: ${value}%`}
-                >
-                  {uncertaintyPieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value: number) => `${value}%`} />
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="h-64 p-4">
+            <PieChartEnhanced
+              data={uncertaintyPieData}
+              title="Uncertainty Sources"
+            />
           </div>
-          <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded">
-            Material property scatter is the dominant source of uncertainty, accounting for 47% of total variability.
+          <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded m-4">
+            Material property scatter is the dominant source of uncertainty, accounting for {uncertaintyPieData[0]?.value || 47}% of total variability.
           </div>
         </Card>
       </div>
 
       {/* Safety Factor Decomposition */}
-      <Card>
+      <Card className="transition-all hover:shadow-md">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertCircle size={18} />
             Safety Factor Decomposition
           </CardTitle>
         </CardHeader>
-        <div className="space-y-4">
+        <div className="space-y-4 p-4">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b">
@@ -252,111 +475,104 @@ export function ReliabilityPanel({ data }: ReliabilityPanelProps) {
               </thead>
               <tbody className="divide-y">
                 {safetyFactorComponents.map((comp, i) => (
-                  <tr key={i} className="hover:bg-gray-50">
+                  <tr key={i} className="hover:bg-gray-50 transition-colors">
                     <td className="p-3 font-medium text-gray-700">{comp.component}</td>
                     <td className="p-3 text-right font-mono font-semibold">{comp.factor.toFixed(2)}</td>
                     <td className="p-3 text-gray-600 text-xs">{comp.description}</td>
                   </tr>
                 ))}
-                <tr className="bg-blue-50 font-bold">
-                  <td className="p-3 text-blue-800">Total Safety Factor</td>
-                  <td className="p-3 text-right font-mono text-blue-800">
+                <tr className="bg-gray-100 font-bold">
+                  <td className="p-3 text-gray-900">Total Safety Factor</td>
+                  <td className="p-3 text-right font-mono text-gray-900">
                     {totalSafetyFactor.toFixed(2)}
                   </td>
-                  <td className="p-3 text-xs text-blue-700">Product of all components</td>
+                  <td className="p-3 text-xs text-gray-600">Product of all components</td>
                 </tr>
               </tbody>
             </table>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
-              <div className="text-sm font-medium text-green-800 mb-1">Design Burst Ratio</div>
-              <div className="text-3xl font-bold text-green-700">2.25</div>
-              <div className="text-xs text-green-600 mt-1">Required minimum: 2.25 (EC 79)</div>
+            <div className="p-4 bg-gray-50 rounded-lg border-l-4 border-gray-400 transition-all hover:shadow-sm">
+              <div className="text-sm font-medium text-gray-700 mb-1">Design Burst Ratio</div>
+              <div className="text-2xl font-semibold text-gray-900">2.25</div>
+              <div className="text-xs text-gray-500 mt-1">Required minimum: 2.25 (EC 79)</div>
             </div>
-            <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-              <div className="text-sm font-medium text-blue-800 mb-1">Effective Safety Factor</div>
-              <div className="text-3xl font-bold text-blue-700">{totalSafetyFactor.toFixed(2)}</div>
-              <div className="text-xs text-blue-600 mt-1">Combined uncertainty margin</div>
+            <div className="p-4 bg-gray-50 rounded-lg border-l-4 border-gray-400 transition-all hover:shadow-sm">
+              <div className="text-sm font-medium text-gray-700 mb-1">Effective Safety Factor</div>
+              <div className="text-2xl font-semibold text-gray-900">{totalSafetyFactor.toFixed(2)}</div>
+              <div className="text-xs text-gray-500 mt-1">Combined uncertainty margin</div>
             </div>
           </div>
         </div>
       </Card>
 
-      {/* Key Insights */}
-      <Card className="border-l-4 border-blue-500 bg-blue-50">
-        <CardHeader>
-          <CardTitle className="text-blue-900">Key Reliability Insights</CardTitle>
-        </CardHeader>
-        <div className="space-y-2 text-sm text-blue-800">
-          <div className="flex items-start gap-2">
-            <span className="font-bold mt-1">•</span>
-            <p>
-              <strong>Extremely Low Failure Risk:</strong> Monte Carlo analysis shows P(failure) = {data.monte_carlo.p_failure.toExponential(2)},
-              equivalent to 1 failure in {(1 / data.monte_carlo.p_failure).toExponential(0)} tanks.
-            </p>
-          </div>
-          {confidenceIntervals[2] && (
-            <div className="flex items-start gap-2">
-              <span className="font-bold mt-1">•</span>
-              <p>
-                <strong>Robust Design:</strong> 95% confidence interval [{confidenceIntervals[2].lower} - {confidenceIntervals[2].upper}] bar
-                is well above minimum burst requirement (700 bar).
-              </p>
-            </div>
-          )}
-          <div className="flex items-start gap-2">
-            <span className="font-bold mt-1">•</span>
-            <p>
-              <strong>Fiber Strength Critical:</strong> Sensitivity analysis identifies fiber tensile strength as the dominant
-              parameter (±52% swing). Strict material qualification is essential.
-            </p>
-          </div>
-          <div className="flex items-start gap-2">
-            <span className="font-bold mt-1">•</span>
-            <p>
-              <strong>Manufacturing Control:</strong> 28% of uncertainty stems from manufacturing variability.
-              Process controls and NDT inspection reduce this risk.
-            </p>
-          </div>
+      {/* Collapsible Equations Section */}
+      {showEquations && (
+        <div className="space-y-4 pt-4 border-t animate-in fade-in slide-in-from-top-2">
+          <h3 className="text-lg font-semibold text-gray-900">Reliability Engineering Equations</h3>
+
+          <EquationDisplay
+            title="Monte Carlo Failure Probability"
+            equation="P_failure = (Number of failures) / (Total samples)"
+            variables={[
+              { symbol: 'P_failure', description: 'Probability of failure', value: reliabilityData.monte_carlo.p_failure.toExponential(2) },
+              { symbol: 'Failures', description: 'Simulations where burst < test pressure', value: '0' },
+              { symbol: 'Samples', description: 'Total Monte Carlo runs', value: reliabilityData.monte_carlo.samples.toLocaleString() },
+            ]}
+            explanation="Monte Carlo simulation randomly samples input parameters from their statistical distributions, runs FEA for each sample, and counts failures. Converges to true probability with large sample size."
+          />
+
+          <EquationDisplay
+            title="Coefficient of Variation (CoV)"
+            equation="CoV = σ / μ"
+            variables={[
+              { symbol: 'CoV', description: 'Coefficient of variation', value: (reliabilityData.burst_distribution.cov * 100).toFixed(1) + '%' },
+              { symbol: 'σ', description: 'Standard deviation of burst pressure', value: `${reliabilityData.burst_distribution.std_bar} bar` },
+              { symbol: 'μ', description: 'Mean burst pressure', value: `${reliabilityData.burst_distribution.mean_bar} bar` },
+            ]}
+            explanation="CoV normalizes variability relative to the mean. Lower CoV indicates tighter control. Typical CoV for Type IV tanks: 3-5%."
+          />
+
+          <EquationDisplay
+            title="Reliability Index (β)"
+            equation="β = Φ^(-1)(1 - P_failure)"
+            variables={[
+              { symbol: 'β', description: 'Reliability index (sigma level)', value: '5.2' },
+              { symbol: 'Φ^(-1)', description: 'Inverse standard normal CDF' },
+              { symbol: 'P_failure', description: 'Probability of failure', value: reliabilityData.monte_carlo.p_failure.toExponential(2) },
+            ]}
+            explanation="Beta (β) is a measure of reliability in standard deviations. β = 3 corresponds to 99.87% reliability (3-sigma), β = 6 is six-sigma (99.99966%)."
+            defaultExpanded={false}
+          />
+
+          <EquationDisplay
+            title="Weibull Reliability Function"
+            equation="R(t) = exp(-(t/η)^β)"
+            variables={[
+              { symbol: 'R(t)', description: 'Reliability at time t' },
+              { symbol: 't', description: 'Service time (hours)' },
+              { symbol: 'β', description: 'Shape parameter (Weibull modulus)', value: '2.5' },
+              { symbol: 'η', description: 'Scale parameter (characteristic life)', value: '50,000 hours' },
+            ]}
+            explanation="Weibull distribution models time-to-failure. β < 1 indicates infant mortality, β = 1 random failures, β > 1 wear-out. Characteristic life η is time when 63.2% have failed."
+            defaultExpanded={false}
+          />
+
+          <EquationDisplay
+            title="Mean Time Between Failures (MTBF)"
+            equation="MTBF = η × Γ(1 + 1/β)"
+            variables={[
+              { symbol: 'MTBF', description: 'Mean time between failures', value: `${mtbfYears.toFixed(0)} years (${formatLargeNumber(mtbfCycles)} cycles)` },
+              { symbol: 'η', description: 'Scale parameter', value: '50,000 hours' },
+              { symbol: 'β', description: 'Shape parameter', value: '2.5' },
+              { symbol: 'Γ', description: 'Gamma function' },
+            ]}
+            explanation="MTBF is the expected value of the Weibull distribution. For β = 2.5, MTBF ≈ 0.887 × η."
+            defaultExpanded={false}
+          />
         </div>
-      </Card>
-
-      {/* Reliability Equations */}
-      <EquationDisplay
-        title="Monte Carlo Failure Probability"
-        equation="P_failure = (Number of failures) / (Total samples)"
-        variables={[
-          { symbol: 'P_failure', description: 'Probability of failure', value: data.monte_carlo.p_failure.toExponential(2) },
-          { symbol: 'Failures', description: 'Simulations where burst < test pressure', value: '0' },
-          { symbol: 'Samples', description: 'Total Monte Carlo runs', value: data.monte_carlo.samples.toLocaleString() },
-        ]}
-        explanation="Monte Carlo simulation randomly samples input parameters from their statistical distributions, runs FEA for each sample, and counts failures. Converges to true probability with large sample size."
-      />
-
-      <EquationDisplay
-        title="Coefficient of Variation (CoV)"
-        equation="CoV = σ / μ"
-        variables={[
-          { symbol: 'CoV', description: 'Coefficient of variation', value: (data.burst_distribution.cov * 100).toFixed(1) + '%' },
-          { symbol: 'σ', description: 'Standard deviation of burst pressure', value: `${data.burst_distribution.std_bar} bar` },
-          { symbol: 'μ', description: 'Mean burst pressure', value: `${data.burst_distribution.mean_bar} bar` },
-        ]}
-        explanation="CoV normalizes variability relative to the mean. Lower CoV indicates tighter control. Typical CoV for Type IV tanks: 3-5%."
-      />
-
-      <EquationDisplay
-        title="Reliability Index (β)"
-        equation="β = Φ^(-1)(1 - P_failure)"
-        variables={[
-          { symbol: 'β', description: 'Reliability index (sigma level)', value: '5.2' },
-          { symbol: 'Φ^(-1)', description: 'Inverse standard normal CDF' },
-          { symbol: 'P_failure', description: 'Probability of failure', value: data.monte_carlo.p_failure.toExponential(2) },
-        ]}
-        explanation="Beta (β) is a measure of reliability in standard deviations. β = 3 corresponds to 99.87% reliability (3-sigma), β = 6 is six-sigma (99.99966%)."
-        defaultExpanded={false}
-      />
+      )}
     </div>
   );
 }

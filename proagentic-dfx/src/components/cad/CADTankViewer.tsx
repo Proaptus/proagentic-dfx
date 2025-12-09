@@ -35,6 +35,8 @@ interface CADTankViewerProps {
   showStress: boolean;
   showWireframe: boolean;
   showCrossSection: boolean;
+  sectionDirection?: 'x' | 'y' | 'z';
+  sectionPosition?: number;  // -1 to 1
   autoRotate: boolean;
   visibleLayers?: Set<number>;
   showLiner?: boolean;
@@ -50,6 +52,8 @@ export function CADTankViewer({
   showStress,
   showWireframe,
   showCrossSection,
+  sectionDirection = 'z',
+  sectionPosition = 0,
   autoRotate,
   visibleLayers,
   showLiner = true,
@@ -162,7 +166,10 @@ export function CADTankViewer({
     renderer.setCameraPosition([0, 0, 2]);
     renderer.setRotation(rotationRef.current[0], rotationRef.current[1]);
     renderer.setWireframe(showWireframe);
-    renderer.setClipping(showCrossSection, [0, 0, -1, 0]);
+
+    // Set clipping plane based on direction and position
+    const clippingPlane = calculateClippingPlane(sectionDirection, sectionPosition);
+    renderer.setClipping(showCrossSection, clippingPlane);
 
     // Animation loop
     const animate = () => {
@@ -180,7 +187,7 @@ export function CADTankViewer({
       renderer.dispose();
       rendererRef.current = null;
     };
-  }, [geometryData, showLiner, visibleLayers, showStress, stressNodes, feaMesh3D, stressRange, layerOpacity, geometry, autoRotate, showWireframe, showCrossSection]);
+  }, [geometryData, showLiner, visibleLayers, showStress, stressNodes, feaMesh3D, stressRange, layerOpacity, geometry, autoRotate, showWireframe, showCrossSection, sectionDirection, sectionPosition]);
 
   // Update renderer settings when props change
   useEffect(() => {
@@ -190,8 +197,9 @@ export function CADTankViewer({
 
   useEffect(() => {
     if (!rendererRef.current) return;
-    rendererRef.current.setClipping(showCrossSection, [0, 0, -1, 0]);
-  }, [showCrossSection]);
+    const clippingPlane = calculateClippingPlane(sectionDirection, sectionPosition);
+    rendererRef.current.setClipping(showCrossSection, clippingPlane);
+  }, [showCrossSection, sectionDirection, sectionPosition]);
 
   // Update layer opacity
   useEffect(() => {
@@ -580,6 +588,37 @@ export function CADTankViewer({
 }
 
 // Utility functions
+
+/**
+ * Calculate clipping plane based on direction and position
+ * @param direction - 'x', 'y', or 'z' axis
+ * @param position - Position along axis (-1 to 1)
+ * @returns Clipping plane as [nx, ny, nz, d] where n is normal and d is offset
+ */
+function calculateClippingPlane(
+  direction: 'x' | 'y' | 'z',
+  position: number
+): [number, number, number, number] {
+  // Clipping plane equation: nx*x + ny*y + nz*z + d = 0
+  // Positive side is kept, negative side is clipped
+
+  switch (direction) {
+    case 'x':
+      // X-axis: clips perpendicular to X (YZ plane moving along X)
+      // Normal points in +X direction
+      return [1, 0, 0, -position];
+    case 'y':
+      // Y-axis: clips perpendicular to Y (XZ plane moving along Y)
+      // Normal points in +Y direction
+      return [0, 1, 0, -position];
+    case 'z':
+    default:
+      // Z-axis: clips perpendicular to Z (XY plane moving along Z)
+      // Normal points in +Z direction
+      return [0, 0, 1, -position];
+  }
+}
+
 function scalePositions(positions: Float32Array, scale: number): Float32Array {
   const scaled = new Float32Array(positions.length);
   for (let i = 0; i < positions.length; i++) {
