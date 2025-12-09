@@ -157,7 +157,7 @@ export function StressAnalysisPanel({ data }: StressAnalysisPanelProps) {
         <CardHeader>
           <CardTitle>Stress Contour ({STRESS_TYPES[selectedStressType]})</CardTitle>
         </CardHeader>
-        <div className="h-[800px]">
+        <div className="h-[500px]">
           <StressContourChart
             stressData={data}
             onExport={(format) => console.log(`Exporting stress contour as ${format}`)}
