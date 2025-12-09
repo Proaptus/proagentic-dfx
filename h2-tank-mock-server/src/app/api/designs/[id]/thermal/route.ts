@@ -20,14 +20,60 @@ export async function GET(
     const fileContent = await fs.readFile(filePath, 'utf-8');
     const design = JSON.parse(fileContent);
 
+    // Generate temperature profile data for fast fill simulation
+    const peakGasTemp = design.thermal?.fast_fill?.peak_gas_temp_c || 95;
+    const peakWallTemp = design.thermal?.fast_fill?.peak_wall_temp_c || 72;
+    const peakLinerTemp = design.thermal?.peak_liner_temp_c || 68;
+    const timeToPeak = design.thermal?.fast_fill?.time_to_peak_seconds || 180;
+
+    // Generate time series data for temperature profile chart
+    const temperatureProfile = [];
+    for (let t = 0; t <= timeToPeak + 60; t += 10) {
+      // Gas temp rises quickly due to adiabatic compression, then stabilizes
+      const gasProgress = Math.min(t / timeToPeak, 1);
+      const gasTemp = 20 + (peakGasTemp - 20) * (1 - Math.exp(-3 * gasProgress));
+
+      // Wall temp lags behind gas temp
+      const wallProgress = Math.min(t / (timeToPeak * 1.2), 1);
+      const wallTemp = 20 + (peakWallTemp - 20) * (1 - Math.exp(-2.5 * wallProgress));
+
+      // Liner temp lags even more
+      const linerProgress = Math.min(t / (timeToPeak * 1.4), 1);
+      const linerTemp = 20 + (peakLinerTemp - 20) * (1 - Math.exp(-2 * linerProgress));
+
+      temperatureProfile.push({
+        time: t,
+        gas: Math.round(gasTemp * 10) / 10,
+        wall: Math.round(wallTemp * 10) / 10,
+        liner: Math.round(linerTemp * 10) / 10
+      });
+    }
+
+    // CTE mismatch data for composite materials
+    const cteMismatch = [
+      { component: 'Carbon Fiber (Longitudinal)', cte: '−0.5 × 10⁻⁶/°C', stress_contribution: 'Low' },
+      { component: 'Carbon Fiber (Transverse)', cte: '10 × 10⁻⁶/°C', stress_contribution: 'Moderate' },
+      { component: 'Epoxy Matrix', cte: '55 × 10⁻⁶/°C', stress_contribution: 'Moderate' },
+      { component: 'HDPE Liner', cte: '120 × 10⁻⁶/°C', stress_contribution: 'Significant' },
+      { component: 'Aluminum Boss', cte: '23 × 10⁻⁶/°C', stress_contribution: 'Moderate' }
+    ];
+
+    // Extreme temperature performance data
+    const extremeTempPerformance = [
+      { condition: 'Cold Soak (−40°C)', hoop_strength_pct: 105, matrix_brittleness: 'High', status: 'acceptable' },
+      { condition: 'Ambient (20°C)', hoop_strength_pct: 100, matrix_brittleness: 'Low', status: 'nominal' },
+      { condition: 'Hot Soak (85°C)', hoop_strength_pct: 92, matrix_brittleness: 'Low', status: 'acceptable' },
+      { condition: 'Fast Fill Peak (95°C)', hoop_strength_pct: 88, matrix_brittleness: 'Low', status: 'warning' }
+    ];
+
     const response = {
       design_id: design.id,
       fast_fill: design.thermal?.fast_fill || {
         scenario: 'Fill from 20 bar to 700 bar in 3 minutes',
-        peak_gas_temp_c: 95,
-        peak_wall_temp_c: 72,
-        peak_liner_temp_c: design.thermal?.peak_liner_temp_c || 68,
-        time_to_peak_seconds: 180,
+        peak_gas_temp_c: peakGasTemp,
+        peak_wall_temp_c: peakWallTemp,
+        peak_liner_temp_c: peakLinerTemp,
+        time_to_peak_seconds: timeToPeak,
         liner_limit_c: 85,
         status: design.thermal?.status || 'pass'
       },
@@ -37,11 +83,9 @@ export async function GET(
         components: { hoop_mpa: 45, axial_mpa: 28, radial_mpa: 12 },
         combined_with_pressure_max_mpa: 2179
       },
-      extreme_temperature_performance: design.thermal?.extreme_temperature || [
-        { condition: 'cold_soak', temp_c: -40, max_stress_mpa: 2310, margin_percent: 10, status: 'pass' },
-        { condition: 'hot_soak', temp_c: 85, max_stress_mpa: 2095, margin_percent: 22, status: 'pass' },
-        { condition: 'hot_fill', temp_c: 95, max_stress_mpa: 2179, margin_percent: 17, status: 'pass' }
-      ]
+      temperature_profile: temperatureProfile,
+      cte_mismatch: cteMismatch,
+      extreme_temperature_performance: extremeTempPerformance
     };
 
     return NextResponse.json(response, {

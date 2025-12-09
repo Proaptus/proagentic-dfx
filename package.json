@@ -9,9 +9,15 @@
     "h2-tank-mock-server"
   ],
   "scripts": {
+    "kill-ports": "npx kill-port 3000 3001 || exit 0",
+    "predev": "npm run kill-ports",
     "dev": "turbo run dev --filter=proagentic-dfx",
+    "predev:mock": "npm run kill-ports",
     "dev:mock": "turbo run dev --filter=h2-tank-mock-server",
+    "predev:all": "npm run kill-ports",
     "dev:all": "turbo run dev --parallel",
+    "start": "scripts\\start-dev.bat",
+    "start:test": "node scripts/integration-test.mjs",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
@@ -28,6 +34,7 @@
   },
   "devDependencies": {
     "husky": "^9.1.7",
+    "kill-port": "^2.0.1",
     "lint-staged": "^15.2.10",
     "prettier": "^3.7.4",
     "turbo": "^2.6.3"
@@ -42,5 +49,6 @@
   },
   "engines": {
     "node": "20.x"
-  }
+  },
+  "packageManager": "npm@11.6.2"
 }

@@ -25,7 +25,7 @@ interface SentryData {
     count: number;
     purpose: string;
   }>;
-  inspection_schedule: {
+  inspection_summary: {
     visual: string;
     acoustic_monitoring: string;
     full_inspection: string;
@@ -226,22 +226,22 @@ export function SentryScreen() {
                 Inspection Schedule
               </CardTitle>
             </CardHeader>
-            {sentry?.inspection_schedule && (
+            {sentry?.inspection_summary && (
               <dl className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <dt className="text-gray-500">Visual</dt>
-                  <dd className="font-medium">{sentry.inspection_schedule.visual}</dd>
+                  <dd className="font-medium">{sentry.inspection_summary.visual}</dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-gray-500">Acoustic</dt>
                   <dd className="font-medium">
-                    {sentry.inspection_schedule.acoustic_monitoring}
+                    {sentry.inspection_summary.acoustic_monitoring}
                   </dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-gray-500">Full Inspection</dt>
                   <dd className="font-medium">
-                    {sentry.inspection_schedule.full_inspection}
+                    {sentry.inspection_summary.full_inspection}
                   </dd>
                 </div>
               </dl>
@@ -255,7 +255,7 @@ export function SentryScreen() {
               <div className="text-sm">
                 <div className="font-medium text-amber-800">Replacement Trigger</div>
                 <div className="text-amber-700 mt-1">
-                  {sentry?.inspection_schedule?.replacement_trigger || 'As per manufacturer guidelines'}
+                  {sentry?.inspection_summary?.replacement_trigger || 'As per manufacturer guidelines'}
                 </div>
               </div>
             </div>

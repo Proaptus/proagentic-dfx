@@ -1,16 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useAppStore } from '@/lib/stores/app-store';
 import { getOptimizationResults } from '@/lib/api/client';
-import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import type { ParetoDesign } from '@/lib/types';
 import { CheckCircle, ArrowRight, Info } from 'lucide-react';
 import { ParetoChart } from '@/components/charts/ParetoChart';
+import {
+  type ParetoXMetric,
+  type ParetoYMetric,
+  X_AXIS_OPTIONS,
+  Y_AXIS_OPTIONS,
+  LEGEND_ITEMS,
+  getCategoryColors,
+  formatCategoryLabel,
+  extractHighlightedDesigns,
+  findRecommendedDesign,
+} from '@/lib/charts/pareto-config';
 
-type XMetric = 'weight_kg' | 'cost_eur' | 'p_failure' | 'fatigue_life_cycles' | 'permeation_rate';
-type YMetric = 'weight_kg' | 'cost_eur' | 'p_failure' | 'burst_pressure_bar' | 'burst_ratio' | 'volumetric_efficiency';
+const MAX_SELECTIONS = 3;
+const MIN_COMPARE_DESIGNS = 2;
 
 export function ParetoScreen() {
   const {
@@ -23,14 +33,16 @@ export function ParetoScreen() {
     optimizationJob,
   } = useAppStore();
 
-  const [xMetric, setXMetric] = useState<XMetric>('weight_kg');
-  const [yMetric, setYMetric] = useState<YMetric>('cost_eur');
+  const [xMetric, setXMetric] = useState<ParetoXMetric>('weight_kg');
+  const [yMetric, setYMetric] = useState<ParetoYMetric>('cost_eur');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Load Pareto data if not already loaded
   useEffect(() => {
     if (paretoFront.length === 0) {
       setLoading(true);
+      setError(null);
       // Use optimization job ID from state, fallback to 'demo' for development
       const jobId = optimizationJob?.job_id || 'demo';
       getOptimizationResults(jobId)
@@ -38,215 +50,275 @@ export function ParetoScreen() {
           const data = results as { pareto_front: ParetoDesign[] };
           setParetoFront(data.pareto_front);
         })
-        .catch(console.error)
+        .catch((err) => {
+          console.error('Failed to load Pareto data:', err);
+          setError('Failed to load optimization results. Please try again.');
+        })
         .finally(() => setLoading(false));
     }
   }, [paretoFront.length, setParetoFront, optimizationJob]);
 
-  const handleDotClick = (id: string) => {
+  const handleDotClick = useCallback((id: string) => {
     // Limit to 3 selections
-    if (!selectedDesigns.includes(id) && selectedDesigns.length >= 3) {
+    if (!selectedDesigns.includes(id) && selectedDesigns.length >= MAX_SELECTIONS) {
       return; // Don't add more than 3
     }
     toggleDesign(id);
-  };
+  }, [selectedDesigns, toggleDesign]);
 
-  const handleViewDesign = (id: string) => {
+  const handleViewDesign = useCallback((id: string) => {
     setCurrentDesign(id);
     setScreen('viewer');
-  };
+  }, [setCurrentDesign, setScreen]);
 
-  const handleCompare = () => {
-    if (selectedDesigns.length >= 2) {
+  const handleCompare = useCallback(() => {
+    if (selectedDesigns.length >= MIN_COMPARE_DESIGNS) {
       setScreen('compare');
     }
-  };
+  }, [selectedDesigns.length, setScreen]);
 
-  // Highlighted designs (categories)
-  const highlights = paretoFront.filter((d) => d.trade_off_category);
-
-  // Find recommended design
-  const recommendedDesign = paretoFront.find(d => d.trade_off_category === 'recommended');
+  // Memoized computed values
+  const highlights = useMemo(() => extractHighlightedDesigns(paretoFront), [paretoFront]);
+  const recommendedDesign = useMemo(() => findRecommendedDesign(paretoFront), [paretoFront]);
+  const remainingSelections = useMemo(
+    () => MIN_COMPARE_DESIGNS - selectedDesigns.length,
+    [selectedDesigns.length]
+  );
+  const canCompare = useMemo(
+    () => selectedDesigns.length >= MIN_COMPARE_DESIGNS,
+    [selectedDesigns.length]
+  );
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Pareto Explorer</h2>
-          <p className="text-gray-600 mt-1">
-            Explore trade-offs between weight, cost, and reliability. Click points to select up to 3 designs for comparison.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          {selectedDesigns.length > 0 && selectedDesigns.length < 2 && (
-            <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 px-3 py-2 rounded-lg">
-              <Info size={16} />
-              Select {2 - selectedDesigns.length} more design{2 - selectedDesigns.length > 1 ? 's' : ''} to compare
+      {/* Enterprise Page Header */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div className="px-6 py-5 border-b border-gray-100">
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Pareto Explorer</h1>
+              <p className="text-gray-600 mt-2 max-w-3xl">
+                Explore multi-objective trade-offs between weight, cost, and reliability.
+                Visualize the Pareto frontier and select up to 3 optimal designs for detailed comparison.
+              </p>
             </div>
-          )}
-          <Button onClick={handleCompare} disabled={selectedDesigns.length < 2}>
-            Compare {selectedDesigns.length > 0 ? `(${selectedDesigns.length})` : ''} <ArrowRight className="ml-2" size={16} />
-          </Button>
+            <div className="flex gap-3">
+              {selectedDesigns.length > 0 && !canCompare && (
+                <div
+                  className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 px-4 py-2.5 rounded-lg border border-blue-100"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <Info size={16} aria-hidden="true" />
+                  <span className="font-medium">
+                    Select {remainingSelections} more design{remainingSelections > 1 ? 's' : ''} to enable comparison
+                  </span>
+                </div>
+              )}
+              <Button
+                onClick={handleCompare}
+                disabled={!canCompare}
+                variant={canCompare ? "primary" : "secondary"}
+                className="whitespace-nowrap"
+                aria-label={`Compare ${selectedDesigns.length} selected designs`}
+              >
+                Compare Designs {selectedDesigns.length > 0 ? `(${selectedDesigns.length})` : ''}
+                <ArrowRight className="ml-2" size={16} aria-hidden="true" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Axis Controls Panel */}
+        <div className="px-6 py-4 bg-gray-50 border-b border-gray-100">
+          <div className="flex items-center gap-6 flex-wrap">
+            <div className="flex items-center gap-3">
+              <label htmlFor="x-axis-select" className="text-sm font-semibold text-gray-700 min-w-[60px]">
+                X-Axis:
+              </label>
+              <select
+                id="x-axis-select"
+                value={xMetric}
+                onChange={(e) => setXMetric(e.target.value as ParetoXMetric)}
+                className="border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium bg-white hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                aria-label="Select X-axis metric"
+              >
+                {X_AXIS_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center gap-3">
+              <label htmlFor="y-axis-select" className="text-sm font-semibold text-gray-700 min-w-[60px]">
+                Y-Axis:
+              </label>
+              <select
+                id="y-axis-select"
+                value={yMetric}
+                onChange={(e) => setYMetric(e.target.value as ParetoYMetric)}
+                className="border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium bg-white hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                aria-label="Select Y-axis metric"
+              >
+                {Y_AXIS_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex-1" />
+            {selectedDesigns.length > 0 && (
+              <div className="px-4 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm font-semibold border border-blue-200">
+                {selectedDesigns.length} / 3 selected
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Legend */}
+        <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-white">
+          <div className="flex items-center gap-6 text-sm flex-wrap" role="list" aria-label="Chart legend">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Legend:</span>
+            {LEGEND_ITEMS.map((item) => (
+              <span
+                key={item.category}
+                className={`flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border ${
+                  item.category === 'selected' ? 'border-blue-200 bg-blue-50' : 'border-gray-200'
+                }`}
+                role="listitem"
+              >
+                <span
+                  className="w-3 h-3 rounded-full shadow-sm"
+                  style={{ backgroundColor: item.color }}
+                  aria-hidden="true"
+                />
+                <span className={`font-medium ${item.category === 'selected' ? 'text-blue-700' : 'text-gray-700'}`}>
+                  {item.label}
+                </span>
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Axis Controls */}
-      <Card padding="sm">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-gray-700">X-Axis:</label>
-            <select
-              value={xMetric}
-              onChange={(e) => setXMetric(e.target.value as XMetric)}
-              className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
-            >
-              <option value="weight_kg">Weight (kg)</option>
-              <option value="cost_eur">Cost (€)</option>
-              <option value="p_failure">P(Failure)</option>
-              <option value="fatigue_life_cycles">Fatigue Life (cycles)</option>
-              <option value="permeation_rate">Permeation Rate</option>
-            </select>
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-gray-700">Y-Axis:</label>
-            <select
-              value={yMetric}
-              onChange={(e) => setYMetric(e.target.value as YMetric)}
-              className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
-            >
-              <option value="cost_eur">Cost (€)</option>
-              <option value="weight_kg">Weight (kg)</option>
-              <option value="burst_pressure_bar">Burst Pressure (bar)</option>
-              <option value="burst_ratio">Burst Ratio</option>
-              <option value="p_failure">P(Failure)</option>
-              <option value="volumetric_efficiency">Vol. Efficiency</option>
-            </select>
-          </div>
-          <div className="flex-1" />
-          {selectedDesigns.length > 0 && (
-            <div className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium">
-              {selectedDesigns.length} / 3 selected
+      {/* Enterprise Chart Container */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <h3 className="text-lg font-semibold text-gray-900">Pareto Frontier Visualization</h3>
+          <p className="text-sm text-gray-600 mt-1">
+            Interactive scatter plot showing optimal design trade-offs. Click any point to select for comparison.
+          </p>
+        </div>
+        <div className="p-8 bg-gray-50" style={{ height: '640px' }}>
+          {loading ? (
+            <div className="h-full flex flex-col items-center justify-center text-gray-500" role="status" aria-live="polite">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4" aria-hidden="true"></div>
+              <p className="text-lg font-medium">Loading Pareto data...</p>
+            </div>
+          ) : error ? (
+            <div className="h-full flex flex-col items-center justify-center text-red-600" role="alert">
+              <p className="text-lg font-medium mb-2">Error Loading Data</p>
+              <p className="text-sm text-gray-600">{error}</p>
+            </div>
+          ) : (
+            <div className="h-full w-full bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <ParetoChart
+                designs={paretoFront}
+                xAxis={xMetric}
+                yAxis={yMetric}
+                selectedIds={selectedDesigns}
+                onSelect={handleDotClick}
+                recommendedId={recommendedDesign?.id}
+              />
             </div>
           )}
-          <div className="flex items-center gap-4 text-sm">
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#10B981' }} /> Lightest
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#06B6D4' }} /> Balanced
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#8B5CF6' }} /> Recommended
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#64748B' }} /> Conservative
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#A855F7' }} /> Max Margin
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#3B82F6' }} /> Selected
-            </span>
+        </div>
+      </div>
+
+      {/* Enterprise Design Selection Cards */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900">Featured Optimal Designs</h3>
+          <p className="text-sm text-gray-600 mt-1">
+            Pre-selected designs representing key trade-off strategies. Click to select or view in 3D.
+          </p>
+        </div>
+        <div className="p-6 bg-gray-50">
+          <div className="grid grid-cols-4 gap-4">
+            {highlights.map((design) => {
+              const isSelected = selectedDesigns.includes(design.id);
+              const colors = getCategoryColors(design.trade_off_category);
+
+              return (
+                <div
+                  key={design.id}
+                  className={`bg-white rounded-lg shadow-sm border-2 cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] ${
+                    isSelected
+                      ? 'border-blue-500 ring-2 ring-blue-200'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  onClick={() => toggleDesign(design.id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      toggleDesign(design.id);
+                    }
+                  }}
+                  aria-pressed={isSelected}
+                  aria-label={`Select ${formatCategoryLabel(design.trade_off_category)} design ${design.id}`}
+                >
+                  <div className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <span
+                        className="text-xs font-semibold px-2.5 py-1 rounded-full capitalize"
+                        style={{
+                          backgroundColor: colors.bg,
+                          color: colors.text,
+                        }}
+                      >
+                        {formatCategoryLabel(design.trade_off_category)}
+                      </span>
+                    {isSelected && (
+                      <CheckCircle className="text-blue-500" size={20} aria-hidden="true" />
+                    )}
+                  </div>
+                  <div className="text-xl font-bold text-gray-900 mb-3">Design {design.id}</div>
+                  <dl className="text-sm space-y-2 mb-4">
+                    <div className="flex justify-between items-center py-1 border-b border-gray-100">
+                      <dt className="text-gray-600 font-medium">Weight:</dt>
+                      <dd className="font-semibold text-gray-900">{design.weight_kg} kg</dd>
+                    </div>
+                    <div className="flex justify-between items-center py-1 border-b border-gray-100">
+                      <dt className="text-gray-600 font-medium">Cost:</dt>
+                      <dd className="font-semibold text-gray-900">€{design.cost_eur.toLocaleString()}</dd>
+                    </div>
+                    <div className="flex justify-between items-center py-1">
+                      <dt className="text-gray-600 font-medium">Burst:</dt>
+                      <dd className="font-semibold text-gray-900">{design.burst_pressure_bar} bar</dd>
+                    </div>
+                  </dl>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full hover:bg-gray-50 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleViewDesign(design.id);
+                    }}
+                    aria-label={`View design ${design.id} in 3D viewer`}
+                  >
+                    View in 3D
+                  </Button>
+                </div>
+              </div>
+              );
+            })}
           </div>
         </div>
-      </Card>
-
-      {/* Chart - Full height visualization */}
-      <Card padding="none" className="h-[600px]">
-        {loading ? (
-          <div className="h-full flex items-center justify-center text-gray-500">
-            Loading Pareto data...
-          </div>
-        ) : (
-          <div className="h-full w-full p-6">
-            <ParetoChart
-              designs={paretoFront}
-              xAxis={xMetric}
-              yAxis={yMetric}
-              selectedIds={selectedDesigns}
-              onSelect={handleDotClick}
-              recommendedId={recommendedDesign?.id}
-            />
-          </div>
-        )}
-      </Card>
-
-      {/* Highlighted Designs */}
-      <div className="grid grid-cols-4 gap-4">
-        {highlights.map((design) => (
-          <Card
-            key={design.id}
-            className={`cursor-pointer transition-all ${
-              selectedDesigns.includes(design.id)
-                ? 'ring-2 ring-blue-500'
-                : 'hover:shadow-md'
-            }`}
-            onClick={() => toggleDesign(design.id)}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span
-                className="text-sm font-medium px-2 py-0.5 rounded-full capitalize"
-                style={{
-                  backgroundColor:
-                    design.trade_off_category === 'lightest'
-                      ? '#D1FAE5'       // green-100
-                      : design.trade_off_category === 'balanced'
-                      ? '#CFFAFE'       // cyan-100
-                      : design.trade_off_category === 'recommended'
-                      ? '#EDE9FE'       // violet-100
-                      : design.trade_off_category === 'conservative'
-                      ? '#F1F5F9'       // slate-100
-                      : design.trade_off_category === 'max_margin'
-                      ? '#F3E8FF'       // purple-100
-                      : '#F3F4F6',      // gray-100
-                  color:
-                    design.trade_off_category === 'lightest'
-                      ? '#065F46'       // green-800
-                      : design.trade_off_category === 'balanced'
-                      ? '#155E75'       // cyan-800
-                      : design.trade_off_category === 'recommended'
-                      ? '#5B21B6'       // violet-800
-                      : design.trade_off_category === 'conservative'
-                      ? '#334155'       // slate-700
-                      : design.trade_off_category === 'max_margin'
-                      ? '#6B21A8'       // purple-800
-                      : '#374151',      // gray-700
-                }}
-              >
-                {design.trade_off_category?.replace(/_/g, ' ')}
-              </span>
-              {selectedDesigns.includes(design.id) && (
-                <CheckCircle className="text-blue-500" size={18} />
-              )}
-            </div>
-            <div className="text-lg font-bold mb-2">Design {design.id}</div>
-            <dl className="text-sm space-y-1">
-              <div className="flex justify-between">
-                <dt className="text-gray-500">Weight:</dt>
-                <dd className="font-medium">{design.weight_kg} kg</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-gray-500">Cost:</dt>
-                <dd className="font-medium">€{design.cost_eur.toLocaleString()}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-gray-500">Burst:</dt>
-                <dd className="font-medium">{design.burst_pressure_bar} bar</dd>
-              </div>
-            </dl>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full mt-3"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleViewDesign(design.id);
-              }}
-            >
-              View in 3D
-            </Button>
-          </Card>
-        ))}
       </div>
     </div>
   );

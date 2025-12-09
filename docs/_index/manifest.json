@@ -1,99 +1,111 @@
 {
   "version": "1.0.0",
-  "generated_at": "2025-12-07T22:30:00Z",
-  "project": "proagentic-dfx",
-  "framework": "diataxis",
-  "protected_files": [
-    "CLAUDE.md",
-    "requirements_spec/*"
-  ],
-  "structure": {
-    "docs/": {
-      "description": "Main documentation directory",
-      "subdirectories": {
-        "_index/": "Indexes and manifests (machine-readable)",
-        "feature/": "Feature cards and capability documentation",
-        "howto/": "Step-by-step procedural guides",
-        "reference/": "API, configuration, and technical reference",
-        "explanation/": "Conceptual and architectural explanations",
-        "adr/": "Architectural Decision Records",
-        "test-report/": "Test execution reports",
-        "runbook/": "Operational procedures",
-        "quarantine/": "Docs pending review (timestamped)"
-      }
-    }
-  },
+  "generated_at": "2025-12-09T00:00:00Z",
+  "generator": "doc-manager skill",
+  "total_documents": 25,
   "documents": [
     {
-      "id": "REF-CICD-001",
-      "path": "docs/reference/CICD_PIPELINE.md",
-      "doc_type": "reference",
-      "title": "CI/CD Pipeline Reference",
+      "id": "GUIDE-ACTIVATION-001",
+      "path": "docs/guides/ACTIVATION_GUIDE.md",
+      "doc_type": "howto",
+      "title": "Quick Activation Guide - Enhanced 3D Viewer & Comparison",
       "status": "accepted",
-      "last_verified_at": "2025-12-07",
-      "owner": "@proaptus",
-      "code_refs": [".github/workflows/ci.yml"],
-      "keywords": ["ci", "cd", "github-actions", "vercel", "deployment"],
-      "search": {
-        "boost": 2,
-        "exclude": false
-      }
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team",
+      "keywords": ["activation", "viewer", "comparison", "enhanced screens"],
+      "code_refs_count": 13
     },
     {
-      "id": "REF-DEPLOY-001",
-      "path": "docs/DEPLOYMENT.md",
-      "doc_type": "reference",
-      "title": "Deployment Guide",
+      "id": "IMPL-CHARTS-001",
+      "path": "docs/implementation/CHARTS_IMPLEMENTATION_SUMMARY.md",
+      "doc_type": "test_report",
+      "title": "Professional Engineering Charts Implementation Summary",
       "status": "accepted",
-      "last_verified_at": "2025-12-07",
-      "owner": "@proaptus",
-      "code_refs": [".github/workflows/ci.yml", "proagentic-dfx/.vercel/project.json"],
-      "keywords": ["deployment", "vercel", "ci", "cd", "github-actions", "local-dev"]
+      "last_verified_at": "2025-12-08",
+      "owner": "@h2-tank-team",
+      "keywords": ["charts", "recharts", "visualization", "implementation"],
+      "code_refs_count": 9
     },
     {
-      "id": "EXP-ARCH-001",
-      "path": "docs/MULTI-DOMAIN-ARCHITECTURE.md",
+      "id": "IMPL-MATERIALS-001",
+      "path": "docs/implementation/MATERIALS_COMPLIANCE_IMPLEMENTATION.md",
+      "doc_type": "test_report",
+      "title": "Enterprise Materials & Compliance Enhancement - Implementation Summary",
+      "status": "accepted",
+      "last_verified_at": "2025-12-08",
+      "owner": "@h2-tank-team",
+      "keywords": ["materials", "compliance", "implementation", "database"],
+      "code_refs_count": 11
+    },
+    {
+      "id": "IMPL-REQSCREEN-001",
+      "path": "docs/implementation/REQUIREMENTS_SCREEN_ENHANCEMENTS.md",
+      "doc_type": "test_report",
+      "title": "Requirements Screen Enterprise Enhancement Summary",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team",
+      "keywords": ["requirements", "screen", "enhancement", "enterprise"],
+      "code_refs_count": 13
+    },
+    {
+      "id": "ANALYSIS-GAP-ENTERPRISE-001",
+      "path": "docs/ENTERPRISE_GAP_ANALYSIS.md",
+      "doc_type": "test_report",
+      "title": "Enterprise Gap Analysis Report",
+      "status": "accepted",
+      "last_verified_at": "2024-12-09",
+      "owner": "@h2-tank-team",
+      "keywords": ["gap analysis", "enterprise", "assessment"]
+    },
+    {
+      "id": "ANALYSIS-GAP-DETAILED-001",
+      "path": "docs/DETAILED_GAP_ANALYSIS.md",
+      "doc_type": "test_report",
+      "title": "Detailed Enterprise Gap Analysis",
+      "status": "accepted",
+      "last_verified_at": "2024-12-09",
+      "owner": "@h2-tank-team",
+      "keywords": ["gap analysis", "detailed", "rtm"]
+    },
+    {
+      "id": "ANALYSIS-RTM-ACTION-001",
+      "path": "docs/analysis/rtm/DUPLICATE_ACTION_PLAN.md",
       "doc_type": "explanation",
-      "title": "Multi-Domain Architecture",
+      "title": "Duplicate Requirements - Action Plan",
       "status": "accepted",
-      "last_verified_at": "2025-12-07",
-      "owner": "@proaptus",
-      "code_refs": [
-        "proagentic-dfx/src/lib/domains/types.ts",
-        "proagentic-dfx/src/lib/domains/h2-tank.ts",
-        "proagentic-dfx/src/lib/domains/index.ts",
-        "proagentic-dfx/src/lib/stores/domain-store.ts"
-      ],
-      "sources_of_truth": ["requirements_spec/moonshot-analysis.md"],
-      "keywords": ["architecture", "multi-domain", "h2-tank", "pressure-vessel", "domain-registry"]
+      "last_verified_at": "2025-12-08",
+      "owner": "@h2-tank-team",
+      "keywords": ["rtm", "duplicates", "requirements"]
     }
   ],
-  "external_docs": {
-    "agents": {
-      "path": ".claude/agents/",
-      "count": 26,
-      "has_frontmatter": true
+  "superseded_documents": [
+    {
+      "path": ".claude/hooks/PROSWARM_ORCHESTRATION_ENFORCEMENT.md",
+      "superseded_by": ".claude/skills/proswarm/SKILL.md",
+      "reason": "Content consolidated into canonical skill definition"
     },
-    "skills": {
-      "path": ".claude/skills/*/SKILL.md",
-      "count": 10,
-      "has_frontmatter": true
+    {
+      "path": ".claude/hooks/README_PROSWARM_ORCHESTRATION.md",
+      "superseded_by": ".claude/skills/proswarm/SKILL.md",
+      "reason": "Overview content consolidated into skill documentation"
     },
-    "templates": {
-      "path": ".claude/skills/doc-manager/templates/",
-      "count": 8,
-      "has_frontmatter": true
+    {
+      "path": ".claude/hooks/PROSWARM_PHILOSOPHY.md",
+      "superseded_by": ".claude/skills/proswarm/SKILL.md",
+      "reason": "Philosophy concepts incorporated into canonical skill definition"
     }
+  ],
+  "directory_structure": {
+    "docs/guides/": "How-to guides and activation instructions",
+    "docs/implementation/": "Implementation summaries and reports",
+    "docs/analysis/rtm/": "Requirements Traceability Matrix analysis",
+    "docs/reference/": "Technical references and API docs",
+    "docs/_index/": "Machine-readable indexes and manifests"
   },
   "statistics": {
-    "total_docs": 120,
-    "with_frontmatter": 47,
-    "without_frontmatter": 73,
-    "by_status": {
-      "accepted": 3,
-      "draft": 72,
-      "active": 44,
-      "unknown": 1
-    }
+    "total_with_front_matter": 10,
+    "total_code_refs": 46,
+    "superseded_count": 3
   }
 }

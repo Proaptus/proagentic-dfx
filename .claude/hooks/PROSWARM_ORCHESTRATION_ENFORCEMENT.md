@@ -1,3 +1,12 @@
+---
+status: superseded
+superseded_by: [".claude/skills/proswarm/SKILL.md"]
+last_verified_at: 2025-12-09
+reason: Content consolidated into canonical skill definition
+---
+
+> **NOTE**: This document has been superseded. See `.claude/skills/proswarm/SKILL.md` for the canonical documentation.
+
 # ProSWARM Complete Orchestration Enforcement
 
 ## Overview

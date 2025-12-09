@@ -1,0 +1,28 @@
+[
+  {
+    "id": "S2-GLASS",
+    "name": "S-2 Glass",
+    "category": "fiber",
+    "manufacturer": "AGY",
+    "E1": 86,
+    "E2": 12,
+    "G12": 10,
+    "nu12": 0.22,
+    "Xt": 4580,
+    "Xc": 1600,
+    "Yt": 60,
+    "Yc": 180,
+    "S": 80,
+    "density": 2.46,
+    "fiber_density": 2.46,
+    "fiber_diameter": 10.0,
+    "cost_per_kg": 12,
+    "availability": "excellent",
+    "max_service_temp": 300,
+    "typical_applications": [
+      "Impact protection layers",
+      "Low-cost composites",
+      "Marine applications"
+    ]
+  }
+]

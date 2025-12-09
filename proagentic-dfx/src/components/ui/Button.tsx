@@ -1,19 +1,29 @@
 'use client';
 
 /**
- * Button Component
+ * Button Component - Enterprise Grade
  * REQ-272: Component library with consistent styling
  * REQ-273: WCAG 2.1 AA accessibility compliance
+ *
+ * Features:
+ * - Multiple variants with professional depth and gradients
+ * - Size variants (sm, md, lg, icon)
+ * - Loading states with spinner
+ * - Icon support with proper spacing
+ * - Accessibility compliant (WCAG 2.1 AA)
+ * - Smooth transitions and hover effects
  */
 
 import { cn } from '@/lib/utils';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'destructive' | 'success' | 'outline' | 'link';
+  size?: 'sm' | 'md' | 'lg' | 'icon';
   children: ReactNode;
   loading?: boolean;
+  icon?: ReactNode;
+  iconPosition?: 'left' | 'right';
 }
 
 export function Button({
@@ -23,33 +33,40 @@ export function Button({
   className,
   disabled,
   loading,
+  icon,
+  iconPosition = 'left',
   ...props
 }: ButtonProps) {
   const isDisabled = disabled || loading;
 
+  // Base classes applied to all buttons
+  const baseClasses = 'inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+
+  // Variant styles with enterprise-grade polish
+  const variantClasses = {
+    primary: 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-sm hover:from-blue-700 hover:to-blue-800 hover:shadow-md active:shadow-sm focus:ring-blue-500',
+    secondary: 'bg-white text-gray-700 border border-gray-300 shadow-sm hover:bg-gray-50 hover:border-gray-400 active:bg-gray-100 focus:ring-gray-500',
+    ghost: 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 active:bg-gray-200 focus:ring-gray-500',
+    destructive: 'bg-red-600 text-white shadow-sm hover:bg-red-700 hover:shadow-md active:bg-red-800 active:shadow-sm focus:ring-red-500',
+    success: 'bg-green-600 text-white shadow-sm hover:bg-green-700 hover:shadow-md active:bg-green-800 active:shadow-sm focus:ring-green-500',
+    outline: 'border-2 border-blue-600 text-blue-600 bg-transparent hover:bg-blue-50 active:bg-blue-100 focus:ring-blue-500',
+    link: 'text-blue-600 hover:text-blue-700 hover:underline focus:ring-blue-500 bg-transparent p-0 shadow-none',
+  };
+
+  // Size styles with proper spacing and border radius
+  const sizeClasses = {
+    sm: 'text-sm px-3 py-1.5 rounded-md gap-1.5',
+    md: 'text-sm px-4 py-2 rounded-lg gap-2',
+    lg: 'text-base px-6 py-3 rounded-lg gap-2',
+    icon: 'h-9 w-9 p-0 rounded-lg',
+  };
+
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2',
-        {
-          // Variants with design tokens
-          'bg-[rgb(var(--color-primary-600))] text-white hover:bg-[rgb(var(--color-primary-700))] focus:ring-[rgb(var(--color-primary-500))] rounded-[var(--radius-lg)]':
-            variant === 'primary',
-          'bg-[rgb(var(--color-gray-200))] text-[rgb(var(--color-gray-900))] hover:bg-[rgb(var(--color-gray-300))] focus:ring-[rgb(var(--color-gray-500))] rounded-[var(--radius-lg)]':
-            variant === 'secondary',
-          'border border-[rgb(var(--color-gray-300))] bg-transparent hover:bg-[rgb(var(--color-gray-50))] focus:ring-[rgb(var(--color-gray-500))] rounded-[var(--radius-lg)]':
-            variant === 'outline',
-          'bg-transparent hover:bg-[rgb(var(--color-gray-100))] focus:ring-[rgb(var(--color-gray-500))] rounded-[var(--radius-lg)]':
-            variant === 'ghost',
-          'bg-[rgb(var(--color-error))] text-white hover:bg-[rgb(var(--color-error-dark))] focus:ring-[rgb(var(--color-error))] rounded-[var(--radius-lg)]':
-            variant === 'danger',
-          // Sizes
-          'text-sm px-3 py-1.5': size === 'sm',
-          'text-sm px-4 py-2': size === 'md',
-          'text-base px-6 py-3': size === 'lg',
-          // States
-          'opacity-50 cursor-not-allowed': isDisabled,
-        },
+        baseClasses,
+        variantClasses[variant],
+        sizeClasses[size],
         className
       )}
       disabled={isDisabled}
@@ -59,7 +76,7 @@ export function Button({
     >
       {loading && (
         <svg
-          className="animate-spin -ml-1 mr-2 h-4 w-4"
+          className="animate-spin h-4 w-4"
           fill="none"
           viewBox="0 0 24 24"
           aria-hidden="true"
@@ -79,7 +96,9 @@ export function Button({
           />
         </svg>
       )}
+      {!loading && icon && iconPosition === 'left' && icon}
       {children}
+      {!loading && icon && iconPosition === 'right' && icon}
     </button>
   );
 }

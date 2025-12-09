@@ -1,0 +1,591 @@
+
+================================================================================
+ARCHITECTURE VIOLATION REPORT: Hardcoded Mock Data
+================================================================================
+
+Total violations: 121
+Files affected: 60
+
+Severity breakdown:
+  CRITICAL: 48
+  HIGH: 17
+  MEDIUM: 56
+
+------------------------------------------------------------
+FILE: components\analysis\CostAnalysisPanel.tsx
+------------------------------------------------------------
+  Line 31: [CRITICAL] suspicious_variable
+    const volumeSensitivity =
+  Line 41: [CRITICAL] suspicious_variable
+    const weightCostTradeoff =
+  Line 50: [CRITICAL] suspicious_variable
+    const materialComparison =
+  Line 59: [CRITICAL] suspicious_variable
+    const learningCurveData =
+  Line 50: [MEDIUM] array_literal
+    = [
+    { material: 'T700 Carbon Fiber', cost_per_kg: 45, relative: 1.0 },
+    {
+  Line 59: [MEDIUM] array_literal
+    = [
+    { batch: 1, cost_multiplier: 2.5 },
+    { batch: 5, cost_multiplier: 1.8
+
+------------------------------------------------------------
+FILE: components\analysis\FailureAnalysisPanel.tsx
+------------------------------------------------------------
+  Line 13: [HIGH] mock_comment
+    // Mock
+  Line 14: [CRITICAL] suspicious_variable
+    const layerTsaiWu =
+  Line 22: [HIGH] mock_comment
+    // Mock
+  Line 23: [CRITICAL] suspicious_variable
+    const hashinCriteria =
+  Line 31: [CRITICAL] suspicious_variable
+    const failureTimeline =
+  Line 23: [MEDIUM] array_literal
+    = [
+    { mode: 'Fiber Tension', value: 0.35, threshold: 1.0, status: 'safe' },
+
+  Line 31: [MEDIUM] array_literal
+    = [
+    { stage: 1, pressure: 450, event: 'Initial loading', description: 'Linea
+  Line 14: [MEDIUM] array_literal
+    [
+    { layer: 1
+
+------------------------------------------------------------
+FILE: components\analysis\ReliabilityPanel.tsx
+------------------------------------------------------------
+  Line 27: [CRITICAL] suspicious_variable
+    const sensitivityData =
+  Line 37: [CRITICAL] suspicious_variable
+    const uncertaintyPieData =
+  Line 45: [CRITICAL] suspicious_variable
+    const safetyFactorComponents =
+  Line 56: [CRITICAL] suspicious_variable
+    const confidenceIntervals =
+  Line 45: [MEDIUM] array_literal
+    = [
+    { component: 'Material Scatter', factor: 1.15, description: 'Accounts fo
+  Line 37: [MEDIUM] array_literal
+    [
+    { name: 'Material Properties'
+
+------------------------------------------------------------
+FILE: components\analysis\StressAnalysisPanel.tsx
+------------------------------------------------------------
+  Line 42: [HIGH] mock_comment
+    // Generate mock
+  Line 43: [CRITICAL] suspicious_variable
+    const layerStressData =
+  Line 44: [HIGH] known_pattern
+    hoop: 420, axial: 380
+  Line 45: [HIGH] known_pattern
+    hoop: 1650, axial: 120
+  Line 46: [HIGH] known_pattern
+    hoop: 430, axial: 390
+  Line 47: [HIGH] known_pattern
+    hoop: 1640, axial: 125
+  Line 48: [HIGH] known_pattern
+    hoop: 425, axial: 385
+  Line 62: [HIGH] mock_comment
+    // Mock
+  Line 167: [HIGH] mock_comment
+    /* Contour visualization placeholder */
+  Line 43: [MEDIUM] array_literal
+    [
+    { layer: 1
+
+------------------------------------------------------------
+FILE: components\analysis\ThermalAnalysisPanel.tsx
+------------------------------------------------------------
+  Line 24: [CRITICAL] suspicious_variable
+    const temperatureProfile =
+  Line 35: [CRITICAL] suspicious_variable
+    const extremeTemps =
+  Line 43: [CRITICAL] suspicious_variable
+    const cteComponents =
+  Line 24: [MEDIUM] array_literal
+    = [
+    { time: 0, gas: 20, wall: 20, liner: 20 },
+    { time: 30, gas: 45, wall
+  Line 35: [MEDIUM] array_literal
+    = [
+    { condition: 'Cryogenic (-40°C)', hoop_strength_pct: 112, matrix_brittle
+  Line 43: [MEDIUM] array_literal
+    = [
+    { component: 'Fiber (axial)', cte: '0.5 × 10⁻⁶/°C', stress_contribution:
+
+------------------------------------------------------------
+FILE: components\charts\HistogramChart.tsx
+------------------------------------------------------------
+  Line 80: [HIGH] mock_comment
+    // Generate
+
+------------------------------------------------------------
+FILE: components\charts\LineProfileChart.tsx
+------------------------------------------------------------
+  Line 251: [HIGH] known_pattern
+    angle: 90
+
+------------------------------------------------------------
+FILE: components\charts\ParetoChart.tsx
+------------------------------------------------------------
+  Line 49: [CRITICAL] suspicious_variable
+    const DEFAULT_COLOR =
+
+------------------------------------------------------------
+FILE: components\charts\PieChartEnhanced.tsx
+------------------------------------------------------------
+  Line 31: [CRITICAL] suspicious_variable
+    const DEFAULT_COLORS =
+
+------------------------------------------------------------
+FILE: components\export\CureCycleChart.tsx
+------------------------------------------------------------
+  Line 60: [HIGH] known_pattern
+    angle: 90
+  Line 19: [MEDIUM] array_literal
+    = [
+  { time_min: 0, temperature_c: 20, pressure_bar: 0 },
+  { time_min: 30, tem
+
+------------------------------------------------------------
+FILE: components\export\ManufacturingPreview.tsx
+------------------------------------------------------------
+  Line 23: [MEDIUM] array_literal
+    = [
+  { step: 1, layer_type: 'Helical', angle_deg: 15, passes: 2, tension_n: 150
+
+------------------------------------------------------------
+FILE: components\Layout.tsx
+------------------------------------------------------------
+  Line 30: [MEDIUM] array_literal
+    [
+  { id: 'requirements'
+
+------------------------------------------------------------
+FILE: components\materials\MaterialComparisonTable.tsx
+------------------------------------------------------------
+  Line 289: [MEDIUM] array_literal
+    = [
+    { label: 'Type', key: 'type', unit: '', higherBetter: false, isString: t
+  Line 331: [MEDIUM] array_literal
+    = [
+    { label: 'Material Type', key: 'material_type', unit: '', higherBetter: 
+  Line 372: [MEDIUM] array_literal
+    = [
+    { label: 'Alloy', key: 'alloy', unit: '', higherBetter: false, isString:
+
+------------------------------------------------------------
+FILE: components\materials\MaterialsDatabase.tsx
+------------------------------------------------------------
+  Line 116: [MEDIUM] array_literal
+    [
+    { id: 'fibers'
+
+------------------------------------------------------------
+FILE: components\requirements\EnhancedProgress.tsx
+------------------------------------------------------------
+  Line 195: [HIGH] mock_comment
+    /* Convergence Mini Chart (Placeholder - could be enhanced with actual chart) */
+  Line 13: [MEDIUM] array_literal
+    = [
+    { name: 'Initialize', threshold: 0 },
+    { name: 'Explore', threshold: 
+  Line 13: [MEDIUM] array_literal
+    [
+    { name: 'Initialize'
+
+------------------------------------------------------------
+FILE: components\requirements\OptimizationConfig.tsx
+------------------------------------------------------------
+  Line 32: [CRITICAL] suspicious_variable
+    const FIBER_OPTIONS = [
+  Line 39: [CRITICAL] suspicious_variable
+    const MATRIX_OPTIONS = [
+  Line 32: [MEDIUM] array_literal
+    = [
+  { value: 'T700S', label: 'T700S (Standard Modulus)', cost: 'Medium', stren
+  Line 39: [MEDIUM] array_literal
+    = [
+  { value: 'EP_TOUGHENED', label: 'Epoxy (Toughened)', performance: 'Balance
+  Line 45: [MEDIUM] array_literal
+    = [
+  { value: 'HDPE_BARRIER', label: 'HDPE with Barrier Layer', permeation: 'Ex
+  Line 51: [MEDIUM] array_literal
+    = [
+  { value: 'AL_6061_T6', label: 'Aluminum 6061-T6', weight: 'Light', cost: '
+  Line 84: [MEDIUM] array_literal
+    [
+    {
+      id: 'minimize_weight'
+
+------------------------------------------------------------
+FILE: components\requirements\RequirementsTable.tsx
+------------------------------------------------------------
+  Line 65: [MEDIUM] array_literal
+    = [
+    {
+      category: 'Volume',
+      field: 'internal_volume_liters',
+     
+  Line 206: [MEDIUM] array_literal
+    [
+    {
+      id: 'category'
+
+------------------------------------------------------------
+FILE: components\requirements\StandardsPanel.tsx
+------------------------------------------------------------
+  Line 26: [HIGH] mock_comment
+    // Mock
+
+------------------------------------------------------------
+FILE: components\requirements\TankTypeComparison.tsx
+------------------------------------------------------------
+  Line 173: [MEDIUM] array_literal
+    [
+    {
+      id: 'type'
+  Line 403: [MEDIUM] array_literal
+    [
+            {
+              id: 'comparison'
+
+------------------------------------------------------------
+FILE: components\RequirementsChat.tsx
+------------------------------------------------------------
+  Line 15: [MEDIUM] array_literal
+    [
+    {
+      id: '1'
+
+------------------------------------------------------------
+FILE: components\screens\AnalysisScreen.tsx
+------------------------------------------------------------
+  Line 87: [MEDIUM] array_literal
+    [
+    { id: 'stress'
+
+------------------------------------------------------------
+FILE: components\screens\CompareScreen.enhanced.tsx
+------------------------------------------------------------
+  Line 100: [MEDIUM] array_literal
+    [
+    {
+      name: 'Weight'
+
+------------------------------------------------------------
+FILE: components\screens\ComplianceScreen.enhanced.tsx
+------------------------------------------------------------
+  Line 338: [MEDIUM] array_literal
+    [
+                {
+                  id: 'ISO 11119-3'
+  Line 499: [MEDIUM] array_literal
+    [
+                {
+                  name: 'CSA Group - Composite Testing Lab'
+
+------------------------------------------------------------
+FILE: components\screens\ExportScreen.tsx
+------------------------------------------------------------
+  Line 38: [MEDIUM] array_literal
+    [
+  {
+    id: 'geometry'
+  Line 43: [MEDIUM] array_literal
+    [
+      { id: 'step'
+  Line 54: [MEDIUM] array_literal
+    [
+      { id: 'nc_code'
+  Line 65: [MEDIUM] array_literal
+    [
+      { id: 'design_report'
+  Line 76: [MEDIUM] array_literal
+    [
+      { id: 'material_certs'
+
+------------------------------------------------------------
+FILE: components\screens\ParetoScreen.tsx
+------------------------------------------------------------
+  Line 34: [HIGH] mock_comment
+    // Use optimization job ID from state, fallback to 'demo
+
+------------------------------------------------------------
+FILE: components\screens\RequirementsScreen.tsx
+------------------------------------------------------------
+  Line 18: [CRITICAL] suspicious_variable
+    const EXAMPLE_REQUIREMENTS =
+  Line 230: [MEDIUM] array_literal
+    [
+              {
+                id: 'requirements'
+
+------------------------------------------------------------
+FILE: components\screens\ValidationScreen.tsx
+------------------------------------------------------------
+  Line 80: [CRITICAL] suspicious_variable
+    const INSPECTION_SCHEDULE = [
+  Line 80: [CRITICAL] suspicious_variable
+    const INSPECTION_SCHEDULE =
+  Line 162: [HIGH] mock_comment
+    /* 3D Visualization Placeholder */
+  Line 22: [MEDIUM] array_literal
+    = [
+  {
+    id: 'sen_01',
+    position: 'Dome Apex (Boss)',
+    x: 0,
+    y: 0,
+
+  Line 80: [MEDIUM] array_literal
+    = [
+  { interval: 'Pre-Flight', checks: 'Visual inspection, leak check', duratio
+  Line 22: [MEDIUM] array_literal
+    [
+  {
+    id: 'sen_01'
+
+------------------------------------------------------------
+FILE: components\validation\SurrogateConfidencePanel.tsx
+------------------------------------------------------------
+  Line 17: [MEDIUM] array_literal
+    = [
+  {
+    output: 'Burst Pressure',
+    r_squared: 0.984,
+    rmse: 2.3,
+    c
+
+------------------------------------------------------------
+FILE: components\validation\TestPlanPanel.tsx
+------------------------------------------------------------
+  Line 19: [MEDIUM] array_literal
+    [
+  {
+    id: 'hydrostatic'
+
+------------------------------------------------------------
+FILE: components\validation\VerificationChecklist.tsx
+------------------------------------------------------------
+  Line 149: [MEDIUM] array_literal
+    = [
+  {
+    role: 'Design Engineer',
+    name: 'Sarah Chen',
+    status: 'approv
+
+------------------------------------------------------------
+FILE: components\viewer\MeasurementTools.tsx
+------------------------------------------------------------
+  Line 36: [MEDIUM] array_literal
+    [
+    {
+      id: 'distance'
+
+------------------------------------------------------------
+FILE: components\viewer\SectionControls.tsx
+------------------------------------------------------------
+  Line 32: [MEDIUM] array_literal
+    = [
+    { id: 'x', label: 'X-Axis', description: 'Cut perpendicular to X-axis' }
+  Line 32: [MEDIUM] array_literal
+    [
+    { id: 'x'
+
+------------------------------------------------------------
+FILE: components\viewer\ViewerControls.tsx
+------------------------------------------------------------
+  Line 44: [MEDIUM] array_literal
+    = [
+    { id: 'front', label: 'Front', description: 'Front view (XY plane)' },
+ 
+  Line 44: [MEDIUM] array_literal
+    [
+    { id: 'front'
+
+------------------------------------------------------------
+FILE: lib\data\materials.ts
+------------------------------------------------------------
+  Line 122: [MEDIUM] array_literal
+    [
+  {
+    id: 'T700S-12K'
+  Line 232: [MEDIUM] array_literal
+    [
+  {
+    id: 'S2-GLASS'
+  Line 262: [MEDIUM] array_literal
+    [
+  {
+    id: 'EPON-862'
+  Line 332: [MEDIUM] array_literal
+    [
+  {
+    id: 'HDPE-GM5010T2'
+  Line 428: [MEDIUM] array_literal
+    [
+  {
+    id: 'AL-6061-T6'
+
+------------------------------------------------------------
+FILE: app\api\auth\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\compare\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\designs\[id]\compliance\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\designs\[id]\cost\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\designs\[id]\failure\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\designs\[id]\geometry\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\designs\[id]\reliability\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\designs\[id]\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\designs\[id]\sentry\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\designs\[id]\stress\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\designs\[id]\surrogate-confidence\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\designs\[id]\test-plan\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\designs\[id]\thermal\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\export\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\export\[id]\download\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\export\[id]\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\health\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\materials\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\optimization\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\optimization\[id]\results\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\optimization\[id]\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\optimization\[id]\stream\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\requirements\chat\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\requirements\parse\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\standards\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+
+------------------------------------------------------------
+FILE: app\api\tank-type\recommend\route.ts
+------------------------------------------------------------
+  Line 1: [CRITICAL] api_route
+    API route exists in frontend - should only be in mock server
+

@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "./.claude/hooks/block-dangerous-commands.py"
+            "command": "python .claude/hooks/block-dangerous-commands.py"
           }
         ]
       },
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "./.claude/hooks/enforce-proswarm.py"
+            "command": "python .claude/hooks/enforce-proswarm.py"
           }
         ]
       }

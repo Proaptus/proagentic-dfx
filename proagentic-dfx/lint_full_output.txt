@@ -1,0 +1,68 @@
+
+> proagentic-dfx@0.1.0 lint
+> eslint .
+
+
+C:\Users\chine\Projects\proagentic-dfx\proagentic-dfx\src\__tests__\components\AnalysisScreen.test.tsx
+    7:35  warning  'within' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+  292:13  warning  'user' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  429:13  warning  'user' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\chine\Projects\proagentic-dfx\proagentic-dfx\src\__tests__\components\ExportScreen.test.tsx
+  15:35  warning  'within' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\chine\Projects\proagentic-dfx\proagentic-dfx\src\__tests__\components\RequirementsChat.test.tsx
+  20:66  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\chine\Projects\proagentic-dfx\proagentic-dfx\src\__tests__\components\StandardCard.test.tsx
+  112:13  warning  'container' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  128:13  warning  'container' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  144:13  warning  'container' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\chine\Projects\proagentic-dfx\proagentic-dfx\src\__tests__\components\compare\ComparisonCard.test.tsx
+  6:26  warning  'waitFor' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\chine\Projects\proagentic-dfx\proagentic-dfx\src\__tests__\lib\utils\comparison.test.ts
+  56:11  warning  'average' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\chine\Projects\proagentic-dfx\proagentic-dfx\src\components\Layout.tsx
+  26:11  warning  'NavItem' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\chine\Projects\proagentic-dfx\proagentic-dfx\src\components\RequirementsChat.tsx
+  77:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\chine\Projects\proagentic-dfx\proagentic-dfx\src\components\charts\GeodesicPathChart.tsx
+  54:3  warning  'numSteps' is assigned a value but never used. Allowed unused args must match /^_/u   @typescript-eslint/no-unused-vars
+  89:9  warning  'bossTheta' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\chine\Projects\proagentic-dfx\proagentic-dfx\src\components\compliance\ComplianceStatCard.tsx
+  12:15  warning  'ReactNode' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\chine\Projects\proagentic-dfx\proagentic-dfx\src\components\compliance\StandardCard.tsx
+  11:10  warning  'Badge' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\chine\Projects\proagentic-dfx\proagentic-dfx\src\components\screens\ValidationScreen.tsx
+  74:10  warning  'sentryLoading' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\chine\Projects\proagentic-dfx\proagentic-dfx\src\components\ui\GlobalSearch.tsx
+  309:17  warning  The attribute aria-selected is not supported by the role button. This role is implicit on the element button  jsx-a11y/role-supports-aria-props
+  342:73  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                               react/no-unescaped-entities
+  342:81  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                               react/no-unescaped-entities
+  367:23  warning  The attribute aria-selected is not supported by the role button. This role is implicit on the element button  jsx-a11y/role-supports-aria-props
+
+C:\Users\chine\Projects\proagentic-dfx\proagentic-dfx\src\components\ui\ThemeToggle.tsx
+  79:28  warning  'resolvedTheme' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\chine\Projects\proagentic-dfx\proagentic-dfx\src\lib\notifications\examples.ts
+   59:12  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  188:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 24 problems (3 errors, 21 warnings)
+
+npm error Lifecycle script `lint` failed with error:
+npm error code 1
+npm error path C:\Users\chine\Projects\proagentic-dfx\proagentic-dfx
+npm error workspace proagentic-dfx@0.1.0
+npm error location C:\Users\chine\Projects\proagentic-dfx\proagentic-dfx
+npm error command failed
+npm error command C:\Windows\System32\cmd.exe /d /s /c eslint .

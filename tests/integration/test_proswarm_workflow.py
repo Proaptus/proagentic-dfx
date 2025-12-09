@@ -90,7 +90,7 @@ class TestProSWARMIntegration:
         """Test that CLAUDE.md exists and has no hardcoded paths."""
         claude_md = TEMPLATE_DIR / "CLAUDE.md"
         assert claude_md.exists()
-        content = claude_md.read_text()
+        content = claude_md.read_text(encoding="utf-8")
         assert "/home/chine/proagentic-clean" not in content
         assert "PROSWARM" in content
         assert "orchestrate_task" in content
@@ -103,13 +103,13 @@ class TestTemplateStandalone:
         """Test that hooks have no hardcoded paths."""
         hooks_dir = TEMPLATE_DIR / ".claude" / "hooks"
         for hook_file in hooks_dir.glob("*.py"):
-            content = hook_file.read_text()
+            content = hook_file.read_text(encoding="utf-8")
             assert "/home/chine/proagentic-clean" not in content, f"{hook_file.name} has hardcoded path"
 
     def test_hook_uses_dynamic_paths(self):
         """Test that enforce-proswarm.py uses dynamic path resolution."""
         hook_path = HOOKS_DIR / "enforce-proswarm.py"
-        content = hook_path.read_text()
+        content = hook_path.read_text(encoding="utf-8")
         assert "__file__" in content or "SCRIPT_DIR" in content
 
 

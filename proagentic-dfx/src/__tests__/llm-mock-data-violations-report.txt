@@ -1,0 +1,67 @@
+
+==========================================================================================
+ LLM MOCK DATA DETECTION REPORT - Enhanced Architecture Test
+==========================================================================================
+
+SUMMARY
+-------
+Total Violations:  3
+Files Scanned:     116
+Files Affected:    1
+
+SEVERITY BREAKDOWN
+------------------
+  CRITICAL:    0 ✓
+  HIGH:        0 ✓
+  MEDIUM:      3
+  LOW:         0
+
+CATEGORY BREAKDOWN
+------------------
+  🟡 Filler Text:    3
+
+==========================================================================================
+DETAILED VIOLATIONS BY FILE
+==========================================================================================
+
+----------------------------------------------------------------------
+FILE: components\screens\AnalysisScreen.tsx
+VIOLATIONS: 3 (Critical: 0, High: 0)
+----------------------------------------------------------------------
+
+  🟡 Line 212: [MEDIUM] Filler Text
+     Pattern: : 'N/A'
+     Reason:  Filler/placeholder text
+
+  🟡 Line 216: [MEDIUM] Filler Text
+     Pattern: : 'N/A'
+     Reason:  Filler/placeholder text
+
+  🟡 Line 222: [MEDIUM] Filler Text
+     Pattern: : 'N/A'
+     Reason:  Filler/placeholder text
+
+==========================================================================================
+HOW TO FIX
+==========================================================================================
+
+1. CRITICAL - API Routes:
+   Delete all files in src/app/api/ - these should ONLY exist in mock server
+
+2. CRITICAL - Variable Naming:
+   Remove hardcoded arrays. Data should come from props passed by parent
+   components that fetch from API.
+
+3. HIGH - Engineering Mock Values:
+   These values must come from API endpoints like:
+   - GET /api/designs/{id}/stress
+   - GET /api/designs/{id}/failure
+   - GET /api/designs/{id}/thermal
+
+4. MEDIUM - Round Numbers & Perfect Data:
+   Real data has noise. If you see perfect sequences, it's generated.
+
+5. LOW - Status Strings:
+   May be acceptable for enums/types, but review if data arrays use them.
+
+==========================================================================================

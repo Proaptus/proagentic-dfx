@@ -1,0 +1,29 @@
+[
+  {
+    "file": "components\\screens\\AnalysisScreen.tsx",
+    "line": 212,
+    "type": "filler_text",
+    "category": "Filler Text",
+    "match": ": 'N/A'",
+    "severity": "medium",
+    "description": "Filler/placeholder text"
+  },
+  {
+    "file": "components\\screens\\AnalysisScreen.tsx",
+    "line": 216,
+    "type": "filler_text",
+    "category": "Filler Text",
+    "match": ": 'N/A'",
+    "severity": "medium",
+    "description": "Filler/placeholder text"
+  },
+  {
+    "file": "components\\screens\\AnalysisScreen.tsx",
+    "line": 222,
+    "type": "filler_text",
+    "category": "Filler Text",
+    "match": ": 'N/A'",
+    "severity": "medium",
+    "description": "Filler/placeholder text"
+  }
+]

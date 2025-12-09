@@ -310,6 +310,24 @@ export class WebGLRenderer {
     this.camera.position = position;
   }
 
+  getMatrices(): { view: Float32Array; projection: Float32Array; model: Float32Array; cameraPosition: [number, number, number] } {
+    const aspect = this.canvas.width / this.canvas.height;
+    const projectionMatrix = this.perspective(this.camera.fov, aspect, this.camera.near, this.camera.far);
+    const viewMatrix = this.lookAt(this.camera.position, this.camera.target, this.camera.up);
+
+    // Apply rotation
+    const rotationMatrix = this.multiply(
+      this.rotateY(this.rotation[1]),
+      this.rotateX(this.rotation[0])
+    );
+
+    // Scale for zoom
+    const scaleMatrix = this.scale(this.zoom, this.zoom, this.zoom);
+    const modelMatrix = this.multiply(scaleMatrix, rotationMatrix);
+
+    return { view: viewMatrix, projection: projectionMatrix, model: modelMatrix, cameraPosition: this.camera.position };
+  }
+
   render(): void {
     const gl = this.gl;
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);

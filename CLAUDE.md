@@ -36,14 +36,40 @@ await mcp__proswarm-neural__execute_plan(result.task_id);
 
 ## 📋 PROJECT OVERVIEW
 
-<!-- CUSTOMIZE THIS SECTION FOR YOUR PROJECT -->
-**[Your Project Name]** - Add your project description here.
+**ProAgentic DfX** - Multi-agent AI ecosystem for Design for Excellence (DfX), starting with the H2 Tank Designer module.
 
-### Technology Stack:
-<!-- Update with your actual stack -->
-- **Frontend**: React 18 + TypeScript + Vite + Tailwind CSS
+### Competition Context
+
+| Field | Details |
+|-------|---------|
+| **Competition** | Agentic AI Pioneers Prize - Development Phase |
+| **Competition ID** | 2355 |
+| **Organiser** | Innovate UK (UKRI) + DSIT |
+| **Sector** | Advanced Manufacturing |
+| **Challenge** | Detailed Design for X Agents |
+| **Prize** | £250k (sector) + £250k (overall bonus) |
+| **Deadline** | 23 February 2026 at 11:00 UK |
+| **Interview** | 16-18 March 2026 (London) |
+
+### Competition Documentation
+```
+agentic-pioneers-prize/
+├── COMPETITION_OVERVIEW.md    # Full competition details
+├── SCORING_CRITERIA.md        # Assessor scoring guidance
+├── TIMELINE.md                # Key dates and milestones
+├── OUR_APPROACH.md            # Strategy and technical approach
+├── application/               # Scored questions (Q10-Q15)
+├── appendices/                # Visual appendix templates
+└── interview/                 # Demo preparation
+```
+
+### Technology Stack
+- **Frontend**: React 18 + TypeScript + Next.js + Tailwind CSS
+- **3D Viewer**: Three.js (@react-three/fiber)
 - **Backend**: Node.js + Express
-- **Testing**: Vitest + React Testing Library
+- **Analysis**: CadQuery, Gmsh, CalculiX
+- **AI/LLM**: Claude API, GPT-4 (fallback)
+- **Testing**: Vitest + React Testing Library + Playwright
 - **Deployment**: Docker + Docker Compose
 
 ## 🚨 MANDATORY PROSWARM HOOK ENFORCEMENT

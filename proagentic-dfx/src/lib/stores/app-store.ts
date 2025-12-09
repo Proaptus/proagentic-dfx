@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import type {
   Screen,
   ParsedRequirements,
@@ -6,17 +7,21 @@ import type {
   OptimizationJob,
 } from '@/lib/types';
 
-interface AppState {
-  // Navigation
+// Snapshot type for history tracking
+interface StateSnapshot {
   currentScreen: Screen;
-  setScreen: (screen: Screen) => void;
-
-  // Requirements
   requirements: ParsedRequirements | null;
-  setRequirements: (req: ParsedRequirements | null) => void;
-
-  // Tank Type
   tankType: 'IV' | 'III' | 'V' | null;
+  paretoFront: ParetoDesign[];
+  selectedDesigns: string[];
+  currentDesign: string | null;
+  analysisTab: 'stress' | 'failure' | 'thermal' | 'reliability' | 'cost' | 'physics';
+}
+
+interface AppState extends StateSnapshot {
+  // Actions
+  setScreen: (screen: Screen) => void;
+  setRequirements: (req: ParsedRequirements | null) => void;
   setTankType: (type: 'IV' | 'III' | 'V' | null) => void;
 
   // Optimization
@@ -26,78 +31,187 @@ interface AppState {
   setOptimizationProgress: (progress: number) => void;
 
   // Pareto Front
-  paretoFront: ParetoDesign[];
   setParetoFront: (designs: ParetoDesign[]) => void;
 
   // Design Selection
-  selectedDesigns: string[];
+  setSelectedDesigns: (designs: string[]) => void;
   selectDesign: (id: string) => void;
   deselectDesign: (id: string) => void;
   toggleDesign: (id: string) => void;
   clearSelection: () => void;
 
-  // Current Design for Viewer/Analysis
-  currentDesign: string | null;
+  // Current Design
   setCurrentDesign: (id: string | null) => void;
 
   // Analysis Tab
-  analysisTab: 'stress' | 'failure' | 'thermal' | 'reliability' | 'cost';
-  setAnalysisTab: (tab: 'stress' | 'failure' | 'thermal' | 'reliability' | 'cost') => void;
+  setAnalysisTab: (tab: 'stress' | 'failure' | 'thermal' | 'reliability' | 'cost' | 'physics') => void;
+
+  // History (Undo/Redo)
+  _history: StateSnapshot[];
+  _historyIndex: number;
+  _pushHistory: () => void;
+  undo: () => void;
+  redo: () => void;
+  canUndo: () => boolean;
+  canRedo: () => boolean;
 
   // Reset
   reset: () => void;
 }
 
-const initialState = {
-  currentScreen: 'requirements' as Screen,
+const initialState: StateSnapshot = {
+  currentScreen: 'requirements',
   requirements: null,
   tankType: null,
-  optimizationJob: null,
-  optimizationProgress: 0,
   paretoFront: [],
   selectedDesigns: [],
   currentDesign: null,
-  analysisTab: 'stress' as const,
+  analysisTab: 'stress',
 };
 
-export const useAppStore = create<AppState>((set) => ({
-  ...initialState,
+// Helper to create snapshot from state
+const createSnapshot = (state: AppState): StateSnapshot => ({
+  currentScreen: state.currentScreen,
+  requirements: state.requirements,
+  tankType: state.tankType,
+  paretoFront: state.paretoFront,
+  selectedDesigns: state.selectedDesigns,
+  currentDesign: state.currentDesign,
+  analysisTab: state.analysisTab,
+});
 
-  setScreen: (screen) => set({ currentScreen: screen }),
+// Create store with persist (auto-save) and built-in undo/redo
+export const useAppStore = create<AppState>()(
+  persist(
+    (set, get) => ({
+      ...initialState,
+      optimizationJob: null,
+      optimizationProgress: 0,
+      _history: [],
+      _historyIndex: -1,
 
-  setRequirements: (requirements) => set({ requirements }),
+      _pushHistory: () => {
+        const state = get();
+        const snapshot = createSnapshot(state);
+        const newHistory = state._history.slice(0, state._historyIndex + 1);
+        newHistory.push(snapshot);
+        // Keep only last 50 states
+        if (newHistory.length > 50) {
+          newHistory.shift();
+        }
+        set({ _history: newHistory, _historyIndex: newHistory.length - 1 });
+      },
 
-  setTankType: (tankType) => set({ tankType }),
+      setScreen: (screen) => {
+        get()._pushHistory();
+        set({ currentScreen: screen });
+      },
 
-  setOptimizationJob: (optimizationJob) => set({ optimizationJob }),
-  setOptimizationProgress: (optimizationProgress) => set({ optimizationProgress }),
+      setRequirements: (requirements) => {
+        get()._pushHistory();
+        set({ requirements });
+      },
 
-  setParetoFront: (paretoFront) => set({ paretoFront }),
+      setTankType: (tankType) => {
+        get()._pushHistory();
+        set({ tankType });
+      },
 
-  selectDesign: (id) =>
-    set((state) => ({
-      selectedDesigns: state.selectedDesigns.includes(id)
-        ? state.selectedDesigns
-        : [...state.selectedDesigns, id],
-    })),
+      setOptimizationJob: (optimizationJob) => set({ optimizationJob }),
+      setOptimizationProgress: (optimizationProgress) => set({ optimizationProgress }),
 
-  deselectDesign: (id) =>
-    set((state) => ({
-      selectedDesigns: state.selectedDesigns.filter((d) => d !== id),
-    })),
+      setParetoFront: (paretoFront) => {
+        get()._pushHistory();
+        set({ paretoFront });
+      },
 
-  toggleDesign: (id) =>
-    set((state) => ({
-      selectedDesigns: state.selectedDesigns.includes(id)
-        ? state.selectedDesigns.filter((d) => d !== id)
-        : [...state.selectedDesigns, id],
-    })),
+      setSelectedDesigns: (selectedDesigns) => {
+        get()._pushHistory();
+        set({ selectedDesigns });
+      },
 
-  clearSelection: () => set({ selectedDesigns: [] }),
+      selectDesign: (id) => {
+        get()._pushHistory();
+        set((state) => ({
+          selectedDesigns: state.selectedDesigns.includes(id)
+            ? state.selectedDesigns
+            : [...state.selectedDesigns, id],
+        }));
+      },
 
-  setCurrentDesign: (currentDesign) => set({ currentDesign }),
+      deselectDesign: (id) => {
+        get()._pushHistory();
+        set((state) => ({
+          selectedDesigns: state.selectedDesigns.filter((d) => d !== id),
+        }));
+      },
 
-  setAnalysisTab: (analysisTab) => set({ analysisTab }),
+      toggleDesign: (id) => {
+        get()._pushHistory();
+        set((state) => ({
+          selectedDesigns: state.selectedDesigns.includes(id)
+            ? state.selectedDesigns.filter((d) => d !== id)
+            : [...state.selectedDesigns, id],
+        }));
+      },
 
-  reset: () => set(initialState),
-}));
+      clearSelection: () => {
+        get()._pushHistory();
+        set({ selectedDesigns: [] });
+      },
+
+      setCurrentDesign: (currentDesign) => {
+        get()._pushHistory();
+        set({ currentDesign });
+      },
+
+      setAnalysisTab: (analysisTab) => {
+        get()._pushHistory();
+        set({ analysisTab });
+      },
+
+      undo: () => {
+        const state = get();
+        if (state._historyIndex > 0) {
+          const newIndex = state._historyIndex - 1;
+          const snapshot = state._history[newIndex];
+          set({ ...snapshot, _historyIndex: newIndex });
+        }
+      },
+
+      redo: () => {
+        const state = get();
+        if (state._historyIndex < state._history.length - 1) {
+          const newIndex = state._historyIndex + 1;
+          const snapshot = state._history[newIndex];
+          set({ ...snapshot, _historyIndex: newIndex });
+        }
+      },
+
+      canUndo: () => get()._historyIndex > 0,
+      canRedo: () => get()._historyIndex < get()._history.length - 1,
+
+      reset: () => set({
+        ...initialState,
+        optimizationJob: null,
+        optimizationProgress: 0,
+        _history: [],
+        _historyIndex: -1,
+      }),
+    }),
+    {
+      name: 'h2-tank-app-storage',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        // Only persist essential state, not transient values or history
+        currentScreen: state.currentScreen,
+        requirements: state.requirements,
+        tankType: state.tankType,
+        paretoFront: state.paretoFront,
+        selectedDesigns: state.selectedDesigns,
+        currentDesign: state.currentDesign,
+        analysisTab: state.analysisTab,
+      }),
+    }
+  )
+);

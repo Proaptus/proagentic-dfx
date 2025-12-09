@@ -1,0 +1,56 @@
+Req_ID,Category,Source_Doc,Source_Section,Requirement_Description,User_Journey_Phase,UI_Element_Needed,Priority,Status_in_Frontend_Plan,Actual_Status,Enterprise_Ready,Code_Location,Notes
+REQ-001,Input,Doc-08,Phase 1,Parse natural language requirements into structured constraints,1-Requirements,Text input with AI parsing,P1,Addressed,Working,Partial,RequirementsChat.tsx:60-63,Works but no confidence shown in main view
+REQ-002,Input,Doc-08,Phase 1,Decode pressure specification (working vs burst),1-Requirements,Clarification display,P1,Addressed,Working,Yes,API response parsing,Working
+REQ-003,Input,Doc-08,Phase 1,Standards lookup and cross-reference,1-Requirements,Standards list with requirements,P1,Addressed,Working,Yes,Static data,Working
+REQ-004,Input,Doc-08,Phase 1,Calculate derived requirements (test pressure burst pressure cycle life),1-Requirements,Derived requirements display,P1,Addressed,Working,Yes,API response,Working
+REQ-005,Input,Doc-08,Phase 1,Temperature range determination from application,1-Requirements,Temperature range display,P2,Addressed,Working,Yes,API response,Working
+REQ-006,Input,Doc-08,Phase 1,Fire resistance requirements identification,1-Requirements,Fire test requirements,P2,Addressed,Working,Yes,Static data,Working
+REQ-007,Concept,Doc-08,Phase 2,Tank type selection with rationale,2-Concept,Tank type cards with comparison,P1,Addressed,Working,Yes,Screen 2,Working
+REQ-008,Concept,Doc-08,Phase 2,Tank type feasibility check (weight/volume ratio),2-Concept,Feasibility indicators,P1,Addressed,Working,Yes,Screen 2,Working
+REQ-011,Materials,Doc-08,Phase 2,Fiber material selection with properties,2-Concept,Material selector with specs,P1,Addressed,Working,Yes,MaterialsDatabase.tsx,Working
+REQ-012,Materials,Doc-08,Phase 2,Matrix material selection,2-Concept,Matrix selector,P1,Addressed,Working,Yes,MaterialsDatabase.tsx,Working
+REQ-013,Materials,Doc-08,Phase 2,Liner material selection with permeation data,2-Concept,Liner selector with permeation,P1,Addressed,Working,Yes,MaterialsDatabase.tsx,Working
+REQ-014,Materials,Doc-08,Phase 2,Boss material selection (corrosion consideration),2-Concept,Boss selector,P1,Addressed,Working,Yes,MaterialsDatabase.tsx,Working
+REQ-015,Materials,Doc-09,3.1,Display material properties table (E1 E2 G12 nu12 strengths),2-Concept,Material properties table,P1,Addressed,Working,Yes,MaterialPropertyCard.tsx:31-89,Comprehensive display
+REQ-016,Geometry,Doc-08,Phase 3,Isotensoid dome profile generation,Auto,Not shown (auto),P1,Addressed,Partial,No,tank-geometry.ts,Spherical not isotensoid
+REQ-017,Geometry,Doc-08,Phase 3,Dome profile visualization,3-Visualization,2D dome profile curve,P1,Addressed,Partial,No,CADTankViewer.tsx,3D only no 2D curve
+REQ-031,3D-View,Doc-08,Phase 5,3D tank model (rotatable),3-Visualization,Three.js canvas with controls,P1,Addressed,Working,Yes,CADTankViewer.tsx:187-208,Drag rotation works
+REQ-032,3D-View,Doc-08,Phase 5,Layer toggle in 3D view,3-Visualization,Show/hide layer controls,P1,Addressed,Working,Yes,CADTankViewer.tsx:177-184,Working
+REQ-033,3D-View,Doc-08,Phase 5,Helical vs hoop layer distinction,3-Visualization,Color coding by layer type,P1,Addressed,Working,Yes,CADTankViewer.tsx:16-17,Orange vs Blue
+REQ-034,3D-View,Doc-08,Phase 6,Section view (cut-away),3-Visualization,Section plane control,P1,Addressed,Working,Yes,CADTankViewer.tsx:138,Clipping plane
+REQ-035,3D-View,Doc-08,Phase 6,Liner visibility in section,3-Visualization,Liner layer in section,P1,Addressed,Working,Yes,CADTankViewer.tsx:88-92,showLiner prop
+REQ-041,FEA-Results,Doc-08,Phase 7,Stress contour plot (von Mises),5-Details,Color-mapped stress on 3D,P1,Addressed,Working,Partial,CADTankViewer.tsx:102-106,Basic color mapping
+REQ-047,FEA-Results,Doc-08,Phase 7,Tsai-Wu failure index display,5-Details,Failure index contour,P1,Addressed,Partial,No,Screen 5 Tab 3,Display exists but not full contour
+REQ-058,Optimization,Doc-08,Phase 4,Live optimization progress display,4-Optimization,Progress bar with animation,P1,Addressed,Working,Yes,Screen 3,SSE streaming works
+REQ-065,Results,Doc-08,Phase 4,Pareto frontier visualization,4-Results,2D/3D Pareto plot,P1,Addressed,Working,Yes,ParetoScreen.tsx,2D Pareto works
+REQ-066,Results,Doc-08,Phase 4,Interactive Pareto plot (hover/select),4-Results,Interactive chart,P1,Addressed,Working,Yes,ParetoScreen.tsx,Click to select
+REQ-071,Results,Doc-08,Phase 4,Multi-design comparison,6-Comparison,Comparison table,P1,Addressed,Working,Yes,CompareScreen.tsx,Radar chart + table
+REQ-084,Compliance,Doc-08,Phase 4,Standards compliance status,4-Results,Pass/fail badges,P1,Addressed,Working,Yes,ComplianceScreen.enhanced.tsx:185-202,Working
+REQ-085,Compliance,Doc-08,Phase 4,Per-standard compliance detail,4-Results,Expandable standard rows,P1,Addressed,Working,Yes,ComplianceScreen.enhanced.tsx:337-397,Working
+REQ-086,Compliance,Doc-08,Phase 4,Clause-by-clause breakdown,7-Export,Clause table,P2,Addressed,Working,Yes,ComplianceScreen.enhanced.tsx:404,ClauseBreakdown component
+REQ-094,Testing,Doc-08,Phase 12,Test plan generation,6-Validation,Test plan table,P1,Addressed,Working,Yes,ComplianceScreen.enhanced.tsx:413-490,Test plan table
+REQ-111,Export,Doc-08,Phase 13,STEP file export,7-Export,STEP download,P1,Addressed,Partial,No,ExportScreen.tsx,Button exists but no real CAD export
+REQ-115,Export,Doc-08,Phase 10,Winding program (NC code),7-Export,NC file download,P2,Addressed,Partial,No,ExportScreen.tsx,Placeholder only
+REQ-121,UI-General,Doc-08,Agent Output,Workflow progress indicator,All,Step indicator bar,P1,Addressed,Working,Partial,Layout.tsx sidebar,Works but no keyboard nav
+REQ-122,UI-General,Doc-08,Agent Output,Step navigation (back/forward),All,Navigation buttons,P1,Addressed,Working,Yes,Navigation works,Working
+REQ-123,UI-General,Doc-08,Agent Output,Data persistence across steps,All,State management,P1,Addressed,NOT WORKING,No,app-store.ts,NO PERSISTENCE - Data lost on refresh
+REQ-190,LLM-Engagement,Doc-Competition,Section 2,Conversational requirements gathering with LLM dialogue,1-Requirements,Chat-style interface with AI responses,P1,Gap,Partial,No,RequirementsChat.tsx,Chat exists but not fully conversational
+REQ-191,LLM-Engagement,Doc-Competition,Section 2,Multi-turn dialogue for requirement clarification,1-Requirements,Message history with context,P1,Gap,Partial,No,RequirementsChat.tsx:55-58,Context passed but limited
+REQ-192,LLM-Engagement,Doc-Competition,Section 2,Proactive follow-up questions from AI,1-Requirements,AI-generated clarification prompts,P1,Gap,Gap,No,Not implemented,No proactive questions
+REQ-193,LLM-Engagement,Doc-Competition,Section 2,Real-time requirement extraction display,1-Requirements,Live structured data panel,P1,Gap,Working,Yes,RequirementsChat.tsx:256-362,Right panel shows live extraction
+REQ-194,LLM-Engagement,Doc-Competition,Section 2,Confidence indicators for parsed requirements,1-Requirements,Confidence badges per field,P2,Gap,Working,Yes,RequirementsChat.tsx:113-136,High/Medium/Low badges
+REQ-195,LLM-Engagement,Doc-Competition,Section 2,Edit and confirm parsed requirements,1-Requirements,Inline editing capability,P1,Gap,Working,Yes,RequirementsChat.tsx:93-111,Edit capability exists
+REQ-196,LLM-Engagement,Doc-Competition,Section 2,Suggested requirements from application context,1-Requirements,AI suggestion chips,P2,Gap,Working,Yes,RequirementsChat.tsx:214-230,Suggestion chips
+REQ-197,3D-Geometry,Doc-08,Phase 3,Isotensoid dome profile in 3D model (not spherical),3-Visualization,Three.js lathe geometry with isotensoid curve,P1,Gap,Gap,No,tank-geometry.ts,Uses spherical approximation
+REQ-198,3D-Geometry,Doc-08,Phase 3,Boss openings with hole geometry at dome ends,3-Visualization,3D boss holes with cylinder cutout,P1,Gap,Gap,No,CADTankViewer.tsx,No hole cutout
+REQ-211,CAD-Core,Doc-08,Phase 5,OpenCascade.js WebAssembly integration,3-Visualization,CAD engine initialization,P1,Gap,Gap,No,Not implemented,No OpenCascade
+REQ-224,CAD-Measure,Doc-08,Phase 6,Interactive measurement tools,3-Visualization,Measurement mode toolbar,P1,Gap,Gap,No,CADTankViewer.tsx,No measurement code
+REQ-225,CAD-Camera,Doc-08,Phase 5,Professional camera controls with standard views,3-Visualization,Camera control toolbar + view cube,P1,Gap,Gap,No,CADTankViewer.tsx,Drag only no presets
+REQ-276,UI-Accessibility,Doc-UX,WCAG 2.1,WCAG 2.1 AA compliance for all interactive elements,All,Accessible components with ARIA labels,P1,Gap,Gap,No,All components,No ARIA labels
+REQ-277,UI-Accessibility,Doc-UX,WCAG 2.1,Complete keyboard navigation for all functionality,All,Focus management and tab order,P1,Gap,Gap,No,All components,Mouse-only 3D viewer
+REQ-291,UI-ErrorHandling,Doc-UX,Error Handling,Graceful error boundaries preventing app crashes,All,React Error Boundary components,P1,Gap,Gap,No,Not implemented,No error boundaries
+REQ-296,UI-Professional,Doc-UX,Professional Features,Undo/redo capability for user configuration actions,All,Command pattern state management,P1,Gap,Gap,No,Not implemented,No undo/redo
+REQ-297,UI-Professional,Doc-UX,Professional Features,Auto-save with conflict resolution,All,Debounced save with version checking,P2,Gap,Gap,No,app-store.ts,No auto-save
+REQ-298,UI-Professional,Doc-UX,Professional Features,Session persistence across browser tabs,All,SharedWorker or localStorage sync,P2,Gap,Gap,No,Not implemented,No cross-tab sync
+REQ-299,UI-Professional,Doc-UX,Professional Features,Keyboard shortcuts for power users,All,Keyboard shortcut system,P1,Gap,Gap,No,Not implemented,No shortcuts
+REQ-300,UI-Professional,Doc-UX,Professional Features,Context-sensitive help system with inline tooltips,All,Help tooltip and panel components,P1,Gap,Partial,No,HelpProvider.tsx HelpPanel.tsx,Components exist but NOT MOUNTED in app

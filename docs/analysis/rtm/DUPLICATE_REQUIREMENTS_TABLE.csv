@@ -1,0 +1,19 @@
+Duplicate_Group,Priority,Req_IDs,Count,Description,Categories,Recommendation,Impact
+Monte_Carlo_Analysis,P0,REQ-076|REQ-160|REQ-239|REQ-261|REQ-356|REQ-379|REQ-388,7,Monte Carlo reliability analysis across all layers,Reliability|Simulator|Physics-Core|Multi-Domain|Workflow|Physics-Rust|Export-Package,MERGE into single composite requirement with UI/Backend/Export/Mock layers,HIGH - Eliminates 6 requirements
+STEP_Export,P0,REQ-111|REQ-214|REQ-314,3,STEP file export functionality,Export|CAD-Export|CAD-Truck,MERGE into single requirement noting UI/Frontend/Backend layers,HIGH - Eliminates 2 requirements
+STEP_Import,P0,REQ-213|REQ-313,2,STEP file import functionality,CAD-Import|CAD-Truck,MERGE into single requirement noting Frontend/Backend layers,MEDIUM - Eliminates 1 requirement
+Backend_Schema_Match,P0,REQ-186|REQ-187,2,Backend must match OpenAPI schemas,Backend-Contract,MERGE into single requirement covering request AND response schemas,LOW - Eliminates 1 requirement
+Performance_Target,P0,REQ-130|REQ-359,2,Requirements to Pareto under 60 seconds timing target,Performance|Workflow,MERGE - Identical requirement stated twice,LOW - Eliminates 1 requirement
+Parametric_Geometry,P1,REQ-216|REQ-323,2,Parametric geometry updates with constraint solver,CAD-Parametric|CAD-Truck,CLARIFY layer separation or MERGE if truly identical,MEDIUM - Eliminates 0-1 requirement
+Multi_Body_Assembly,P1,REQ-220|REQ-320,2,Multi-body assembly visualization (liner + composite + bosses),CAD-Assembly|CAD-Truck,CLARIFY layer separation or MERGE if truly identical,MEDIUM - Eliminates 0-1 requirement
+Brep_Modeling,P1,REQ-212|REQ-311,2,B-rep solid geometry modeling,CAD-Core|CAD-Truck,CLARIFY CAD kernel choice (OpenCascade vs Truck) or MERGE,MEDIUM - Eliminates 0-1 requirement
+Netting_Theory,P1,REQ-023|REQ-353,2,Netting theory initial sizing,Sizing|Workflow,CLARIFY if REQ-023 is just display of REQ-353 output,LOW - May keep separate
+Surrogate_Confidence,P2,REQ-090|REQ-176,2,Surrogate model confidence,Validation|Data-Schema,NOTE relationship (UI display + data schema for same feature),LOW - Keep separate but note dependency
+Test_Plan,P2,REQ-094|REQ-177,2,Test plan generation,Testing|Data-Schema,NOTE relationship (feature + data schema for same feature),LOW - Keep separate but note dependency
+Hoop_Stress,P3,REQ-042|REQ-231,2,Hoop stress calculation and display,FEA-Results|Physics-Core,KEEP SEPARATE - Note dependency: REQ-042 displays REQ-231 calculation,None - Document dependency only
+Axial_Stress,P3,REQ-043|REQ-232,2,Axial stress calculation and display,FEA-Results|Physics-Core,KEEP SEPARATE - Note dependency: REQ-043 displays REQ-232 calculation,None - Document dependency only
+VonMises_Stress,P3,REQ-041|REQ-157,2,Von Mises stress field,FEA-Results|Simulator,KEEP SEPARATE - REQ-041 is display; REQ-157 is mock server simulation,None - Different purposes
+TsaiWu_Failure,P3,REQ-047|REQ-235,2,Tsai-Wu failure index,FEA-Results|Physics-Core,KEEP SEPARATE - Note dependency: REQ-047 displays REQ-235 calculation,None - Document dependency only
+Compliance_Checking,P2,REQ-084|REQ-262|REQ-357|REQ-392,4,Standards compliance checking,Compliance|Multi-Domain|Workflow|Export-Package,REVIEW for scope overlap - May represent display/engine/export aspects,MEDIUM - Potential to eliminate 1-2 requirements
+Optimization_Progress,P3,REQ-058|REQ-150,2,Optimization progress tracking,Optimization|API-Contract,KEEP SEPARATE - REQ-058 is UI; REQ-150 is SSE protocol,None - Different layers
+Mesh_Tessellation,P2,REQ-037|REQ-038|REQ-316|REQ-397,4,Mesh and tessellation operations,FEA-Setup|CAD-Truck|Export-Package,REVIEW - Verify distinct purposes (visualization vs export vs FEA),MEDIUM - Potential overlap

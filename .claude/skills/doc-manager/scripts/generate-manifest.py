@@ -1,137 +1,109 @@
 #!/usr/bin/env python3
-"""
-generate-manifest.py - Generate manifest.json from all documentation
-
-Usage:
-    python3 generate-manifest.py [--output PATH]
-"""
-
-import json
-import re
-import yaml
+import sys, re, json, yaml
 from pathlib import Path
-from datetime import datetime
+from datetime import date, datetime
 
 def extract_frontmatter(file_path):
-    """Extract YAML front matter from Markdown file."""
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
-
         match = re.match(r'^---\s*\n(.*?)\n---\s*\n', content, re.DOTALL)
         if not match:
             return None
-
-        return yaml.safe_load(match.group(1))
-    except Exception:
+        yaml_content = match.group(1)
+        fm = yaml.safe_load(yaml_content)
+        if fm and isinstance(fm, dict):
+            for key in ['last_verified_at', 'test_date', 'date']:
+                if key in fm and isinstance(fm[key], date):
+                    fm[key] = fm[key].isoformat()
+        return fm
+    except:
         return None
 
-def find_docs(docs_dir):
-    """Find all documented files with valid front matter."""
-    docs = []
-    docs_path = Path(docs_dir)
+def find_markdown_files(path):
+    path_obj = Path(path)
+    md_files = []
+    for md_file in path_obj.rglob('*.md'):
+        if md_file.name != 'CLAUDE.md' and '.git' not in str(md_file) and '__pycache__' not in str(md_file):
+            md_files.append(md_file)
+    return sorted(md_files)
 
-    if not docs_path.exists():
-        return docs
-
-    for md_file in docs_path.rglob('*.md'):
-        if md_file.name == 'CLAUDE.md' or 'quarantine' in str(md_file):
-            continue
-
-        frontmatter = extract_frontmatter(md_file)
-        if frontmatter:
-            docs.append({
-                'path': str(md_file.relative_to(docs_path.parent)),
-                'frontmatter': frontmatter
-            })
-
-    return docs
-
-def generate_manifest(docs):
-    """Generate manifest from documentation."""
-    manifest = {
-        'generated_at': datetime.utcnow().isoformat() + 'Z',
-        'total_docs': len(docs),
-        'by_type': {},
-        'by_status': {},
-        'features': [],
-        'adrs': [],
-        'howtos': [],
-        'references': [],
-        'explanations': []
-    }
-
-    for doc in docs:
-        fm = doc['frontmatter']
-        doc_type = fm.get('doc_type', 'unknown')
-        status = fm.get('status', 'unknown')
-
-        # Count by type
-        manifest['by_type'][doc_type] = manifest['by_type'].get(doc_type, 0) + 1
-
-        # Count by status
-        manifest['by_status'][status] = manifest['by_status'].get(status, 0) + 1
-
-        # Add to appropriate category
-        last_verified = fm.get('last_verified_at')
-        if hasattr(last_verified, 'isoformat'):
-            last_verified = last_verified.isoformat()
-
-        entry = {
-            'id': fm.get('id'),
-            'title': fm.get('title'),
-            'path': doc['path'],
-            'status': status,
-            'last_verified_at': last_verified,
-            'owner': fm.get('owner'),
-            'code_refs': fm.get('code_refs', []),
-            'test_refs': fm.get('test_refs', []),
-            'evidence': fm.get('evidence', {}),
-            'search': fm.get('search', {})
-        }
-
-        if doc_type == 'feature':
-            manifest['features'].append(entry)
-        elif doc_type == 'adr':
-            manifest['adrs'].append(entry)
-        elif doc_type == 'howto':
-            manifest['howtos'].append(entry)
-        elif doc_type == 'reference':
-            manifest['references'].append(entry)
-        elif doc_type == 'explanation':
-            manifest['explanations'].append(entry)
-
-    return manifest
+def create_document_entry(file_path, base_path, frontmatter):
+    rel_path = str(file_path.relative_to(base_path))
+    rel_path = rel_path.replace(chr(92), '/')
+    entry = {'path': rel_path}
+    
+    if frontmatter:
+        entry['id'] = frontmatter.get('id', 'UNKNOWN')
+        entry['title'] = frontmatter.get('title', file_path.stem)
+        entry['doc_type'] = frontmatter.get('doc_type', 'unknown')
+        entry['status'] = frontmatter.get('status', 'draft')
+        entry['last_verified_at'] = frontmatter.get('last_verified_at', '')
+        entry['owner'] = frontmatter.get('owner', '@unknown')
+        if 'keywords' in frontmatter:
+            entry['keywords'] = frontmatter['keywords']
+        if 'code_refs' in frontmatter and frontmatter['code_refs']:
+            entry['code_refs_count'] = len(frontmatter['code_refs'])
+    else:
+        entry['id'] = 'NO-FRONTMATTER'
+        entry['title'] = file_path.stem
+        entry['doc_type'] = 'unclassified'
+        entry['status'] = 'draft'
+        entry['owner'] = '@unknown'
+    
+    return entry
 
 def main():
-    """Main function."""
-    import argparse
-
-    parser = argparse.ArgumentParser(description='Generate manifest.json')
-    parser.add_argument('--output', default='docs/_index/manifest.json',
-                        help='Output file path (default: docs/_index/manifest.json)')
-    args = parser.parse_args()
-
-    # Find docs
-    docs = find_docs('docs/')
-    print(f"Found {len(docs)} documents with front matter")
-
-    # Generate manifest
-    manifest = generate_manifest(docs)
-
-    # Create output directory if needed
-    output_path = Path(args.output)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
-    # Write manifest
-    with open(output_path, 'w') as f:
+    base_path = Path('/c/Users/chine/Projects/proagentic-dfx')
+    docs_path = base_path / 'docs'
+    
+    files = find_markdown_files(docs_path)
+    print(f"Found {len(files)} markdown files")
+    
+    documents = []
+    by_status = {}
+    by_type = {}
+    by_directory = {}
+    
+    for file_path in files:
+        fm = extract_frontmatter(file_path)
+        entry = create_document_entry(file_path, docs_path, fm)
+        documents.append(entry)
+        
+        status = entry['status']
+        doc_type = entry['doc_type']
+        directory = entry['path'].split('/')[0]
+        
+        by_status[status] = by_status.get(status, 0) + 1
+        by_type[doc_type] = by_type.get(doc_type, 0) + 1
+        if directory not in by_directory:
+            by_directory[directory] = []
+        by_directory[directory].append(entry['path'])
+    
+    manifest = {
+        'version': '1.0.0',
+        'generated_at': datetime.utcnow().isoformat() + 'Z',
+        'generator': 'doc-manager skill (Phase 7 validation)',
+        'project': 'ProAgentic DfX',
+        'total_documents': len(documents),
+        'documents': documents,
+        'statistics': {
+            'by_status': by_status,
+            'by_type': by_type,
+            'by_directory': {k: len(v) for k, v in by_directory.items()},
+            'with_frontmatter': len([d for d in documents if d['id'] != 'NO-FRONTMATTER']),
+            'without_frontmatter': len([d for d in documents if d['id'] == 'NO-FRONTMATTER'])
+        }
+    }
+    
+    manifest_path = base_path / 'docs' / '_index' / 'manifest.json'
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    with open(manifest_path, 'w') as f:
         json.dump(manifest, f, indent=2)
-
-    print(f"Manifest generated: {output_path}")
-    print(f"  Total docs: {manifest['total_docs']}")
-    print(f"  Features: {len(manifest['features'])}")
-    print(f"  ADRs: {len(manifest['adrs'])}")
-    print(f"  How-Tos: {len(manifest['howtos'])}")
+    
+    print(f"Generated manifest")
+    print(json.dumps(manifest['statistics'], indent=2))
 
 if __name__ == '__main__':
     main()

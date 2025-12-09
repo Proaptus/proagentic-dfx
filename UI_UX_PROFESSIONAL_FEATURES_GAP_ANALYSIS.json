@@ -1,0 +1,898 @@
+{
+  "analysis_metadata": {
+    "date": "2025-12-09",
+    "scope": "UI/UX and Professional Features Gap Analysis",
+    "rtm_version": "CONSOLIDATED",
+    "total_requirements_analyzed": 30,
+    "p0_legal_violations": 3,
+    "critical_gaps": 12,
+    "partial_implementations": 8,
+    "addressed_requirements": 10
+  },
+
+  "executive_summary": {
+    "overall_status": "CRITICAL GAPS - LEGAL VIOLATIONS PRESENT",
+    "p0_violations": [
+      "REQ-276: WCAG 2.1 AA compliance - PARTIAL (missing comprehensive ARIA labels)",
+      "REQ-277: Complete keyboard navigation - GAP (3D viewer mouse-only)",
+      "REQ-291: Error boundaries - GAP (no error boundaries implemented)"
+    ],
+    "major_concerns": [
+      "No undo/redo functionality (REQ-296 P0)",
+      "No auto-save or persistence (REQ-123, REQ-297)",
+      "Help system exists but not integrated (REQ-300)",
+      "No global error handling - app crashes on JS errors",
+      "Missing breadcrumb navigation (NEW-005)",
+      "No session recovery (NEW-004)",
+      "Limited keyboard navigation in 3D viewer"
+    ],
+    "positive_findings": [
+      "LLM engagement features well implemented (REQ-190-196)",
+      "Keyboard shortcuts system implemented for main navigation",
+      "Skip link for accessibility present",
+      "Some ARIA labels on key components",
+      "Help system components created (just not mounted)"
+    ]
+  },
+
+  "requirements": [
+    {
+      "requirement_id": "REQ-121",
+      "category": "UI-General",
+      "description": "Workflow progress indicator with keyboard navigation",
+      "priority": "P1",
+      "status": "PARTIAL",
+      "gap_description": "Workflow progress exists in sidebar (Layout.tsx) with visual indicators for completed steps. However, keyboard navigation is MISSING - nav items are only mouse-clickable buttons without Tab sequence. WCAG violation.",
+      "code_locations": [
+        "proagentic-dfx/src/components/Layout.tsx:244-306",
+        "proagentic-dfx/src/components/Layout.tsx:119-136 (canNavigate logic)"
+      ],
+      "effort_hours": 8,
+      "legal_violation": true,
+      "notes": "Status was marked 'Addressed' in RTM but is actually PARTIAL. Navigation works but lacks keyboard Tab navigation through nav items. Need to add tabIndex and arrow key navigation.",
+      "implementation_needed": [
+        "Add tabIndex={0} to nav buttons",
+        "Implement arrow key navigation between nav items",
+        "Add proper ARIA current='page' (already present)",
+        "Add focus-visible styles (need verification)"
+      ]
+    },
+    {
+      "requirement_id": "REQ-122",
+      "category": "UI-General",
+      "description": "Step navigation (back/forward) with state preservation",
+      "priority": "P1",
+      "status": "PARTIAL",
+      "gap_description": "Navigation between screens works via sidebar and setScreen(). State is preserved in Zustand store DURING session, but NO persistence on page refresh. Back/forward is conceptual (via sidebar) not explicit UI buttons.",
+      "code_locations": [
+        "proagentic-dfx/src/lib/stores/app-store.ts:1-107",
+        "proagentic-dfx/src/components/Layout.tsx:147-151"
+      ],
+      "effort_hours": 4,
+      "legal_violation": false,
+      "notes": "State preservation works in-session but not across refreshes. Need to add Zustand persist middleware.",
+      "implementation_needed": [
+        "Add zustand persist middleware to app-store.ts",
+        "Serialize/deserialize state to localStorage",
+        "Handle migration for schema changes"
+      ]
+    },
+    {
+      "requirement_id": "REQ-123",
+      "category": "UI-General",
+      "description": "Data persistence across steps and sessions (LocalStorage, auto-save every 30s, session recovery)",
+      "priority": "P1",
+      "status": "GAP",
+      "gap_description": "ZERO persistence implemented. Zustand store uses basic create() with NO persist middleware. No auto-save. No localStorage. All data lost on page refresh. RTM incorrectly marked as 'Addressed'.",
+      "code_locations": [
+        "proagentic-dfx/src/lib/stores/app-store.ts:64-106 (no persist middleware)"
+      ],
+      "effort_hours": 16,
+      "legal_violation": false,
+      "notes": "CRITICAL for professional tool - users lose all work on browser close. Requires Zustand persist middleware + auto-save logic + version handling.",
+      "implementation_needed": [
+        "Add zustand/middleware persist",
+        "Configure localStorage with versioning",
+        "Add auto-save every 30s (debounced)",
+        "Add 'unsaved changes' warning on navigation",
+        "Implement session recovery on mount"
+      ]
+    },
+    {
+      "requirement_id": "REQ-190",
+      "category": "LLM-Engagement",
+      "description": "Conversational requirements gathering with LLM dialogue",
+      "priority": "P1",
+      "status": "PARTIAL",
+      "gap_description": "Chat interface implemented (RequirementsChat.tsx) with multi-turn conversation. Context passed to API. However, NO fallback to manual form if LLM unavailable. Limited to ~5 turns based on message history array.",
+      "code_locations": [
+        "proagentic-dfx/src/components/RequirementsChat.tsx:41-88",
+        "proagentic-dfx/src/components/RequirementsChat.tsx:56-60 (context handling)"
+      ],
+      "effort_hours": 8,
+      "legal_violation": false,
+      "notes": "Good implementation but needs fallback handling for LLM failures. Should degrade gracefully to manual form entry.",
+      "implementation_needed": [
+        "Add error handling for LLM API failures",
+        "Implement fallback to manual form on timeout/error",
+        "Add retry logic with exponential backoff",
+        "Show manual entry option if LLM unavailable"
+      ]
+    },
+    {
+      "requirement_id": "REQ-191",
+      "category": "LLM-Engagement",
+      "description": "Multi-turn dialogue for requirement clarification (5+ turn context)",
+      "priority": "P1",
+      "status": "PARTIAL",
+      "gap_description": "Context window passes all previous messages to API (line 57-60). However, no explicit turn limit enforcement or progressive refinement indicators. Works but not explicitly constrained to 5+ turns.",
+      "code_locations": [
+        "proagentic-dfx/src/components/RequirementsChat.tsx:56-65"
+      ],
+      "effort_hours": 4,
+      "legal_violation": false,
+      "notes": "Implementation allows unlimited turns which exceeds requirement. Could add turn counter UI for transparency.",
+      "implementation_needed": [
+        "Add turn counter UI (optional enhancement)",
+        "Show conversation progress indicator",
+        "Add 'too long conversation' warning after 10+ turns"
+      ]
+    },
+    {
+      "requirement_id": "REQ-192",
+      "category": "LLM-Engagement",
+      "description": "Proactive follow-up questions from AI",
+      "priority": "P1",
+      "status": "GAP",
+      "gap_description": "NO proactive questioning implemented. AI responds to user input but does not autonomously ask clarifying questions. Would require backend enhancement to generate proactive prompts.",
+      "code_locations": [
+        "N/A - not implemented"
+      ],
+      "effort_hours": 12,
+      "legal_violation": false,
+      "notes": "Requires AI model enhancement to generate context-aware questions. Backend API change needed.",
+      "implementation_needed": [
+        "Backend: Add proactive question generation",
+        "Frontend: Handle proactive question display",
+        "Add timeout after 30s of inactivity",
+        "Provide skip/manual entry option"
+      ]
+    },
+    {
+      "requirement_id": "REQ-193",
+      "category": "LLM-Engagement",
+      "description": "Real-time requirement extraction display",
+      "priority": "P1",
+      "status": "ADDRESSED",
+      "gap_description": "Fully implemented. Right panel (lines 281-401) shows live extracted requirements. Updates as API responds with new data. Field highlighting via confidence badges.",
+      "code_locations": [
+        "proagentic-dfx/src/components/RequirementsChat.tsx:281-401",
+        "proagentic-dfx/src/components/RequirementsChat.tsx:73-76 (state update)"
+      ],
+      "effort_hours": 0,
+      "legal_violation": false,
+      "notes": "Well implemented. RTM status corrected from Gap to Addressed."
+    },
+    {
+      "requirement_id": "REQ-194",
+      "category": "LLM-Engagement",
+      "description": "Confidence indicators for parsed requirements (<80% needs review)",
+      "priority": "P2",
+      "status": "ADDRESSED",
+      "gap_description": "Fully implemented. Confidence badges (High/Medium/Low) shown with color coding. High >= 0.8, Medium >= 0.5, Low < 0.5. Visual indicators with icons.",
+      "code_locations": [
+        "proagentic-dfx/src/components/RequirementsChat.tsx:122-145 (getConfidenceBadge)",
+        "proagentic-dfx/src/components/RequirementsChat.tsx:325 (badge display)"
+      ],
+      "effort_hours": 0,
+      "legal_violation": false,
+      "notes": "Excellent implementation with clear visual hierarchy. RTM corrected to Addressed."
+    },
+    {
+      "requirement_id": "REQ-195",
+      "category": "LLM-Engagement",
+      "description": "Edit and confirm parsed requirements inline",
+      "priority": "P1",
+      "status": "ADDRESSED",
+      "gap_description": "Fully implemented. Inline editing with Save/Cancel buttons (lines 339-363). Edit state tracked per field. Version tracking via confidence reset to 1.0 on manual edit.",
+      "code_locations": [
+        "proagentic-dfx/src/components/RequirementsChat.tsx:95-113 (edit handlers)",
+        "proagentic-dfx/src/components/RequirementsChat.tsx:339-363 (edit UI)"
+      ],
+      "effort_hours": 0,
+      "legal_violation": false,
+      "notes": "Professional implementation. RTM corrected to Addressed."
+    },
+    {
+      "requirement_id": "REQ-196",
+      "category": "LLM-Engagement",
+      "description": "Suggested requirements from application context",
+      "priority": "P2",
+      "status": "ADDRESSED",
+      "gap_description": "Implemented as suggestion chips (lines 235-250). Click to send suggestion as message. Context-aware based on API response.",
+      "code_locations": [
+        "proagentic-dfx/src/components/RequirementsChat.tsx:235-250",
+        "proagentic-dfx/src/components/RequirementsChat.tsx:76 (setSuggestions)",
+        "proagentic-dfx/src/components/RequirementsChat.tsx:90-93 (click handler)"
+      ],
+      "effort_hours": 0,
+      "legal_violation": false,
+      "notes": "Good UX. RTM corrected to Addressed."
+    },
+    {
+      "requirement_id": "REQ-276",
+      "category": "UI-Accessibility",
+      "description": "WCAG 2.1 AA compliance for all interactive elements (ARIA labels, focus visible, 4.5:1 contrast)",
+      "priority": "P0",
+      "status": "PARTIAL",
+      "gap_description": "PARTIAL COMPLIANCE - LEGAL RISK. Some ARIA labels present (AppHeader, RequirementsChat, Layout nav, ExportScreen components) but NOT comprehensive. Grep found only 60 aria- attributes across entire codebase. Many components lack labels. Focus rings implemented (focus:ring-2). Color contrast likely OK (needs audit). Missing: comprehensive ARIA labeling, landmark roles on all regions, form labels.",
+      "code_locations": [
+        "proagentic-dfx/src/components/AppHeader.tsx:70,80 (aria-label)",
+        "proagentic-dfx/src/components/Layout.tsx:230,318 (role attributes)",
+        "proagentic-dfx/src/components/RequirementsChat.tsx:184,256,272 (roles/labels)",
+        "proagentic-dfx/src/components/ui/Button.tsx:73-74 (aria-busy, aria-disabled)",
+        "MISSING: Many components lack ARIA labels"
+      ],
+      "effort_hours": 24,
+      "legal_violation": true,
+      "notes": "P0 LEGAL REQUIREMENT. Partial implementation is NOT COMPLIANT. Need comprehensive ARIA audit. Accessibility tests exist (accessibility.test.tsx) but implementation incomplete. Must add: aria-label/aria-labelledby to all interactive elements, role attributes, aria-live regions for dynamic content.",
+      "implementation_needed": [
+        "Comprehensive ARIA audit of all components",
+        "Add aria-label to all buttons without text",
+        "Add role='region' with aria-label to all major sections",
+        "Add aria-live='polite' to loading/status areas",
+        "Add aria-describedby to form inputs",
+        "Run axe-core audit tool",
+        "Fix all violations before production"
+      ]
+    },
+    {
+      "requirement_id": "REQ-277",
+      "category": "UI-Accessibility",
+      "description": "Complete keyboard navigation for all functionality (Tab, Escape, Enter, focus trap in modals)",
+      "priority": "P0",
+      "status": "GAP",
+      "gap_description": "CRITICAL GAP - LEGAL VIOLATION. Keyboard shortcuts implemented (useKeyboardShortcuts.ts) for 1-9 navigation, ? for help, Esc for close. HOWEVER: 3D viewer (CADTankViewer.tsx) is MOUSE-ONLY - no keyboard controls for rotation/zoom. This violates WCAG. onKeyPress found only 4 times in codebase. Tab navigation unclear for many components. Focus trap not verified in modals.",
+      "code_locations": [
+        "proagentic-dfx/src/lib/hooks/useKeyboardShortcuts.ts:1-84 (main shortcuts)",
+        "proagentic-dfx/src/components/cad/CADTankViewer.tsx (MOUSE-ONLY - violation)",
+        "proagentic-dfx/src/components/Layout.tsx:153-157 (shortcuts integrated)"
+      ],
+      "effort_hours": 32,
+      "legal_violation": true,
+      "notes": "P0 LEGAL REQUIREMENT. 3D viewer must support keyboard controls or provide alternative. Need: arrow keys for rotation, +/- for zoom, Tab through layer toggles, keyboard section view control. Modal focus traps need verification.",
+      "implementation_needed": [
+        "Add keyboard controls to 3D viewer (CRITICAL)",
+        "Arrow keys: rotate camera",
+        "PageUp/PageDown: zoom",
+        "Tab through view controls",
+        "Add focus trap to all modals",
+        "Ensure Tab order is logical",
+        "Add 'keyboard navigation mode' indicator",
+        "Provide text alternative/data table for 3D view"
+      ]
+    },
+    {
+      "requirement_id": "REQ-291",
+      "category": "UI-ErrorHandling",
+      "description": "Graceful error boundaries preventing app crashes (React Error Boundary on each screen, friendly message, recovery, logging)",
+      "priority": "P0",
+      "status": "GAP",
+      "gap_description": "ZERO error boundaries implemented. No ErrorBoundary components found in codebase. JS errors crash entire app. This is a CRITICAL P0 gap. Try/catch exists in some async calls but no component-level error boundaries.",
+      "code_locations": [
+        "N/A - not implemented",
+        "proagentic-dfx/src/app/page.tsx:15-44 (no error boundary wrapper)"
+      ],
+      "effort_hours": 16,
+      "legal_violation": true,
+      "notes": "P0 LEGAL REQUIREMENT for production app. Must implement React Error Boundaries. Each screen should have boundary. Need: class component with componentDidCatch, friendly error UI, 'Try Again' button, error logging to console/service.",
+      "implementation_needed": [
+        "Create ErrorBoundary class component",
+        "Wrap each screen in <ErrorBoundary>",
+        "Add error logging (console.error + optional Sentry)",
+        "Friendly error message UI",
+        "Retry/Reset button",
+        "Report error button (optional)",
+        "Test by throwing errors in components"
+      ]
+    },
+    {
+      "requirement_id": "REQ-296",
+      "category": "UI-Professional",
+      "description": "Undo/redo capability (50+ action stack, Ctrl+Z/Ctrl+Y, covers parameter changes/selections/view configs)",
+      "priority": "P0",
+      "status": "GAP",
+      "gap_description": "NOT IMPLEMENTED. No undo/redo system exists. Zustand store has no history tracking. Command pattern not implemented. Critical for professional engineering tool where users need to experiment safely.",
+      "code_locations": [
+        "N/A - not implemented",
+        "proagentic-dfx/src/lib/stores/app-store.ts (no history middleware)"
+      ],
+      "effort_hours": 32,
+      "legal_violation": false,
+      "notes": "P0 for professional tool. Need command pattern with action history stack. Track: parameter changes, design selections, view configs, material selections. Implement with Zustand middleware or separate undo store.",
+      "implementation_needed": [
+        "Create undo middleware for Zustand",
+        "Implement command pattern (Action interface)",
+        "Track actions: setRequirements, toggleDesign, setXMetric, etc.",
+        "Add undo/redo actions to store",
+        "Bind Ctrl+Z / Ctrl+Y keyboard shortcuts",
+        "Add undo/redo buttons to UI (optional)",
+        "Limit stack to 50 actions (circular buffer)",
+        "Show undo/redo state in UI"
+      ]
+    },
+    {
+      "requirement_id": "REQ-297",
+      "category": "UI-Professional",
+      "description": "Auto-save with conflict resolution (5s debounce, version conflict modal, manual save option)",
+      "priority": "P1",
+      "status": "GAP",
+      "gap_description": "NOT IMPLEMENTED. No auto-save functionality. No debounced persistence. Users lose work on browser close/refresh. Related to REQ-123 (persistence).",
+      "code_locations": [
+        "N/A - not implemented",
+        "proagentic-dfx/src/lib/stores/app-store.ts (no auto-save logic)"
+      ],
+      "effort_hours": 16,
+      "legal_violation": false,
+      "notes": "Depends on REQ-123 persistence. Need: useEffect with debounced save, localStorage versioning, conflict detection if multiple tabs, manual save button (optional).",
+      "implementation_needed": [
+        "Add auto-save hook (useAutoSave)",
+        "Debounce store changes (5s)",
+        "Save to localStorage with timestamp",
+        "Detect conflicts (compare timestamps)",
+        "Show conflict modal: Keep Local / Use Remote / Merge",
+        "Add 'Last saved' timestamp in UI",
+        "Manual save button (optional)"
+      ]
+    },
+    {
+      "requirement_id": "REQ-298",
+      "category": "UI-Professional",
+      "description": "Session persistence across browser tabs (SharedWorker or localStorage sync, no conflicts)",
+      "priority": "P2",
+      "status": "GAP",
+      "gap_description": "NOT IMPLEMENTED. No cross-tab sync. Each tab has independent state. Can lead to conflicts if user opens multiple tabs.",
+      "code_locations": [
+        "N/A - not implemented"
+      ],
+      "effort_hours": 20,
+      "legal_violation": false,
+      "notes": "P2 - nice to have. Use BroadcastChannel API or localStorage events. Sync state changes across tabs. Show warning if state diverges.",
+      "implementation_needed": [
+        "Add BroadcastChannel for tab communication",
+        "Broadcast state changes to other tabs",
+        "Listen for state changes from other tabs",
+        "Detect conflicts (timestamp comparison)",
+        "Show conflict warning in UI",
+        "Provide 'Sync Now' option"
+      ]
+    },
+    {
+      "requirement_id": "REQ-299",
+      "category": "UI-Professional",
+      "description": "Keyboard shortcuts for power users (15 primary shortcuts, ? shows palette, customizable)",
+      "priority": "P1",
+      "status": "PARTIAL",
+      "gap_description": "PARTIAL - shortcuts exist but limited. Current: 1-9 for navigation, ? for help, Esc for close (useKeyboardShortcuts.ts). Help overlay shows shortcuts (Layout.tsx:174-220). Missing: customization, shortcuts for actions (save, export, undo, redo, search). Only ~10 shortcuts, need 15+.",
+      "code_locations": [
+        "proagentic-dfx/src/lib/hooks/useKeyboardShortcuts.ts:10-20 (defined shortcuts)",
+        "proagentic-dfx/src/components/Layout.tsx:174-220 (help overlay)"
+      ],
+      "effort_hours": 12,
+      "legal_violation": false,
+      "notes": "Good foundation but needs expansion. Add: Ctrl+S (save), Ctrl+E (export), Ctrl+F (search), Ctrl+Z/Y (undo/redo), Ctrl+K (command palette). Make customizable via settings.",
+      "implementation_needed": [
+        "Add more shortcuts: Ctrl+S, Ctrl+E, Ctrl+F, Ctrl+Z, Ctrl+Y",
+        "Create command palette (Ctrl+K)",
+        "Add shortcut customization in settings",
+        "Store custom shortcuts in localStorage",
+        "Update help overlay dynamically",
+        "Add visual shortcut hints on buttons (optional)"
+      ]
+    },
+    {
+      "requirement_id": "REQ-300",
+      "category": "UI-Professional",
+      "description": "Context-sensitive help system integrated in app (? icon on all fields, F1 opens panel, HelpProvider mounted)",
+      "priority": "P1",
+      "status": "PARTIAL",
+      "gap_description": "Components exist but NOT INTEGRATED. HelpProvider.tsx, HelpPanel.tsx, HelpIcon.tsx, glossary.ts, topics.ts all created. However, HelpProvider is NOT mounted in app layout. Help panel opens in Layout.tsx but uses simple overlay (lines 167-224) not the full HelpProvider system. ? icon triggers simple help, not context-sensitive.",
+      "code_locations": [
+        "proagentic-dfx/src/components/help/HelpProvider.tsx:1-163 (exists, not mounted)",
+        "proagentic-dfx/src/components/help/HelpPanel.tsx (exists, not used)",
+        "proagentic-dfx/src/lib/help/topics.ts (content exists)",
+        "proagentic-dfx/src/components/Layout.tsx:167-224 (simple help overlay, not full system)",
+        "proagentic-dfx/src/app/layout.tsx:20-34 (HelpProvider NOT wrapped)"
+      ],
+      "effort_hours": 12,
+      "legal_violation": false,
+      "notes": "RTM marked as Gap but should be PARTIAL - components exist. Just need integration. Wrap app in HelpProvider, replace simple overlay with HelpPanel component, add HelpIcon to fields, bind F1 key.",
+      "implementation_needed": [
+        "Wrap app in <HelpProvider> (layout.tsx)",
+        "Replace Layout help overlay with <HelpPanel>",
+        "Add <HelpIcon topicId='...'> to form fields",
+        "Bind F1 key to openTopic()",
+        "Add context-sensitive topic IDs to components",
+        "Test help navigation and search"
+      ]
+    },
+    {
+      "requirement_id": "REQ-PERF-001",
+      "category": "Performance",
+      "description": "Requirements to Pareto under 60 seconds (60s ± 5s target, 90s hard limit)",
+      "priority": "P1",
+      "status": "PARTIAL",
+      "gap_description": "PARTIAL - depends on backend performance. Frontend loads data via getOptimizationResults() API call. No performance metrics tracked on frontend. Mock server likely achieves 60s but production unclear. Frontend doesn't enforce timeout or show performance metrics.",
+      "code_locations": [
+        "proagentic-dfx/src/components/screens/ParetoScreen.tsx:42-59 (API call)",
+        "proagentic-dfx/src/lib/api/client.ts (no timeout enforcement)"
+      ],
+      "effort_hours": 8,
+      "legal_violation": false,
+      "notes": "Frontend should track and display performance. Add: timer from requirements submit to Pareto display, show elapsed time, log metrics, enforce 90s timeout with error.",
+      "implementation_needed": [
+        "Add performance timer (Date.now() at start)",
+        "Track time to Pareto data load",
+        "Display elapsed time in UI",
+        "Log performance metrics to console",
+        "Enforce 90s timeout on API call",
+        "Show performance warning if >60s",
+        "Add performance dashboard (optional)"
+      ]
+    },
+    {
+      "requirement_id": "NEW-001",
+      "category": "UI-Global",
+      "description": "Application header with branding and global actions (logo, app name, user menu, help, search)",
+      "priority": "P0",
+      "status": "ADDRESSED",
+      "gap_description": "IMPLEMENTED. AppHeader.tsx exists with logo, app name ('H2 Tank Designer - Pro Edition'), help button, settings button. Breadcrumb shows current workflow step. Missing: user menu (placeholder exists), global search (separate requirement NEW-003).",
+      "code_locations": [
+        "proagentic-dfx/src/components/AppHeader.tsx:1-88",
+        "proagentic-dfx/src/components/Layout.tsx:164 (mounted)"
+      ],
+      "effort_hours": 4,
+      "legal_violation": false,
+      "notes": "RTM marked as Gap but is ADDRESSED. Good implementation. Minor enhancement: add user menu dropdown.",
+      "implementation_needed": [
+        "Add user menu dropdown (optional)",
+        "Add avatar/initials",
+        "Add logout option",
+        "Add profile link"
+      ]
+    },
+    {
+      "requirement_id": "NEW-002",
+      "category": "UI-Global",
+      "description": "Error boundary components preventing full app crashes (wrapper per screen, friendly message, retry, logging)",
+      "priority": "P0",
+      "status": "GAP",
+      "gap_description": "Same as REQ-291. ZERO error boundaries. P0 CRITICAL.",
+      "code_locations": [
+        "N/A - not implemented"
+      ],
+      "effort_hours": 16,
+      "legal_violation": true,
+      "notes": "Duplicate of REQ-291. See REQ-291 for details."
+    },
+    {
+      "requirement_id": "NEW-003",
+      "category": "UI-Global",
+      "description": "Global search functionality across all content (header search, Ctrl+K shortcut)",
+      "priority": "P1",
+      "status": "GAP",
+      "gap_description": "NOT IMPLEMENTED. No global search. No search input in header. Would need to index: requirements, materials, designs, compliance data.",
+      "code_locations": [
+        "N/A - not implemented"
+      ],
+      "effort_hours": 24,
+      "legal_violation": false,
+      "notes": "Enterprise standard feature. Need: search index, fuzzy search, Ctrl+K command palette, search results modal.",
+      "implementation_needed": [
+        "Add search input to AppHeader",
+        "Create search index (client-side or API)",
+        "Implement fuzzy search (fuse.js)",
+        "Ctrl+K opens command palette",
+        "Show search results modal",
+        "Navigate to result on click",
+        "Recent searches history"
+      ]
+    },
+    {
+      "requirement_id": "NEW-004",
+      "category": "UI-Global",
+      "description": "Session recovery after crash or browser close (recovery prompt, last 5 sessions, clear option)",
+      "priority": "P0",
+      "status": "GAP",
+      "gap_description": "NOT IMPLEMENTED. No session recovery. Depends on REQ-123 persistence. Users lose all work on crash/close. P0 CRITICAL for professional tool.",
+      "code_locations": [
+        "N/A - not implemented"
+      ],
+      "effort_hours": 16,
+      "legal_violation": false,
+      "notes": "Depends on persistence (REQ-123). Store session snapshots to localStorage. On mount, check for saved sessions. Show recovery modal if found.",
+      "implementation_needed": [
+        "Save session snapshots to localStorage",
+        "Store last 5 sessions with timestamps",
+        "On app mount, check for saved sessions",
+        "Show recovery modal with session list",
+        "Load selected session",
+        "Clear old sessions option",
+        "Auto-recovery after crash detection"
+      ]
+    },
+    {
+      "requirement_id": "NEW-005",
+      "category": "UI-Global",
+      "description": "Breadcrumb navigation showing current location (below header, clickable, current highlighted)",
+      "priority": "P1",
+      "status": "PARTIAL",
+      "gap_description": "PARTIAL - breadcrumb exists in AppHeader (lines 52-61) showing 'Workflow > [Current Screen]'. However, NOT clickable - just display. Need to make breadcrumb clickable to navigate back.",
+      "code_locations": [
+        "proagentic-dfx/src/components/AppHeader.tsx:52-61"
+      ],
+      "effort_hours": 4,
+      "legal_violation": false,
+      "notes": "Good foundation. Just needs click handlers to navigate workflow steps.",
+      "implementation_needed": [
+        "Make breadcrumb items clickable",
+        "Add onClick handlers",
+        "Show full path (Requirements > Pareto > Viewer)",
+        "Disable current item (non-clickable)",
+        "Add separators between items"
+      ]
+    },
+    {
+      "requirement_id": "NEW-006",
+      "category": "UI-Global",
+      "description": "Dark mode toggle with system preference detection (toggle in settings, prefers-color-scheme, persisted)",
+      "priority": "P1",
+      "status": "GAP",
+      "gap_description": "NOT IMPLEMENTED. No dark mode support. Tailwind config likely supports dark: classes but not enabled. No theme provider. Accessibility feature for low-light environments.",
+      "code_locations": [
+        "N/A - not implemented",
+        "proagentic-dfx/src/app/globals.css (no dark mode classes)",
+        "proagentic-dfx/tailwind.config.ts (likely supports dark mode)"
+      ],
+      "effort_hours": 20,
+      "legal_violation": false,
+      "notes": "Tailwind dark mode requires darkMode: 'class' in config. Need ThemeProvider, toggle button, localStorage persistence, system preference detection.",
+      "implementation_needed": [
+        "Enable Tailwind dark mode (darkMode: 'class')",
+        "Create ThemeProvider context",
+        "Add dark: variants to all components",
+        "Detect prefers-color-scheme media query",
+        "Add toggle button in settings",
+        "Persist theme choice to localStorage",
+        "Add theme transition animations"
+      ]
+    },
+    {
+      "requirement_id": "NEW-007",
+      "category": "UI-Global",
+      "description": "Notification system for alerts and updates (toast notifications, center, dismissable, persist important)",
+      "priority": "P1",
+      "status": "GAP",
+      "gap_description": "NOT IMPLEMENTED. No toast/notification system. Alert components exist (Alert.tsx) but no global notification manager. Need toast queue, auto-dismiss, notification center.",
+      "code_locations": [
+        "proagentic-dfx/src/components/ui/Alert.tsx (static alert component)",
+        "N/A - no toast system"
+      ],
+      "effort_hours": 16,
+      "legal_violation": false,
+      "notes": "Need notification manager with queue. Use sonner, react-hot-toast, or custom. Add notification center for history.",
+      "implementation_needed": [
+        "Install sonner or react-hot-toast",
+        "Create NotificationProvider",
+        "Add useNotification hook",
+        "Toast positions (top-right, bottom-right)",
+        "Auto-dismiss after 5s (configurable)",
+        "Notification center (bell icon)",
+        "Persist important notifications",
+        "Mark as read/unread"
+      ]
+    },
+    {
+      "requirement_id": "NEW-008",
+      "category": "UI-Global",
+      "description": "Recent projects list on dashboard (last 10 projects, click to load, delete, sort by date)",
+      "priority": "P1",
+      "status": "GAP",
+      "gap_description": "NOT IMPLEMENTED. No project concept. No dashboard. No project history. Would need project save/load system.",
+      "code_locations": [
+        "N/A - not implemented"
+      ],
+      "effort_hours": 24,
+      "legal_violation": false,
+      "notes": "Requires project management system. Save entire app state as 'project'. Store in localStorage or backend. Show list on load.",
+      "implementation_needed": [
+        "Add project save/load functionality",
+        "Save full state snapshot with metadata (name, date, preview)",
+        "Store last 10 projects in localStorage/IndexedDB",
+        "Create project selection modal on app load",
+        "Show project thumbnails/previews",
+        "Sort by date (newest first)",
+        "Delete project option",
+        "Rename project option"
+      ]
+    },
+    {
+      "requirement_id": "NEW-009",
+      "category": "UI-Global",
+      "description": "User preferences persistence across sessions (settings to localStorage, export/import)",
+      "priority": "P1",
+      "status": "GAP",
+      "gap_description": "NOT IMPLEMENTED. No user settings. Theme, shortcuts, UI preferences not persisted. Related to dark mode (NEW-006) and keyboard shortcuts (REQ-299).",
+      "code_locations": [
+        "N/A - not implemented",
+        "proagentic-dfx/src/components/help/HelpProvider.tsx:40-59 (localStorage example for recent topics)"
+      ],
+      "effort_hours": 12,
+      "legal_violation": false,
+      "notes": "Create settings context. Store: theme, shortcuts, units, language, etc. Persist to localStorage. Export/import as JSON.",
+      "implementation_needed": [
+        "Create SettingsProvider context",
+        "Define settings schema (theme, units, shortcuts, etc.)",
+        "Save to localStorage on change",
+        "Load on mount",
+        "Add settings modal/page",
+        "Export settings as JSON",
+        "Import settings from JSON",
+        "Reset to defaults option"
+      ]
+    },
+    {
+      "requirement_id": "NEW-010",
+      "category": "Export",
+      "description": "Export presets for common configurations (save settings, named presets, quick apply)",
+      "priority": "P1",
+      "status": "GAP",
+      "gap_description": "NOT IMPLEMENTED. Export screen exists but no preset system. Each export requires manual configuration.",
+      "code_locations": [
+        "proagentic-dfx/src/components/screens/ExportScreen.tsx (no presets)",
+        "N/A - preset system not implemented"
+      ],
+      "effort_hours": 12,
+      "legal_violation": false,
+      "notes": "Add preset dropdown to export screen. Save current settings as preset. Quick apply saved presets.",
+      "implementation_needed": [
+        "Add export presets state",
+        "Create preset save modal",
+        "Store presets in localStorage",
+        "Preset dropdown in ExportScreen",
+        "Quick apply button",
+        "Edit/delete preset options",
+        "Default presets (e.g., 'Full Report', 'Quick Summary')"
+      ]
+    },
+    {
+      "requirement_id": "NEW-011",
+      "category": "3D-View",
+      "description": "View state persistence across navigation (rotation/zoom saved, restore on return, per-design state)",
+      "priority": "P1",
+      "status": "GAP",
+      "gap_description": "NOT IMPLEMENTED. 3D view resets on navigation away and back. Camera position not saved. Users lose their view configuration.",
+      "code_locations": [
+        "proagentic-dfx/src/components/cad/CADTankViewer.tsx (no state persistence)",
+        "N/A - view state not saved"
+      ],
+      "effort_hours": 8,
+      "legal_violation": false,
+      "notes": "Save camera position (rotation, zoom, target) to store. Restore on mount. Store per-design if viewing multiple designs.",
+      "implementation_needed": [
+        "Add viewState to app-store (camera rotation, zoom, target)",
+        "Save on camera change (debounced)",
+        "Restore on CADTankViewer mount",
+        "Store per-design (keyed by design ID)",
+        "Add 'Reset View' button",
+        "Persist to localStorage (optional)"
+      ]
+    },
+    {
+      "requirement_id": "NEW-012",
+      "category": "UI-General",
+      "description": "Batch operations for multi-item actions (select multiple designs, batch export, batch delete)",
+      "priority": "P1",
+      "status": "PARTIAL",
+      "gap_description": "PARTIAL - multi-select exists for comparison (selectedDesigns in app-store). Can select up to 3 designs. However, no batch export or batch delete. Only batch compare.",
+      "code_locations": [
+        "proagentic-dfx/src/lib/stores/app-store.ts:33-38 (selectedDesigns)",
+        "proagentic-dfx/src/components/screens/ParetoScreen.tsx:22-23 (MAX_SELECTIONS = 3)"
+      ],
+      "effort_hours": 12,
+      "legal_violation": false,
+      "notes": "Selection system exists. Add batch actions: Export Selected, Delete Selected, Add to Favorites, etc.",
+      "implementation_needed": [
+        "Add batch action toolbar when items selected",
+        "Batch export (export all selected as zip)",
+        "Batch delete (with confirmation)",
+        "Select all / Deselect all buttons",
+        "Show selection count",
+        "Keyboard shortcuts for select all (Ctrl+A)"
+      ]
+    },
+    {
+      "requirement_id": "NEW-013",
+      "category": "Export",
+      "description": "Print-friendly views with proper stylesheets (print CSS, clean layout, page breaks, headers/footers)",
+      "priority": "P2",
+      "status": "GAP",
+      "gap_description": "NOT IMPLEMENTED. No print stylesheets. Browser default print will be messy. Professional reports need print CSS.",
+      "code_locations": [
+        "N/A - not implemented",
+        "proagentic-dfx/src/app/globals.css (no @media print)"
+      ],
+      "effort_hours": 8,
+      "legal_violation": false,
+      "notes": "Add @media print CSS. Hide navigation, optimize for A4, page breaks, print headers/footers.",
+      "implementation_needed": [
+        "Add @media print CSS to globals.css",
+        "Hide navigation/sidebar on print",
+        "Optimize layout for A4 page",
+        "Add page breaks (page-break-after: always)",
+        "Add print headers (company name, date)",
+        "Add print footers (page numbers)",
+        "Print preview button",
+        "Test with Chrome print preview"
+      ]
+    }
+  ],
+
+  "summary_by_priority": {
+    "P0": {
+      "total": 7,
+      "addressed": 1,
+      "partial": 1,
+      "gap": 5,
+      "legal_violations": 3,
+      "requirements": [
+        "REQ-276 (PARTIAL - LEGAL VIOLATION)",
+        "REQ-277 (GAP - LEGAL VIOLATION)",
+        "REQ-291 (GAP - LEGAL VIOLATION)",
+        "REQ-296 (GAP)",
+        "NEW-001 (ADDRESSED)",
+        "NEW-002 (GAP - duplicate REQ-291)",
+        "NEW-004 (GAP)"
+      ]
+    },
+    "P1": {
+      "total": 18,
+      "addressed": 3,
+      "partial": 6,
+      "gap": 9,
+      "requirements": [
+        "REQ-121 (PARTIAL)",
+        "REQ-122 (PARTIAL)",
+        "REQ-123 (GAP)",
+        "REQ-190 (PARTIAL)",
+        "REQ-191 (PARTIAL)",
+        "REQ-192 (GAP)",
+        "REQ-193 (ADDRESSED)",
+        "REQ-195 (ADDRESSED)",
+        "REQ-297 (GAP)",
+        "REQ-299 (PARTIAL)",
+        "REQ-300 (PARTIAL)",
+        "REQ-PERF-001 (PARTIAL)",
+        "NEW-003 (GAP)",
+        "NEW-005 (PARTIAL)",
+        "NEW-006 (GAP)",
+        "NEW-007 (GAP)",
+        "NEW-008 (GAP)",
+        "NEW-009 (GAP)",
+        "NEW-010 (GAP)",
+        "NEW-011 (GAP)",
+        "NEW-012 (PARTIAL)"
+      ]
+    },
+    "P2": {
+      "total": 5,
+      "addressed": 2,
+      "partial": 0,
+      "gap": 3,
+      "requirements": [
+        "REQ-194 (ADDRESSED)",
+        "REQ-196 (ADDRESSED)",
+        "REQ-298 (GAP)",
+        "NEW-013 (GAP)"
+      ]
+    }
+  },
+
+  "implementation_roadmap": {
+    "phase_1_legal_compliance": {
+      "priority": "CRITICAL - P0 Legal Violations",
+      "effort_hours": 72,
+      "requirements": [
+        "REQ-276: Complete ARIA audit and implementation",
+        "REQ-277: Add keyboard navigation to 3D viewer",
+        "REQ-291/NEW-002: Implement error boundaries"
+      ],
+      "notes": "Must complete before production release. Legal risk."
+    },
+    "phase_2_professional_foundation": {
+      "priority": "HIGH - P0 Professional Features",
+      "effort_hours": 64,
+      "requirements": [
+        "REQ-296: Undo/redo system",
+        "REQ-123: Data persistence",
+        "NEW-004: Session recovery"
+      ],
+      "notes": "Essential for professional engineering tool. Users expect these features."
+    },
+    "phase_3_help_and_usability": {
+      "priority": "HIGH - P1 User Experience",
+      "effort_hours": 52,
+      "requirements": [
+        "REQ-300: Integrate help system (components exist)",
+        "REQ-297: Auto-save",
+        "REQ-121: Complete keyboard navigation",
+        "NEW-005: Clickable breadcrumbs"
+      ],
+      "notes": "Improves usability and reduces support burden."
+    },
+    "phase_4_power_user_features": {
+      "priority": "MEDIUM - P1 Advanced Features",
+      "effort_hours": 96,
+      "requirements": [
+        "NEW-003: Global search",
+        "NEW-006: Dark mode",
+        "NEW-007: Notification system",
+        "REQ-299: Expand keyboard shortcuts",
+        "NEW-008: Recent projects",
+        "NEW-009: User preferences"
+      ],
+      "notes": "Professional polish features. Important for power users."
+    },
+    "phase_5_workflow_enhancements": {
+      "priority": "LOW - P1/P2 Nice-to-have",
+      "effort_hours": 60,
+      "requirements": [
+        "REQ-192: Proactive AI questions",
+        "NEW-010: Export presets",
+        "NEW-011: View state persistence",
+        "NEW-012: Batch operations",
+        "REQ-298: Cross-tab sync",
+        "NEW-013: Print stylesheets"
+      ],
+      "notes": "Workflow optimizations. Can be deferred."
+    }
+  },
+
+  "total_implementation_effort": {
+    "hours": 344,
+    "weeks": 8.6,
+    "person_months": 2.0,
+    "notes": "Assumes 40-hour weeks, single developer. Can parallelize some tasks."
+  },
+
+  "recommendations": {
+    "immediate_actions": [
+      "1. STOP production deployment until P0 legal violations fixed (REQ-276, REQ-277, REQ-291)",
+      "2. Run comprehensive ARIA audit with axe-core",
+      "3. Implement error boundaries on all screens",
+      "4. Add keyboard controls to 3D viewer or provide alternative",
+      "5. Create compliance test suite for WCAG 2.1 AA"
+    ],
+    "short_term_priorities": [
+      "1. Implement undo/redo system (REQ-296)",
+      "2. Add data persistence with auto-save (REQ-123, REQ-297)",
+      "3. Integrate existing help system (REQ-300)",
+      "4. Complete keyboard navigation (REQ-121, REQ-277)",
+      "5. Add session recovery (NEW-004)"
+    ],
+    "architecture_improvements": [
+      "1. Add Zustand persist middleware for state persistence",
+      "2. Create undo middleware with command pattern",
+      "3. Implement global error boundary hierarchy",
+      "4. Add accessibility testing to CI/CD",
+      "5. Create component library documentation with a11y guidelines"
+    ],
+    "testing_requirements": [
+      "1. Automated WCAG 2.1 AA testing (axe-core in CI)",
+      "2. Keyboard navigation test suite",
+      "3. Screen reader testing (NVDA, JAWS)",
+      "4. Error boundary crash testing",
+      "5. Cross-browser accessibility testing"
+    ]
+  }
+}

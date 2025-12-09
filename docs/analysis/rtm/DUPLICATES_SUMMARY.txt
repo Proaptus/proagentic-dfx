@@ -1,0 +1,128 @@
+================================================================================
+DUPLICATE REQUIREMENTS - QUICK REFERENCE
+H2 Tank Designer RTM Analysis - 2025-12-08
+================================================================================
+
+CRITICAL DUPLICATES TO MERGE IMMEDIATELY:
+--------------------------------------------------------------------------------
+
+1. MONTE CARLO MEGA-DUPLICATE (7 requirements)
+   REQ-076, 160, 239, 261, 356, 379, 388
+   → Same Monte Carlo reliability analysis across UI, backend, mock, export
+   → MERGE into single composite requirement
+
+2. STEP EXPORT (3 requirements)
+   REQ-111, 214, 314
+   → Same STEP file export feature
+   → MERGE into single requirement with UI/frontend/backend layers noted
+
+3. STEP IMPORT (2 requirements)
+   REQ-213, 313
+   → Same STEP file import feature
+   → MERGE into single requirement
+
+4. PARAMETRIC GEOMETRY UPDATES (2 requirements)
+   REQ-216, 323
+   → Identical descriptions, different categories
+   → MERGE or clarify layer separation
+
+5. MULTI-BODY ASSEMBLY (2 requirements)
+   REQ-220, 320
+   → Same assembly visualization feature
+   → MERGE or clarify layer separation
+
+6. B-REP SOLID MODELING (2 requirements)
+   REQ-212, 311
+   → Same B-rep modeling for different CAD kernels
+   → MERGE or note CAD kernel choice
+
+7. NETTING THEORY SIZING (2 requirements)
+   REQ-023, 353
+   → 92% similar, one is display, one is calculation
+   → CLARIFY relationship or merge
+
+8. PERFORMANCE TARGET (2 requirements)
+   REQ-130, 359
+   → Identical "Requirements to Pareto under 60 seconds" target
+   → MERGE
+
+9. BACKEND SCHEMA COMPLIANCE (2 requirements)
+   REQ-186, 187
+   → Request vs response schemas (should be single requirement)
+   → MERGE
+
+10. SURROGATE CONFIDENCE (2 requirements)
+    REQ-090, 176
+    → Display vs data schema for same feature
+    → MERGE or note relationship
+
+11. TEST PLAN (2 requirements)
+    REQ-094, 177
+    → Feature vs data schema for same feature
+    → MERGE or note relationship
+
+================================================================================
+STRESS CALCULATION PAIRS (Keep separate but note dependencies):
+--------------------------------------------------------------------------------
+
+REQ-042 (Hoop stress distribution) ← depends on → REQ-231 (σ_hoop = PR/t calc)
+REQ-043 (Axial stress distribution) ← depends on → REQ-232 (σ_axial = PR/2t calc)
+REQ-041 (von Mises contour plot) ← depends on → REQ-157 (stress field generation)
+REQ-047 (Tsai-Wu display) ← depends on → REQ-235 (Tsai-Wu calculation)
+
+These are valid separations (display vs physics engine), but should note dependencies.
+
+================================================================================
+API ENDPOINT OVER-SPECIFICATION (Review for scope overlap):
+--------------------------------------------------------------------------------
+
+GET /api/designs/{id}/geometry    - 26 requirements ⚠️
+GET /api/designs/{id}/stress      - 21 requirements ⚠️
+GET /api/designs/{id}/reliability - 16 requirements ⚠️ (includes MC dups)
+POST /api/requirements/parse      - 9 requirements
+GET /api/materials                - 9 requirements
+GET /api/designs/{id}/thermal     - 9 requirements
+
+→ Verify these represent distinct features, not duplicate specifications
+
+================================================================================
+STATISTICS:
+--------------------------------------------------------------------------------
+
+Total Requirements:           430
+Duplicates/Overlaps Found:    ~78 requirements (18%)
+Critical Merge Candidates:    11 groups
+High-Risk API Endpoints:      6 endpoints with 15+ requirements
+
+ESTIMATED REDUCTION POTENTIAL:
+- Merging critical duplicates:    -30 to -40 requirements
+- Noting dependencies properly:   Keeps separate but clarifies relationships
+- Final count estimate:           ~390-400 distinct requirements
+
+================================================================================
+RECOMMENDED ACTIONS:
+--------------------------------------------------------------------------------
+
+IMMEDIATE (This Sprint):
+1. Merge Monte Carlo duplicates (7 → 1)
+2. Merge STEP export/import (5 → 2)
+3. Merge backend schema requirements (2 → 1)
+4. Merge performance target (2 → 1)
+
+NEXT SPRINT:
+5. Review CAD duplicates (parametric, assembly, B-rep)
+6. Clarify stress calculation dependencies
+7. Review high-volume API endpoints for scope overlap
+
+PROCESS IMPROVEMENT:
+8. Adopt layered requirement pattern (UI + Backend + Data + Mock in one requirement)
+9. Add explicit dependency notation for display ← calculation relationships
+10. Category guidelines for Physics-Core vs FEA-Results vs Simulator
+
+================================================================================
+FILES:
+  - DUPLICATE_REQUIREMENTS_REPORT.md (detailed analysis)
+  - DUPLICATES_SUMMARY.txt (this file)
+  - analyze_duplicates.py (automated detection script)
+  - detailed_duplicates.py (functional duplicate analyzer)
+================================================================================

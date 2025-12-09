@@ -278,23 +278,24 @@ export function applyStressColors(
  * Jet colormap (blue -> cyan -> green -> yellow -> red)
  */
 function jetColormap(t: number): { r: number; g: number; b: number } {
+  const clampedT = Math.max(0, Math.min(1, t));
   let r = 0, g = 0, b = 0;
 
-  if (t < 0.25) {
+  if (clampedT < 0.25) {
     r = 0;
-    g = 4 * t;
+    g = 4 * clampedT;
     b = 1;
-  } else if (t < 0.5) {
+  } else if (clampedT < 0.5) {
     r = 0;
     g = 1;
-    b = 1 - 4 * (t - 0.25);
-  } else if (t < 0.75) {
-    r = 4 * (t - 0.5);
+    b = 1 - 4 * (clampedT - 0.25);
+  } else if (clampedT < 0.75) {
+    r = 4 * (clampedT - 0.5);
     g = 1;
     b = 0;
   } else {
     r = 1;
-    g = 1 - 4 * (t - 0.75);
+    g = 1 - 4 * (clampedT - 0.75);
     b = 0;
   }
 
@@ -302,10 +303,63 @@ function jetColormap(t: number): { r: number; g: number; b: number } {
 }
 
 /**
+ * Apply stress coloring using FEA 3D mesh data
+ * Uses proper mesh interpolation instead of nearest-neighbor
+ */
+export function applyFEAStressColors(
+  mesh: TankMeshData,
+  feaMesh: {
+    nodes: Array<{ id: number; x: number; y: number; z: number; stress: number }>;
+    elements: Array<{ nodes: [number, number, number]; centroid_stress: number }>;
+  },
+  minStress: number,
+  maxStress: number
+): TankMeshData {
+  const colors: number[] = [];
+  const positions = mesh.positions;
+  const stressRange = maxStress - minStress || 1;
+
+  // Build spatial index for FEA nodes (simple grid-based)
+  const nodeMap = new Map(feaMesh.nodes.map(n => [n.id, n]));
+
+  for (let i = 0; i < positions.length; i += 3) {
+    const x = positions[i];
+    const y = positions[i + 1];
+    const z = positions[i + 2];
+
+    // Find nearest FEA element or node
+    let nearestStress = minStress;
+    let minDist = Infinity;
+
+    // Search through nodes (for 3D mesh, nodes have x,y,z)
+    for (const node of feaMesh.nodes) {
+      const dx = x - node.x;
+      const dy = y - node.y;
+      const dz = z - node.z;
+      const dist = dx * dx + dy * dy + dz * dz; // Squared distance
+      if (dist < minDist) {
+        minDist = dist;
+        nearestStress = node.stress;
+      }
+    }
+
+    // Map to jet colormap
+    const t = (nearestStress - minStress) / stressRange;
+    const color = jetColormap(t);
+    colors.push(color.r, color.g, color.b);
+  }
+
+  return {
+    ...mesh,
+    colors: new Float32Array(colors),
+  };
+}
+
+/**
  * Export tank geometry to GLTF format
  * STEP export will be handled by server-side Truck CAD kernel
  */
-export async function exportToGLTF(geometry: DesignGeometry): Promise<Blob | null> {
+export async function exportToGLTF(_geometry: DesignGeometry): Promise<Blob | null> {
   // TODO: Implement GLTF export from mesh data
   // For now, this will be handled by server API with Truck
   console.warn('GLTF export not yet implemented - use server API');

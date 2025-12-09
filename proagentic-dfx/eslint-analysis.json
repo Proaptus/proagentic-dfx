@@ -1,0 +1,402 @@
+{
+  "summary": {
+    "totalProblems": 24,
+    "errors": 3,
+    "warnings": 21,
+    "filesAffected": 11,
+    "timestamp": "2025-12-09",
+    "command": "npm run lint"
+  },
+  "ruleBreakdown": {
+    "@typescript-eslint/no-unused-vars": {
+      "count": 18,
+      "severity": "warning",
+      "description": "Variables, imports, or parameters defined but never used"
+    },
+    "jsx-a11y/role-supports-aria-props": {
+      "count": 2,
+      "severity": "warning",
+      "description": "Using aria-selected on button role elements"
+    },
+    "react/no-unescaped-entities": {
+      "count": 2,
+      "severity": "error",
+      "description": "Unescaped quotes in JSX text"
+    },
+    "@typescript-eslint/no-explicit-any": {
+      "count": 1,
+      "severity": "error",
+      "description": "Explicit any type used"
+    }
+  },
+  "fileViolations": {
+    "src/components/ui/GlobalSearch.tsx": {
+      "total": 4,
+      "errors": 2,
+      "warnings": 2,
+      "violations": [
+        {
+          "line": 309,
+          "column": 17,
+          "rule": "jsx-a11y/role-supports-aria-props",
+          "severity": "warning",
+          "message": "The attribute aria-selected is not supported by the role button"
+        },
+        {
+          "line": 342,
+          "column": 73,
+          "rule": "react/no-unescaped-entities",
+          "severity": "error",
+          "message": "`\"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`"
+        },
+        {
+          "line": 342,
+          "column": 81,
+          "rule": "react/no-unescaped-entities",
+          "severity": "error",
+          "message": "`\"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`"
+        },
+        {
+          "line": 367,
+          "column": 23,
+          "rule": "jsx-a11y/role-supports-aria-props",
+          "severity": "warning",
+          "message": "The attribute aria-selected is not supported by the role button"
+        }
+      ]
+    },
+    "src/__tests__/components/AnalysisScreen.test.tsx": {
+      "total": 3,
+      "errors": 0,
+      "warnings": 3,
+      "violations": [
+        {
+          "line": 7,
+          "column": 35,
+          "rule": "@typescript-eslint/no-unused-vars",
+          "severity": "warning",
+          "message": "'within' is defined but never used"
+        },
+        {
+          "line": 292,
+          "column": 13,
+          "rule": "@typescript-eslint/no-unused-vars",
+          "severity": "warning",
+          "message": "'user' is assigned a value but never used"
+        },
+        {
+          "line": 429,
+          "column": 13,
+          "rule": "@typescript-eslint/no-unused-vars",
+          "severity": "warning",
+          "message": "'user' is assigned a value but never used"
+        }
+      ]
+    },
+    "src/__tests__/components/StandardCard.test.tsx": {
+      "total": 3,
+      "errors": 0,
+      "warnings": 3,
+      "violations": [
+        {
+          "line": 112,
+          "column": 13,
+          "rule": "@typescript-eslint/no-unused-vars",
+          "severity": "warning",
+          "message": "'container' is assigned a value but never used"
+        },
+        {
+          "line": 128,
+          "column": 13,
+          "rule": "@typescript-eslint/no-unused-vars",
+          "severity": "warning",
+          "message": "'container' is assigned a value but never used"
+        },
+        {
+          "line": 144,
+          "column": 13,
+          "rule": "@typescript-eslint/no-unused-vars",
+          "severity": "warning",
+          "message": "'container' is assigned a value but never used"
+        }
+      ]
+    },
+    "src/components/charts/GeodesicPathChart.tsx": {
+      "total": 2,
+      "errors": 0,
+      "warnings": 2,
+      "violations": [
+        {
+          "line": 54,
+          "column": 3,
+          "rule": "@typescript-eslint/no-unused-vars",
+          "severity": "warning",
+          "message": "'numSteps' is assigned a value but never used"
+        },
+        {
+          "line": 89,
+          "column": 9,
+          "rule": "@typescript-eslint/no-unused-vars",
+          "severity": "warning",
+          "message": "'bossTheta' is assigned a value but never used"
+        }
+      ]
+    },
+    "src/lib/notifications/examples.ts": {
+      "total": 2,
+      "errors": 0,
+      "warnings": 2,
+      "violations": [
+        {
+          "line": 59,
+          "column": 12,
+          "rule": "@typescript-eslint/no-unused-vars",
+          "severity": "warning",
+          "message": "'error' is defined but never used"
+        },
+        {
+          "line": 188,
+          "column": 14,
+          "rule": "@typescript-eslint/no-unused-vars",
+          "severity": "warning",
+          "message": "'error' is defined but never used"
+        }
+      ]
+    },
+    "src/__tests__/components/ExportScreen.test.tsx": {
+      "total": 1,
+      "errors": 0,
+      "warnings": 1,
+      "violations": [
+        {
+          "line": 15,
+          "column": 35,
+          "rule": "@typescript-eslint/no-unused-vars",
+          "severity": "warning",
+          "message": "'within' is defined but never used"
+        }
+      ]
+    },
+    "src/__tests__/components/RequirementsChat.test.tsx": {
+      "total": 1,
+      "errors": 1,
+      "warnings": 0,
+      "violations": [
+        {
+          "line": 20,
+          "column": 66,
+          "rule": "@typescript-eslint/no-explicit-any",
+          "severity": "error",
+          "message": "Unexpected any. Specify a different type"
+        }
+      ]
+    },
+    "src/__tests__/components/compare/ComparisonCard.test.tsx": {
+      "total": 1,
+      "errors": 0,
+      "warnings": 1,
+      "violations": [
+        {
+          "line": 6,
+          "column": 26,
+          "rule": "@typescript-eslint/no-unused-vars",
+          "severity": "warning",
+          "message": "'waitFor' is defined but never used"
+        }
+      ]
+    },
+    "src/__tests__/lib/utils/comparison.test.ts": {
+      "total": 1,
+      "errors": 0,
+      "warnings": 1,
+      "violations": [
+        {
+          "line": 56,
+          "column": 11,
+          "rule": "@typescript-eslint/no-unused-vars",
+          "severity": "warning",
+          "message": "'average' is assigned a value but never used"
+        }
+      ]
+    },
+    "src/components/Layout.tsx": {
+      "total": 1,
+      "errors": 0,
+      "warnings": 1,
+      "violations": [
+        {
+          "line": 26,
+          "column": 11,
+          "rule": "@typescript-eslint/no-unused-vars",
+          "severity": "warning",
+          "message": "'NavItem' is defined but never used"
+        }
+      ]
+    },
+    "src/components/RequirementsChat.tsx": {
+      "total": 1,
+      "errors": 0,
+      "warnings": 1,
+      "violations": [
+        {
+          "line": 77,
+          "column": 14,
+          "rule": "@typescript-eslint/no-unused-vars",
+          "severity": "warning",
+          "message": "'error' is defined but never used"
+        }
+      ]
+    },
+    "src/components/compliance/ComplianceStatCard.tsx": {
+      "total": 1,
+      "errors": 0,
+      "warnings": 1,
+      "violations": [
+        {
+          "line": 12,
+          "column": 15,
+          "rule": "@typescript-eslint/no-unused-vars",
+          "severity": "warning",
+          "message": "'ReactNode' is defined but never used"
+        }
+      ]
+    },
+    "src/components/compliance/StandardCard.tsx": {
+      "total": 1,
+      "errors": 0,
+      "warnings": 1,
+      "violations": [
+        {
+          "line": 11,
+          "column": 10,
+          "rule": "@typescript-eslint/no-unused-vars",
+          "severity": "warning",
+          "message": "'Badge' is defined but never used"
+        }
+      ]
+    },
+    "src/components/screens/ValidationScreen.tsx": {
+      "total": 1,
+      "errors": 0,
+      "warnings": 1,
+      "violations": [
+        {
+          "line": 74,
+          "column": 10,
+          "rule": "@typescript-eslint/no-unused-vars",
+          "severity": "warning",
+          "message": "'sentryLoading' is assigned a value but never used"
+        }
+      ]
+    },
+    "src/components/ui/ThemeToggle.tsx": {
+      "total": 1,
+      "errors": 0,
+      "warnings": 1,
+      "violations": [
+        {
+          "line": 79,
+          "column": 28,
+          "rule": "@typescript-eslint/no-unused-vars",
+          "severity": "warning",
+          "message": "'resolvedTheme' is assigned a value but never used"
+        }
+      ]
+    }
+  },
+  "fixBatches": [
+    {
+      "id": "batch-1-critical-errors",
+      "priority": "high",
+      "estimatedTime": "15 minutes",
+      "files": [
+        "src/components/ui/GlobalSearch.tsx",
+        "src/__tests__/components/RequirementsChat.test.tsx"
+      ],
+      "issues": 3,
+      "description": "Fix critical errors that block build/CI"
+    },
+    {
+      "id": "batch-2-test-files",
+      "priority": "medium",
+      "estimatedTime": "20 minutes",
+      "files": [
+        "src/__tests__/components/AnalysisScreen.test.tsx",
+        "src/__tests__/components/ExportScreen.test.tsx",
+        "src/__tests__/components/StandardCard.test.tsx",
+        "src/__tests__/components/compare/ComparisonCard.test.tsx",
+        "src/__tests__/lib/utils/comparison.test.ts"
+      ],
+      "issues": 9,
+      "description": "Fix unused variables in test files"
+    },
+    {
+      "id": "batch-3-component-files",
+      "priority": "medium",
+      "estimatedTime": "25 minutes",
+      "files": [
+        "src/components/Layout.tsx",
+        "src/components/RequirementsChat.tsx",
+        "src/components/charts/GeodesicPathChart.tsx",
+        "src/components/compliance/ComplianceStatCard.tsx",
+        "src/components/compliance/StandardCard.tsx",
+        "src/components/screens/ValidationScreen.tsx"
+      ],
+      "issues": 7,
+      "description": "Fix unused variables in component files"
+    },
+    {
+      "id": "batch-4-ui-components",
+      "priority": "medium",
+      "estimatedTime": "20 minutes",
+      "files": [
+        "src/components/ui/GlobalSearch.tsx",
+        "src/components/ui/ThemeToggle.tsx"
+      ],
+      "issues": 3,
+      "description": "Fix UI component issues (aria + unused vars)"
+    },
+    {
+      "id": "batch-5-library-files",
+      "priority": "low",
+      "estimatedTime": "10 minutes",
+      "files": [
+        "src/lib/notifications/examples.ts"
+      ],
+      "issues": 2,
+      "description": "Fix unused variables in library files"
+    }
+  ],
+  "topViolatingFiles": [
+    {
+      "file": "src/components/ui/GlobalSearch.tsx",
+      "violations": 4,
+      "errors": 2,
+      "warnings": 2
+    },
+    {
+      "file": "src/__tests__/components/AnalysisScreen.test.tsx",
+      "violations": 3,
+      "errors": 0,
+      "warnings": 3
+    },
+    {
+      "file": "src/__tests__/components/StandardCard.test.tsx",
+      "violations": 3,
+      "errors": 0,
+      "warnings": 3
+    },
+    {
+      "file": "src/components/charts/GeodesicPathChart.tsx",
+      "violations": 2,
+      "errors": 0,
+      "warnings": 2
+    },
+    {
+      "file": "src/lib/notifications/examples.ts",
+      "violations": 2,
+      "errors": 0,
+      "warnings": 2
+    }
+  ]
+}

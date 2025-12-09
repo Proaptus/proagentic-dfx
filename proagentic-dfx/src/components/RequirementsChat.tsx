@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { sendChatMessage } from '@/lib/api/client';
-import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import type { ChatMessage, ExtractedRequirement, ChatRequirementsResponse } from '@/lib/types';
 import { Send, CheckCircle, Edit2, AlertTriangle, Sparkles, MessageSquare, Bot, User } from 'lucide-react';
@@ -11,15 +11,21 @@ interface RequirementsChatProps {
   onComplete?: (requirements: Record<string, unknown>) => void;
 }
 
+// Generate unique IDs for messages using a counter
+let messageIdCounter = 1;
+const generateMessageId = () => `msg-${messageIdCounter++}`;
+
+const INITIAL_MESSAGE: ChatMessage = {
+  id: '1',
+  role: 'assistant',
+  content: "Hello! I'm your hydrogen tank engineering assistant. I'll help you define the requirements for your tank design. Let's start with the basics - what type of application is this tank for? (e.g., automotive, aviation, stationary storage)",
+  timestamp: Date.now(),
+};
+
+const MIN_REQUIREMENTS_COUNT = 5;
+
 export function RequirementsChat({ onComplete }: RequirementsChatProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: '1',
-      role: 'assistant',
-      content: "Hello! I'm your hydrogen tank engineering assistant. I'll help you define the requirements for your tank design. Let's start with the basics - what type of application is this tank for? (e.g., automotive, aviation, stationary storage)",
-      timestamp: Date.now(),
-    },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [extractedRequirements, setExtractedRequirements] = useState<ExtractedRequirement[]>([]);
@@ -28,20 +34,20 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
   const [editValue, setEditValue] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollToBottom]);
 
-  const handleSendMessage = async (messageText?: string) => {
+  const handleSendMessage = useCallback(async (messageText?: string) => {
     const textToSend = messageText || inputValue.trim();
     if (!textToSend || isLoading) return;
 
     const userMessage: ChatMessage = {
-      id: Date.now().toString(),
+      id: generateMessageId(),
       role: 'user',
       content: textToSend,
       timestamp: Date.now(),
@@ -63,7 +69,7 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
       )) as ChatRequirementsResponse;
 
       const assistantMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
+        id: generateMessageId(),
         role: 'assistant',
         content: response.message,
         timestamp: Date.now(),
@@ -72,9 +78,9 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
       setMessages((prev) => [...prev, assistantMessage]);
       setExtractedRequirements(response.extracted_requirements);
       setSuggestions(response.suggestions || []);
-    } catch (error) {
+    } catch {
       const errorMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
+        id: generateMessageId(),
         role: 'assistant',
         content: 'Sorry, I encountered an error. Please try again.',
         timestamp: Date.now(),
@@ -83,19 +89,19 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [inputValue, isLoading, messages]);
 
-  const handleSuggestionClick = (suggestion: string) => {
+  const handleSuggestionClick = useCallback((suggestion: string) => {
     handleSendMessage(suggestion);
     setSuggestions([]);
-  };
+  }, [handleSendMessage]);
 
-  const handleEditRequirement = (field: string, currentValue: string | number | null) => {
+  const handleEditRequirement = useCallback((field: string, currentValue: string | number | null) => {
     setEditingField(field);
     setEditValue(currentValue?.toString() || '');
-  };
+  }, []);
 
-  const handleSaveEdit = (field: string) => {
+  const handleSaveEdit = useCallback((field: string) => {
     setExtractedRequirements((prev) =>
       prev.map((req) =>
         req.field === field ? { ...req, value: editValue, confidence: 1.0 } : req
@@ -103,41 +109,53 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
     );
     setEditingField(null);
     setEditValue('');
-  };
+  }, [editValue]);
 
-  const handleCancelEdit = () => {
+  const handleCancelEdit = useCallback(() => {
     setEditingField(null);
     setEditValue('');
-  };
+  }, []);
 
-  const getConfidenceBadge = (confidence: number) => {
+  const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  }, [handleSendMessage]);
+
+  const getConfidenceBadge = useCallback((confidence: number) => {
     if (confidence >= 0.8) {
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">
-          <CheckCircle size={12} />
+          <CheckCircle size={12} aria-hidden="true" />
           High
         </span>
       );
     } else if (confidence >= 0.5) {
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded-full">
-          <AlertTriangle size={12} />
+          <AlertTriangle size={12} aria-hidden="true" />
           Medium
         </span>
       );
     } else {
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-100 text-orange-700 text-xs rounded-full">
-          <AlertTriangle size={12} />
+          <AlertTriangle size={12} aria-hidden="true" />
           Low
         </span>
       );
     }
-  };
+  }, []);
 
-  const canConfirm = extractedRequirements.filter((req) => req.value !== null).length >= 5;
+  const completedRequirementsCount = useMemo(
+    () => extractedRequirements.filter((req) => req.value !== null).length,
+    [extractedRequirements]
+  );
 
-  const handleConfirmRequirements = () => {
+  const canConfirm = completedRequirementsCount >= MIN_REQUIREMENTS_COUNT;
+
+  const handleConfirmRequirements = useCallback(() => {
     const requirements: Record<string, unknown> = {};
     extractedRequirements.forEach((req) => {
       if (req.value !== null) {
@@ -145,22 +163,29 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
       }
     });
     onComplete?.(requirements);
-  };
+  }, [extractedRequirements, onComplete]);
 
   return (
-    <div className="h-[calc(100vh-12rem)] flex gap-6">
+    <div className="flex-1 min-h-0 flex gap-6">
       {/* Left Panel - Chat */}
       <div className="flex-1 flex flex-col">
-        <Card className="flex-1 flex flex-col">
-          <CardHeader className="border-b">
-            <div className="flex items-center gap-2">
-              <MessageSquare className="text-blue-600" size={24} />
-              <CardTitle>Requirements Conversation</CardTitle>
+        <Card padding="none" className="flex-1 flex flex-col">
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 bg-blue-50 rounded-lg" aria-hidden="true">
+                <MessageSquare className="text-blue-600" size={20} />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Requirements Conversation</h3>
+                <p className="text-sm text-gray-500 mt-0.5">
+                  Chat with AI to define specifications
+                </p>
+              </div>
             </div>
-          </CardHeader>
+          </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4" role="log" aria-label="Chat messages" aria-live="polite">
             {messages.map((msg) => (
               <div
                 key={msg.id}
@@ -168,7 +193,7 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
               >
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                   msg.role === 'user' ? 'bg-blue-500' : 'bg-gray-200'
-                }`}>
+                }`} aria-hidden="true">
                   {msg.role === 'user' ? (
                     <User className="w-4 h-4 text-white" />
                   ) : (
@@ -184,7 +209,7 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
                 >
                   {msg.role === 'assistant' && (
                     <div className="flex items-center gap-2 mb-1">
-                      <Sparkles size={14} className="text-blue-600" />
+                      <Sparkles size={14} className="text-blue-600" aria-hidden="true" />
                       <span className="text-xs font-medium text-blue-600">
                         Engineering Assistant
                       </span>
@@ -196,11 +221,11 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
             ))}
             {isLoading && (
               <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0" aria-hidden="true">
                   <Bot className="w-4 h-4 text-gray-600" />
                 </div>
                 <div className="bg-gray-100 rounded-lg px-4 py-2">
-                  <div className="flex gap-1">
+                  <div className="flex gap-1" aria-label="Loading">
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
@@ -216,11 +241,11 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
             <div className="px-4 pb-3">
               <p className="text-xs text-gray-500 mb-2">Suggested responses:</p>
               <div className="flex flex-wrap gap-2">
-                {suggestions.map((suggestion, idx) => (
+                {suggestions.map((suggestion) => (
                   <button
-                    key={idx}
+                    key={`suggestion-${suggestion}`}
                     onClick={() => handleSuggestionClick(suggestion)}
-                    className="px-3 py-1.5 text-sm bg-blue-50 text-blue-700 rounded-full hover:bg-blue-100 transition-colors"
+                    className="px-3 py-1.5 text-sm bg-blue-50 text-blue-700 rounded-full hover:bg-blue-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   >
                     {suggestion}
                   </button>
@@ -230,55 +255,69 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
           )}
 
           {/* Input */}
-          <div className="border-t p-4">
-            <div className="flex gap-2">
+          <div className="border-t border-gray-100 p-4 bg-gray-50">
+            <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex gap-3">
+              <label htmlFor="chat-input" className="sr-only">Type your response</label>
               <input
+                id="chat-input"
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                onKeyPress={handleKeyPress}
                 placeholder="Type your response..."
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-shadow"
                 disabled={isLoading}
               />
               <Button
+                type="submit"
                 onClick={() => handleSendMessage()}
                 disabled={!inputValue.trim() || isLoading}
-                className="px-4"
+                className="px-6"
+                aria-label="Send message"
               >
                 <Send size={18} />
               </Button>
-            </div>
+            </form>
           </div>
         </Card>
       </div>
 
       {/* Right Panel - Extracted Requirements */}
       <div className="w-96">
-        <Card className="h-full flex flex-col">
-          <CardHeader className="border-b">
-            <CardTitle>Extracted Requirements</CardTitle>
-            <p className="text-sm text-gray-500 mt-1">
-              Live-updating as you chat
-            </p>
-          </CardHeader>
+        <Card padding="none" className="h-full flex flex-col">
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 bg-purple-50 rounded-lg" aria-hidden="true">
+                <Sparkles className="text-purple-600" size={20} />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Extracted Requirements</h3>
+                <p className="text-sm text-gray-500 mt-0.5">
+                  Live-updating as you chat
+                </p>
+              </div>
+            </div>
+          </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          <div className="flex-1 overflow-y-auto p-6 space-y-3">
             {extractedRequirements.length === 0 ? (
-              <div className="text-center py-8 text-gray-400">
-                <Sparkles size={48} className="mx-auto mb-2 opacity-50" />
-                <p className="text-sm">
-                  Requirements will appear here as you chat
+              <div className="flex flex-col items-center justify-center h-full text-center py-12">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4" aria-hidden="true">
+                  <Sparkles size={28} className="text-gray-400" />
+                </div>
+                <h4 className="text-sm font-medium text-gray-700 mb-1">No Requirements Yet</h4>
+                <p className="text-sm text-gray-500 max-w-xs">
+                  Requirements will be extracted and displayed here as you chat with the assistant
                 </p>
               </div>
             ) : (
               extractedRequirements.map((req) => (
                 <div
                   key={req.field}
-                  className={`p-3 rounded-lg border ${
+                  className={`p-4 rounded-lg border transition-all ${
                     req.value !== null
-                      ? 'bg-white border-gray-200'
-                      : 'bg-gray-50 border-gray-100'
+                      ? 'bg-white border-gray-200 shadow-sm'
+                      : 'bg-gray-50 border-gray-200'
                   }`}
                 >
                   <div className="flex items-start justify-between mb-2">
@@ -293,7 +332,8 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
                     {req.editable && req.value !== null && editingField !== req.field && (
                       <button
                         onClick={() => handleEditRequirement(req.field, req.value)}
-                        className="text-blue-600 hover:text-blue-700 p-1"
+                        className="text-blue-600 hover:text-blue-700 p-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+                        aria-label={`Edit ${req.label}`}
                       >
                         <Edit2 size={14} />
                       </button>
@@ -302,7 +342,9 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
 
                   {editingField === req.field ? (
                     <div className="space-y-2">
+                      <label htmlFor={`edit-${req.field}`} className="sr-only">Edit {req.label}</label>
                       <input
+                        id={`edit-${req.field}`}
                         type="text"
                         value={editValue}
                         onChange={(e) => setEditValue(e.target.value)}
@@ -312,13 +354,13 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleSaveEdit(req.field)}
-                          className="flex-1 px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                          className="flex-1 px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                         >
                           Save
                         </button>
                         <button
                           onClick={handleCancelEdit}
-                          className="flex-1 px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                          className="flex-1 px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                         >
                           Cancel
                         </button>
@@ -342,19 +384,18 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
           </div>
 
           {extractedRequirements.length > 0 && (
-            <div className="border-t p-4">
+            <div className="border-t border-gray-100 p-6 bg-gray-50">
               <Button
                 onClick={handleConfirmRequirements}
                 disabled={!canConfirm}
-                className="w-full"
+                className="w-full justify-center"
               >
                 <CheckCircle size={18} className="mr-2" />
-                Confirm Requirements ({extractedRequirements.filter((r) => r.value !== null).length}/
-                {extractedRequirements.length})
+                Confirm Requirements ({completedRequirementsCount}/{extractedRequirements.length})
               </Button>
               {!canConfirm && (
-                <p className="text-xs text-gray-500 text-center mt-2">
-                  At least 5 requirements needed
+                <p className="text-xs text-gray-600 text-center mt-3">
+                  At least {MIN_REQUIREMENTS_COUNT} requirements needed to proceed
                 </p>
               )}
             </div>

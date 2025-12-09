@@ -2,6 +2,11 @@
 name: ProSWARM Neural Orchestration
 description: Master orchestration skill for ProSWARM Neural MCP - ALWAYS use this for complex tasks requiring decomposition, planning, or parallel execution. Leverages 70+ specialized neural models for instant task classification and orchestration with 84.8% SWE-Bench accuracy. Use when user asks to solve problems, fix bugs, implement features, or any multi-step task. PRIMARY workflow engine for ALL development work.
 allowed-tools: Task, mcp__proswarm-neural__*, TodoWrite, Read, Grep, Glob, Edit, Write, Bash
+supersedes:
+  - ".claude/hooks/PROSWARM_ORCHESTRATION_ENFORCEMENT.md"
+  - ".claude/hooks/README_PROSWARM_ORCHESTRATION.md"
+  - ".claude/hooks/PROSWARM_PHILOSOPHY.md"
+last_verified_at: 2025-12-09
 ---
 
 # ProSWARM Neural Orchestration - PRIMARY Workflow Engine

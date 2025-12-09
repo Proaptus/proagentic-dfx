@@ -1,0 +1,5 @@
+=== ESLint Analysis Summary ===
+
+Total Problems: 24 (3 errors, 21 warnings)
+
+Files with violations: 11

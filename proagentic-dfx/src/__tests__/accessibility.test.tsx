@@ -9,7 +9,7 @@
  * Tests WCAG 2.1 AA compliance across all UI components
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { axe, toHaveNoViolations } from 'jest-axe';
 import { Button } from '@/components/ui/Button';
@@ -18,6 +18,7 @@ import { LoadingState } from '@/components/ui/LoadingState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
 import { useAnnounce } from '@/hooks/useAnnounce';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useState } from 'react';
 import { vi } from 'vitest';
 
@@ -78,7 +79,7 @@ describe('Accessibility Tests - WCAG 2.1 AA Compliance', () => {
     });
 
     it('should render all variants without accessibility violations', async () => {
-      const variants = ['primary', 'secondary', 'outline', 'ghost', 'danger'] as const;
+      const variants = ['primary', 'secondary', 'outline', 'ghost', 'destructive'] as const;
 
       for (const variant of variants) {
         const { container } = render(<Button variant={variant}>{variant}</Button>);
@@ -338,11 +339,11 @@ describe('Accessibility Tests - WCAG 2.1 AA Compliance', () => {
       expect(button.className).toContain('text-white');
     });
 
-    it('should have sufficient contrast for danger button text', () => {
-      render(<Button variant="danger">Delete</Button>);
+    it('should have sufficient contrast for destructive button text', () => {
+      render(<Button variant="destructive">Delete</Button>);
       const button = screen.getByRole('button');
 
-      // Danger uses design tokens for error color with white text (high contrast)
+      // Destructive uses design tokens for error color with white text (high contrast)
       expect(button.className).toContain('--color-error');
       expect(button.className).toContain('text-white');
     });
@@ -354,6 +355,74 @@ describe('Accessibility Tests - WCAG 2.1 AA Compliance', () => {
       // Secondary uses design tokens for gray-200 with gray-900 (high contrast)
       expect(button.className).toContain('--color-gray-200');
       expect(button.className).toContain('--color-gray-900');
+    });
+  });
+
+  describe('useFocusTrap Hook (REQ-278)', () => {
+    function FocusTrapTestComponent({ active }: { active: boolean }) {
+      const containerRef = useFocusTrap<HTMLDivElement>(active);
+      return (
+        <div ref={containerRef} data-testid="trap-container">
+          <button data-testid="first-button">First</button>
+          <input data-testid="input-field" type="text" placeholder="Input" />
+          <button data-testid="last-button">Last</button>
+        </div>
+      );
+    }
+
+    it('should focus first element when trap activates', () => {
+      render(<FocusTrapTestComponent active={true} />);
+      const firstButton = screen.getByTestId('first-button');
+      expect(document.activeElement).toBe(firstButton);
+    });
+
+    it('should wrap focus from last to first on Tab', () => {
+      render(<FocusTrapTestComponent active={true} />);
+      const container = screen.getByTestId('trap-container');
+      const firstButton = screen.getByTestId('first-button');
+      const lastButton = screen.getByTestId('last-button');
+
+      // Focus the last element
+      lastButton.focus();
+      expect(document.activeElement).toBe(lastButton);
+
+      // Press Tab on last element - should wrap to first
+      fireEvent.keyDown(container, { key: 'Tab', shiftKey: false });
+      expect(document.activeElement).toBe(firstButton);
+    });
+
+    it('should wrap focus from first to last on Shift+Tab', () => {
+      render(<FocusTrapTestComponent active={true} />);
+      const container = screen.getByTestId('trap-container');
+      const firstButton = screen.getByTestId('first-button');
+      const lastButton = screen.getByTestId('last-button');
+
+      // First element is already focused from activation
+      expect(document.activeElement).toBe(firstButton);
+
+      // Press Shift+Tab on first element - should wrap to last
+      fireEvent.keyDown(container, { key: 'Tab', shiftKey: true });
+      expect(document.activeElement).toBe(lastButton);
+    });
+
+    it('should not trap focus when inactive', () => {
+      render(<FocusTrapTestComponent active={false} />);
+      const firstButton = screen.getByTestId('first-button');
+      // Should not auto-focus when inactive
+      expect(document.activeElement).not.toBe(firstButton);
+    });
+
+    it('should handle non-Tab keys without trapping', () => {
+      render(<FocusTrapTestComponent active={true} />);
+      const container = screen.getByTestId('trap-container');
+      const inputField = screen.getByTestId('input-field');
+
+      inputField.focus();
+      expect(document.activeElement).toBe(inputField);
+
+      // Other keys should not affect focus
+      fireEvent.keyDown(container, { key: 'Enter' });
+      expect(document.activeElement).toBe(inputField);
     });
   });
 

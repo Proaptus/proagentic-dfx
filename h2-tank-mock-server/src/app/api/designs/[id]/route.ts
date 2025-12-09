@@ -26,12 +26,22 @@ export async function GET(
     const fileContent = await fs.readFile(filePath, 'utf-8');
     const design = JSON.parse(fileContent);
 
-    // Return summary
+    // Return summary with flat fields for easy access (CompareScreen expects this)
     return NextResponse.json({
       id: design.id,
       trade_off_category: design.trade_off_category,
       recommendation_reason: design.recommendation_reason,
-      summary: design.summary
+      summary: design.summary,
+      // Flat fields for direct access
+      weight_kg: design.summary.weight_kg,
+      burst_pressure_bar: design.summary.burst_pressure_bar,
+      cost_eur: design.summary.cost_eur,
+      p_failure: design.summary.p_failure,
+      fatigue_life_cycles: design.summary.fatigue_life_cycles,
+      permeation_rate: design.summary.permeation_rate,
+      volumetric_efficiency: design.summary.volumetric_efficiency,
+      max_stress_mpa: design.stress?.max_von_mises_mpa || 2127,
+      stress_margin_percent: design.stress?.margin_percent || 20
     }, {
       headers: {
         'Access-Control-Allow-Origin': '*',

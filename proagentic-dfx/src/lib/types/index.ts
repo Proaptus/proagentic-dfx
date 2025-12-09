@@ -195,6 +195,57 @@ export interface StressNode {
   value: number;
 }
 
+// FEA mesh node with ID for element connectivity
+export interface MeshNode {
+  id: number;
+  r: number;  // radial position (mm) - for 2D axisymmetric
+  z: number;  // axial position (mm)
+  stress: number;  // von Mises stress at this node (MPa)
+}
+
+// Triangular mesh element connecting 3 nodes
+export interface MeshElement {
+  id: number;
+  nodes: [number, number, number];  // node IDs forming the triangle
+  region: 'boss' | 'dome' | 'transition' | 'cylinder';
+  centroid_stress: number;  // average stress for element coloring
+}
+
+// Complete FEA mesh for 2D contour visualization
+export interface FEAMesh {
+  nodes: MeshNode[];
+  elements: MeshElement[];
+  bounds: {
+    r_min: number;
+    r_max: number;
+    z_min: number;
+    z_max: number;
+  };
+}
+
+// 3D mesh node for Three.js rendering
+export interface Mesh3DNode {
+  id: number;
+  x: number;
+  y: number;
+  z: number;
+  stress: number;
+}
+
+// Complete 3D FEA mesh for Three.js viewer
+export interface FEAMesh3D {
+  nodes: Mesh3DNode[];
+  elements: MeshElement[];
+  bounds: {
+    x_min: number;
+    x_max: number;
+    y_min: number;
+    y_max: number;
+    z_min: number;
+    z_max: number;
+  };
+}
+
 export interface DesignStress {
   design_id: string;
   load_case: string;
@@ -212,8 +263,18 @@ export interface DesignStress {
     colormap: string;
     min_value: number;
     max_value: number;
-    nodes: StressNode[];
+    nodes: StressNode[];  // legacy format
+    mesh?: FEAMesh;  // 2D axisymmetric FEA mesh
+    mesh3D?: FEAMesh3D;  // 3D mesh for Three.js viewer
   };
+  per_layer_stress?: Array<{
+    layer: number;
+    type: string;
+    hoop: number;
+    axial: number;
+    shear: number;
+  }>;
+  stress_concentration_factor?: number;
 }
 
 export interface DesignFailure {
@@ -229,6 +290,24 @@ export interface DesignFailure {
     max_at_test: { value: number; layer: number; location: string };
     max_at_burst: { value: number; layer: number; location: string };
   };
+  tsai_wu_per_layer?: Array<{
+    layer: number;
+    type: string;
+    value: number;
+    status: string;
+  }>;
+  hashin_indices?: Array<{
+    mode: string;
+    value: number;
+    threshold: number;
+    status: string;
+  }>;
+  progressive_failure_sequence?: Array<{
+    stage: number;
+    pressure: number;
+    event: string;
+    description: string;
+  }>;
 }
 
 export interface DesignThermal {
@@ -247,6 +326,23 @@ export interface DesignThermal {
     location: string;
     components: { hoop_mpa: number; axial_mpa: number; radial_mpa: number };
   };
+  temperature_profile?: Array<{
+    time: number;
+    gas: number;
+    wall: number;
+    liner: number;
+  }>;
+  extreme_temperature_performance?: Array<{
+    condition: string;
+    hoop_strength_pct: number;
+    matrix_brittleness: string;
+    status: string;
+  }>;
+  cte_mismatch?: Array<{
+    component: string;
+    cte: string;
+    stress_contribution: string;
+  }>;
 }
 
 export interface DesignReliability {
@@ -263,6 +359,28 @@ export interface DesignReliability {
     cov: number;
     histogram: Array<{ bin_center: number; count: number }>;
   };
+  sensitivity?: Array<{
+    parameter: string;
+    negative: number;
+    positive: number;
+    color: string;
+  }>;
+  uncertainty_breakdown?: Array<{
+    name: string;
+    value: number;
+    color: string;
+  }>;
+  safety_factor_components?: Array<{
+    component: string;
+    factor: number;
+    description: string;
+  }>;
+  confidence_intervals?: Array<{
+    level: string;
+    lower: number;
+    upper: number;
+    mean: number;
+  }>;
 }
 
 export interface DesignCost {
@@ -272,6 +390,25 @@ export interface DesignCost {
     component: string;
     cost_eur: number;
     percentage: number;
+  }>;
+  volume_sensitivity?: Array<{
+    volume: number;
+    unit_cost: number;
+    label: string;
+  }>;
+  weight_cost_tradeoff?: Array<{
+    weight: number;
+    cost: number;
+    label: string;
+  }>;
+  material_comparison?: Array<{
+    material: string;
+    cost_per_kg: number;
+    relative: number;
+  }>;
+  learning_curve?: Array<{
+    batch: number;
+    cost_multiplier: number;
   }>;
 }
 
@@ -324,6 +461,7 @@ export type Screen =
   | 'compare'
   | 'analysis'
   | 'compliance'
+  | 'validation'
   | 'export'
   | 'sentry';
 
@@ -360,5 +498,5 @@ export interface AppState {
   paretoFront: ParetoDesign[];
   selectedDesigns: string[];
   currentDesign: string | null;
-  analysisTab: 'stress' | 'failure' | 'thermal' | 'reliability' | 'cost';
+  analysisTab: 'stress' | 'failure' | 'thermal' | 'reliability' | 'cost' | 'physics';
 }

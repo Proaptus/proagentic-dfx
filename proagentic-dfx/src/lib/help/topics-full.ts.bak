@@ -1,0 +1,2347 @@
+/**
+ * Help Topics Data
+ * Comprehensive help content for H2 Tank Designer
+ */
+
+export interface HelpTopic {
+  id: string;
+  title: string;
+  category: HelpCategory;
+  content: string;
+  relatedTopics?: string[];
+  keywords: string[];
+}
+
+export type HelpCategory =
+  | 'requirements'
+  | 'tank-types'
+  | 'analysis'
+  | 'standards'
+  | 'physics'
+  | 'workflow'
+  | 'troubleshooting';
+
+export const HELP_TOPICS: HelpTopic[] = [
+  // REQUIREMENTS TOPICS
+  {
+    id: 'working-pressure',
+    title: 'Working Pressure vs Burst Pressure',
+    category: 'requirements',
+    keywords: ['pressure', 'working', 'burst', 'nominal', 'safety'],
+    content: `
+# Working Pressure vs Burst Pressure
+
+## Working Pressure (Nominal Working Pressure - NWP)
+The maximum pressure at which the tank is designed to operate continuously under normal service conditions.
+
+**For automotive hydrogen tanks:**
+- Typically 70 MPa (700 bar, 10,152 psi)
+- Some systems use 35 MPa (350 bar, 5,076 psi)
+
+## Burst Pressure
+The minimum pressure at which the tank must fail (burst) during pressure testing.
+
+**Burst Ratio Requirement:**
+- Burst Pressure = Working Pressure × 2.25
+- For 70 MPa system: Burst ≥ 157.5 MPa
+- For 35 MPa system: Burst ≥ 78.75 MPa
+
+## Why 2.25?
+This safety factor accounts for:
+- Material degradation over time
+- Manufacturing variability
+- Environmental effects (temperature, chemicals)
+- Impact damage during service
+- Stress concentrations at fittings
+
+## Testing
+Burst pressure is verified through hydraulic burst testing of production tanks, not just calculation.
+    `,
+    relatedTopics: ['burst-ratio', 'fatigue-cycles', 'safety-factor'],
+  },
+  {
+    id: 'burst-ratio',
+    title: 'Burst Ratio Explained',
+    category: 'requirements',
+    keywords: ['burst', 'ratio', 'safety', 'factor', '2.25'],
+    content: `
+# Burst Ratio: 2.25 Safety Factor
+
+## Definition
+Burst Ratio = Burst Pressure / Nominal Working Pressure
+
+**Automotive Standard: 2.25**
+
+## Why 2.25 for Automotive?
+This specific value comes from ISO 11119-3 and UN R134:
+
+1. **Service Life Assurance** - Tank must survive 11,000+ cycles
+2. **Impact Resistance** - Survive stones, debris impacts
+3. **Temperature Extremes** - -40°C to +85°C operation
+4. **Aging Buffer** - Material property degradation over 15+ years
+5. **Manufacturing Tolerance** - Accounts for process variations
+
+## Other Industries
+- Industrial gas cylinders: 2.5 - 3.0
+- CNG vehicles: 2.25 - 2.4
+- SCUBA tanks: 2.5 - 3.0
+- Aerospace: 2.0 - 2.5 (tighter controls)
+
+## Testing Verification
+- Hydraulic burst test required
+- Test pressure applied slowly (not shock loading)
+- Failure mode must be fiber fracture, not liner rupture
+    `,
+    relatedTopics: ['working-pressure', 'safety-factor', 'iso-11119-3'],
+  },
+  {
+    id: 'permeation-rate',
+    title: 'Permeation Rate Limits',
+    category: 'requirements',
+    keywords: ['permeation', 'hydrogen', 'leakage', 'liner', '46'],
+    content: `
+# Hydrogen Permeation Rate Limits
+
+## Regulatory Limit
+**≤ 46 NmL/hr/L** (Normal milliliters per hour per liter of tank capacity)
+
+## What is Permeation?
+Hydrogen molecules diffuse through the polymer liner material at the molecular level. This is NOT a leak - it's diffusion through solid material.
+
+## Example Calculation
+For a 150 L tank:
+- Maximum allowed: 46 × 150 = 6,900 NmL/hr
+- That's 6.9 L/hr at standard conditions
+- Or 165.6 L/day
+- Or ~60,000 L/year (~5.4 kg H₂/year @ 700 bar)
+
+## Why It Matters
+- Garage safety (hydrogen accumulation)
+- Fuel gauge accuracy
+- Customer satisfaction (loses ~3-5% annually)
+
+## Liner Materials Performance
+- **HDPE** (Type III): ~30-40 NmL/hr/L ✅
+- **PA6** (Nylon 6): ~20-30 NmL/hr/L ✅
+- **Aluminum** (Type III): ~0 NmL/hr/L ✅ (metal doesn't permeate)
+
+## Testing
+- Measured after aging (temperature cycling)
+- Typical test: 15 days minimum
+- Extrapolated to lifetime prediction
+    `,
+    relatedTopics: ['liner-materials', 'type-iv', 'un-r134'],
+  },
+  {
+    id: 'fatigue-cycles',
+    title: 'Fatigue Cycle Requirements',
+    category: 'requirements',
+    keywords: ['fatigue', 'cycles', '11000', 'pressure', 'cycling'],
+    content: `
+# Fatigue Cycle Requirements: 11,000 Cycles
+
+## Regulatory Requirement
+Tank must survive **11,000 pressure cycles** from empty to full without failure.
+
+## Cycle Definition
+- **Lower Pressure:** 2 MPa (20 bar) - never fully empty
+- **Upper Pressure:** Nominal Working Pressure (70 MPa for automotive)
+- **Rate:** Typically 10-15 cycles per minute during testing
+
+## Why 11,000 Cycles?
+Based on vehicle lifetime usage model:
+- 15 year vehicle life
+- ~30 refuelings per year (weekly)
+- Total: 450 refuelings
+- **Safety factor:** 24.4× (11,000 / 450)
+
+This massive safety factor accounts for:
+- Partial refueling events (not full cycle)
+- Temperature cycling effects
+- Road vibrations
+- Material degradation
+
+## What Gets Tested
+1. **Pressure cycling** - Primary test
+2. **Extreme pressure cycling** - With temperature swings
+3. **Accelerated aging** - UV, temperature, chemicals
+
+## Typical Failure Modes
+- Fiber fracture at boss interface (stress concentration)
+- Delamination between fiber layers
+- Liner fatigue cracking (usually acceptable if no leak)
+
+## Design Implications
+- Boss design critical (largest stress concentration)
+- Fiber angle optimization
+- Proper cure cycle for resin
+    `,
+    relatedTopics: ['stress-concentration', 'boss-design', 'composite-failure'],
+  },
+  {
+    id: 'temperature-range',
+    title: 'Temperature Range Considerations',
+    category: 'requirements',
+    keywords: ['temperature', 'cold', 'hot', '-40', '85', 'thermal'],
+    content: `
+# Temperature Range: -40°C to +85°C
+
+## Operating Range
+**-40°C to +85°C** (-40°F to +185°F)
+
+## Why These Extremes?
+
+### Cold: -40°C
+- Death Valley winter night: -40°C possible
+- Canadian prairies: -40°C common
+- Siberia, Alaska: -50°C+ but vehicles use block heaters
+- **Critical:** Polymer liner becomes brittle
+
+### Hot: +85°C
+- Desert sun on black vehicle roof
+- Direct solar radiation heating
+- Post-refueling temperature spike (adiabatic compression)
+- **Critical:** Resin glass transition temperature
+
+## Temperature Effects on Materials
+
+### Composite (Carbon Fiber/Epoxy)
+- **Cold:** Increased strength, reduced toughness
+- **Hot:** Reduced strength near Tg (~120°C for epoxy)
+- **Coefficient of thermal expansion mismatch:** Stress cycling
+
+### Liner (HDPE/PA6)
+- **Cold:** Brittleness, cracking risk
+- **Hot:** Creep, increased permeation
+- **Tg transitions:** Critical mechanical property changes
+
+## Testing Requirements
+1. **Pressure cycling at temperature extremes**
+2. **Soak tests** - 100+ hours at extremes
+3. **Thermal cycling** - -40°C to +85°C repeatedly
+4. **Fire test** - Bonfire simulation (ISO 11119-3)
+
+## Design Considerations
+- Boss seal material selection
+- Thermal stress analysis
+- Creep analysis for liner
+- CTE mismatch stress calculation
+    `,
+    relatedTopics: ['material-properties', 'thermal-stress', 'liner-materials'],
+  },
+
+  // TANK TYPE TOPICS
+  {
+    id: 'tank-type-comparison',
+    title: 'Type I-V Tank Comparison',
+    category: 'tank-types',
+    keywords: ['type', 'comparison', 'I', 'II', 'III', 'IV', 'V'],
+    content: `
+# Pressure Vessel Type Comparison
+
+## Type I: All Metal
+- **Material:** Steel or aluminum
+- **Weight:** Heavy (gravimetric capacity ~1-2%)
+- **Cost:** Low
+- **Use:** Industrial gas, not automotive
+
+## Type II: Metal Liner + Hoop Wrap
+- **Construction:** Metal liner, fiber hoop wrap only
+- **Weight:** Moderate
+- **Cost:** Moderate
+- **Use:** CNG vehicles (low pressure)
+
+## Type III: Metal Liner + Full Wrap
+- **Construction:** Aluminum liner, full carbon fiber wrap
+- **Weight:** Medium (gravimetric ~5-6%)
+- **Cost:** High
+- **Use:** SCUBA, aerospace, some H₂ vehicles
+- **Advantage:** Zero permeation
+
+## Type IV: Polymer Liner + Full Wrap
+- **Construction:** HDPE/PA6 liner, full carbon fiber wrap
+- **Weight:** Light (gravimetric ~6-7%)
+- **Cost:** Moderate-High
+- **Use:** Automotive H₂ (most common)
+- **Advantage:** Best weight-to-cost ratio
+
+## Type V: Linerless
+- **Construction:** Carbon fiber/resin only, no liner
+- **Weight:** Lightest (gravimetric ~7-10% theoretical)
+- **Cost:** Very high (R&D phase)
+- **Use:** Future technology
+- **Challenge:** Permeation barrier in resin matrix
+
+## Automotive H₂ Choice: Type IV
+Why Type IV dominates automotive:
+1. **Weight:** 40% lighter than Type III
+2. **Cost:** No expensive aluminum liner
+3. **Maturity:** Proven manufacturing process
+4. **Safety:** Good impact resistance
+5. **Compliance:** Meets all automotive standards
+    `,
+    relatedTopics: ['type-iv-advantages', 'liner-materials', 'carbon-fiber'],
+  },
+  {
+    id: 'type-iv-advantages',
+    title: 'Type IV Advantages for Automotive',
+    category: 'tank-types',
+    keywords: ['type', 'IV', 'polymer', 'automotive', 'advantages'],
+    content: `
+# Type IV Tank Advantages
+
+## Why Type IV for Automotive H₂?
+
+### 1. Weight Savings (40% vs Type III)
+- **Type III (Al liner):** ~120 kg for 150 L @ 70 MPa
+- **Type IV (HDPE liner):** ~72 kg for 150 L @ 70 MPa
+- **Impact:** ~4 kg H₂ stored per 100 kg vehicle weight
+
+### 2. Manufacturing Cost
+- No expensive aluminum liner forging
+- Liner made by rotomolding (cheap)
+- Same carbon fiber, same winding
+- **Cost reduction:** 20-30% vs Type III
+
+### 3. Crash Safety
+- Polymer liner more damage-tolerant
+- No sharp metal fragments on burst
+- Better impact energy absorption
+
+### 4. Design Flexibility
+- Complex boss geometries possible
+- Rotomolding allows shapes aluminum can't make
+- Multi-valve configurations easier
+
+### 5. Fatigue Resistance
+- Polymer liner yields, doesn't crack
+- Composite carries all pressure load
+- Better cycle life in practice
+
+## Disadvantages (Trade-offs)
+
+### 1. Permeation
+- Must meet 46 NmL/hr/L limit
+- Type III (aluminum): zero permeation
+- **Solution:** Liner thickness optimization
+
+### 2. Liner Creep
+- HDPE creeps under sustained pressure
+- Can cause fiber stress redistribution
+- **Solution:** Stress analysis with creep modeling
+
+### 3. Temperature Sensitivity
+- Polymer properties vary with temperature
+- -40°C brittleness concern
+- **Solution:** Material selection (PA6 better than HDPE)
+
+## Industry Adoption
+- **Toyota Mirai:** Type IV
+- **Honda Clarity:** Type IV
+- **Hyundai Nexo:** Type IV
+- **Heavy trucks:** Moving to Type IV
+
+Type IV is the current industry standard for automotive hydrogen storage.
+    `,
+    relatedTopics: ['tank-type-comparison', 'liner-materials', 'permeation-rate'],
+  },
+  {
+    id: 'liner-materials',
+    title: 'Liner Material Selection',
+    category: 'tank-types',
+    keywords: ['liner', 'hdpe', 'pa6', 'nylon', 'polymer', 'material'],
+    content: `
+# Liner Material Selection for Type IV Tanks
+
+## Primary Candidates
+
+### HDPE (High-Density Polyethylene)
+**Properties:**
+- Density: 0.95-0.97 g/cm³
+- Tensile Strength: 20-30 MPa
+- Permeation: 30-40 NmL/hr/L
+- Cost: Low
+
+**Advantages:**
+- Excellent chemical resistance
+- Low cost, easy processing
+- Good impact resistance
+- Proven track record
+
+**Disadvantages:**
+- Moderate permeation
+- Creep at high temperatures
+- Stiffness loss above 40°C
+
+### PA6 (Nylon 6)
+**Properties:**
+- Density: 1.12-1.14 g/cm³
+- Tensile Strength: 50-80 MPa
+- Permeation: 20-30 NmL/hr/L
+- Cost: Moderate
+
+**Advantages:**
+- Lower permeation than HDPE
+- Better high-temperature properties
+- Higher stiffness
+- Better low-temperature toughness
+
+**Disadvantages:**
+- Hygroscopic (absorbs moisture)
+- More expensive
+- Requires drying before processing
+
+### PA6/HDPE Blends
+**Hybrid approach:**
+- Inner layer: PA6 (permeation barrier)
+- Outer layer: HDPE (cost, processing)
+- **Total thickness:** 5-8 mm
+
+## Selection Criteria
+
+### Permeation Performance
+```
+Requirement: ≤ 46 NmL/hr/L
+HDPE:  30-40 NmL/hr/L ✅ (with sufficient thickness)
+PA6:   20-30 NmL/hr/L ✅ (thinner possible)
+```
+
+### Temperature Range
+```
+-40°C to +85°C requirement
+HDPE: Borderline at -40°C (brittleness)
+PA6:  Better at -40°C, better at +85°C
+```
+
+### Cost vs Performance
+- HDPE: Best cost/performance for most applications
+- PA6: When permeation is critical
+- Blend: Optimize both
+
+## Manufacturing Process
+All use **rotomolding** (rotational molding):
+1. Powder resin in mold
+2. Heat while rotating
+3. Uniform wall thickness
+4. Cool and remove
+5. Trim and prepare for winding
+
+## Industry Trends
+- **Current:** 70% HDPE, 30% PA6/blends
+- **Future:** More PA6 as permeation limits tighten
+    `,
+    relatedTopics: ['type-iv-advantages', 'permeation-rate', 'rotomolding'],
+  },
+  {
+    id: 'carbon-fiber-vs-glass',
+    title: 'Carbon Fiber vs Glass Fiber',
+    category: 'tank-types',
+    keywords: ['carbon', 'glass', 'fiber', 'composite', 'material'],
+    content: `
+# Carbon Fiber vs Glass Fiber for Pressure Vessels
+
+## Property Comparison
+
+| Property | Carbon Fiber (T700) | E-Glass Fiber |
+|----------|---------------------|---------------|
+| Tensile Strength | 4,900 MPa | 3,400 MPa |
+| Elastic Modulus | 230 GPa | 72 GPa |
+| Density | 1.8 g/cm³ | 2.6 g/cm³ |
+| Cost | High ($20-30/kg) | Low ($2-4/kg) |
+| Strain to Failure | 2.1% | 4.7% |
+
+## Why Carbon for H₂ Tanks?
+
+### 1. Specific Strength (Strength/Density)
+- **Carbon:** 2,722 MPa·cm³/g
+- **Glass:** 1,308 MPa·cm³/g
+- **Advantage:** 2.08× better
+
+### 2. Specific Modulus (Stiffness/Density)
+- **Carbon:** 127.8 GPa·cm³/g
+- **Glass:** 27.7 GPa·cm³/g
+- **Advantage:** 4.61× better
+
+### 3. Weight Savings
+For same pressure rating:
+- **Carbon:** 100 kg
+- **Glass:** 208 kg
+- **Weight penalty:** 108% heavier with glass
+
+### 4. Fatigue Resistance
+- Carbon: Excellent (11,000+ cycles easily)
+- Glass: Good but degrades faster
+- **Advantage:** Carbon maintains strength
+
+## When Glass Fiber is Used
+
+### Hoop Layer Only (Type II)
+- Glass fiber for hoop wrap on metal liner
+- Low pressure (CNG: 20-25 MPa)
+- Cost-sensitive applications
+
+### Hybrid Layup
+- Inner layer: Glass (impact resistance)
+- Outer layer: Carbon (strength)
+- **Rare in H₂, common in SCUBA**
+
+## Cost Consideration
+For 70 MPa H₂ tank:
+- Glass fiber cost: $50-100 per tank
+- Carbon fiber cost: $800-1,200 per tank
+- **BUT:** Vehicle weight reduction worth $1,500-2,000
+- **Result:** Carbon is cost-effective despite material cost
+
+## Industry Standard
+**Automotive H₂:** 100% carbon fiber (typically T700 or T800)
+    `,
+    relatedTopics: ['composite-materials', 'type-iv-advantages', 'material-properties'],
+  },
+
+  // ANALYSIS TOPICS
+  {
+    id: 'von-mises-stress',
+    title: 'Von Mises Stress Explained',
+    category: 'analysis',
+    keywords: ['von', 'mises', 'stress', 'equivalent', 'yield'],
+    content: `
+# Von Mises Stress (Equivalent Stress)
+
+## Definition
+Von Mises stress combines all six stress components into a single scalar value that predicts yielding in ductile materials.
+
+## Formula
+\`\`\`
+σ_vm = √[(σ₁ - σ₂)² + (σ₂ - σ₃)² + (σ₃ - σ₁)²] / √2
+\`\`\`
+
+Where σ₁, σ₂, σ₃ are principal stresses.
+
+## Alternative Form (Stress Components)
+\`\`\`
+σ_vm = √[σₓ² + σᵧ² + σᵪ² - σₓσᵧ - σᵧσᵪ - σᵪσₓ + 3(τₓᵧ² + τᵧᵪ² + τᵪₓ²)]
+\`\`\`
+
+## Yield Criterion
+Material yields when: **σ_vm ≥ σ_yield**
+
+## For Pressure Vessels
+In a thin-walled cylinder:
+- Hoop stress (σ_hoop) = PR/t
+- Axial stress (σ_axial) = PR/2t
+- Radial stress (σ_radial) ≈ 0 (thin wall)
+
+Von Mises stress:
+\`\`\`
+σ_vm = √[σ_hoop² + σ_axial² - σ_hoop·σ_axial]
+σ_vm = (PR/t) × √[1 + 0.25 - 0.5]
+σ_vm = PR/t × √0.75
+σ_vm = 0.866 × PR/t
+\`\`\`
+
+## Why Von Mises?
+- Agrees with experimental data for ductile materials
+- Accounts for all stress components
+- **Limitation:** Only for metals (liner), NOT for composites
+
+## For Composites
+Use **Tsai-Wu** or **Hashin** failure criteria instead.
+Von Mises doesn't account for:
+- Fiber direction dependency
+- Different tensile/compressive strengths
+- Shear-dominated failures
+    `,
+    relatedTopics: ['tsai-wu-criterion', 'hoop-stress', 'composite-failure'],
+  },
+  {
+    id: 'tsai-wu-criterion',
+    title: 'Tsai-Wu Failure Criterion',
+    category: 'analysis',
+    keywords: ['tsai', 'wu', 'failure', 'composite', 'criterion'],
+    content: `
+# Tsai-Wu Failure Criterion for Composites
+
+## Why Not Von Mises for Composites?
+Composites have:
+- Different strengths in fiber vs transverse directions
+- Different tensile vs compressive strengths
+- Anisotropic behavior
+
+Von Mises assumes isotropic, ductile material.
+
+## Tsai-Wu Formula
+\`\`\`
+F₁σ₁ + F₂σ₂ + F₆τ₁₂ + F₁₁σ₁² + F₂₂σ₂² + F₆₆τ₁₂² + 2F₁₂σ₁σ₂ = 1
+\`\`\`
+
+Where:
+- σ₁ = stress parallel to fibers
+- σ₂ = stress perpendicular to fibers
+- τ₁₂ = shear stress
+
+## Strength Parameters
+\`\`\`
+F₁ = 1/Xₜ - 1/Xc
+F₂ = 1/Yₜ - 1/Yc
+F₁₁ = 1/(Xₜ·Xc)
+F₂₂ = 1/(Yₜ·Yc)
+F₆₆ = 1/S²
+F₁₂ = -0.5√(F₁₁·F₂₂)  [interaction term]
+\`\`\`
+
+Where:
+- Xₜ, Xc = tensile, compressive strength parallel to fiber
+- Yₜ, Yc = tensile, compressive strength perpendicular to fiber
+- S = shear strength
+
+## Failure Index
+\`\`\`
+FI = Left side of equation
+FI < 1.0: Safe
+FI = 1.0: First ply failure
+FI > 1.0: Failed
+\`\`\`
+
+## Example: Carbon/Epoxy (T700)
+\`\`\`
+Xₜ = 2,500 MPa  (fiber tensile)
+Xc = 1,500 MPa  (fiber compressive)
+Yₜ = 60 MPa     (matrix tensile)
+Yc = 150 MPa    (matrix compressive)
+S = 90 MPa      (shear)
+\`\`\`
+
+## First Ply Failure vs Ultimate Failure
+- **First Ply Failure (FPF):** FI = 1.0 in first layer
+- **Progressive Failure:** Degrade failed plies, continue loading
+- **Ultimate Failure:** Catastrophic (multiple plies failed)
+
+## Design Safety Factor
+\`\`\`
+SF = 1 / FI_max
+Typical requirement: SF ≥ 2.0 at burst pressure
+\`\`\`
+
+## Implementation in FEA
+1. Calculate stresses in each ply
+2. Transform to ply coordinate system
+3. Evaluate Tsai-Wu criterion per ply
+4. Track maximum FI across all plies
+    `,
+    relatedTopics: ['composite-failure', 'first-ply-failure', 'progressive-failure'],
+  },
+  {
+    id: 'first-ply-failure',
+    title: 'First Ply Failure vs Ultimate Failure',
+    category: 'analysis',
+    keywords: ['first', 'ply', 'failure', 'ultimate', 'progressive'],
+    content: `
+# First Ply Failure vs Ultimate Failure
+
+## Design Philosophy Question
+Should tank design be based on:
+1. **First Ply Failure (FPF):** No single ply fails?
+2. **Ultimate Failure (UF):** Catastrophic failure of all plies?
+
+## First Ply Failure (FPF)
+**Definition:** Loading at which the first layer reaches its failure criterion.
+
+**Conservative Approach:**
+- Design so FPF doesn't occur at service pressure
+- Typically: FPF > 2.0 × Burst Pressure
+- **Advantage:** Maximum safety margin
+- **Disadvantage:** Heavier, more expensive tank
+
+## Progressive Failure Analysis
+**Reality:** After FPF, tank doesn't immediately burst.
+
+**What happens:**
+1. First ply fails (matrix cracking, fiber breakage)
+2. Load redistributes to adjacent plies
+3. More plies progressively fail
+4. Eventually: catastrophic failure
+
+**Example Sequence:**
+\`\`\`
+Pressure  Event
+50 MPa    First matrix crack (inner hoop layer)
+80 MPa    Multiple matrix cracks
+120 MPa   First fiber breakage (±20° layer)
+157.5 MPa Catastrophic burst (all helical plies failed)
+\`\`\`
+
+## Ultimate Failure (UF)
+**Definition:** Pressure at which catastrophic failure occurs.
+
+**Less Conservative:**
+- Design for UF > 2.25 × Working Pressure
+- Allow FPF at lower pressure
+- **Advantage:** Lighter, cheaper tank
+- **Disadvantage:** Less safety margin
+
+## Industry Practice: Hybrid Approach
+\`\`\`
+Working Pressure:     70 MPa
+Design Goals:
+  - No FPF at:        140 MPa (2× working)
+  - Ultimate burst:   >157.5 MPa (2.25× working)
+  - Actual burst:     ~180-200 MPa (testing shows)
+\`\`\`
+
+## Testing Validates Design
+- **FPF prediction:** Theoretical (FEA)
+- **Actual burst:** Experimental (hydraulic test)
+- **Safety factor:** Based on test data, not FPF
+
+## Acoustic Emission Monitoring
+During testing:
+- Monitors fiber breakage in real-time
+- Detects FPF before catastrophic failure
+- Provides validation of progressive failure model
+
+## Design Recommendation
+1. Predict FPF using Tsai-Wu or Hashin
+2. Ensure FPF > 1.5-2.0× Working Pressure
+3. Use progressive failure model for ultimate prediction
+4. Validate with burst testing
+5. Apply safety factor to test burst pressure
+    `,
+    relatedTopics: ['tsai-wu-criterion', 'progressive-failure', 'burst-testing'],
+  },
+  {
+    id: 'monte-carlo-reliability',
+    title: 'Monte Carlo Reliability Analysis',
+    category: 'analysis',
+    keywords: ['monte', 'carlo', 'reliability', 'probability', 'statistics'],
+    content: `
+# Monte Carlo Reliability Analysis
+
+## Why Probabilistic Analysis?
+Deterministic analysis gives single answer:
+- Burst pressure = 180 MPa
+- **Question:** What's the probability of burst < 157.5 MPa?
+
+Monte Carlo gives distribution:
+- Mean burst = 180 MPa
+- Std dev = 8 MPa
+- P(burst < 157.5) = 0.0023% (2.3 in 100,000)
+
+## Input Uncertainties
+
+### Material Properties (Normal Distribution)
+\`\`\`
+Carbon Fiber Strength: 4900 ± 245 MPa (CV = 5%)
+Epoxy Modulus: 3.5 ± 0.35 GPa (CV = 10%)
+Fiber Volume Fraction: 0.60 ± 0.03 (CV = 5%)
+\`\`\`
+
+### Geometric Tolerances
+\`\`\`
+Wall Thickness: 20 ± 0.5 mm (manufacturing tolerance)
+Fiber Angle: 54.7° ± 1.0° (winding accuracy)
+\`\`\`
+
+### Environmental Factors
+\`\`\`
+Temperature: -40°C to +85°C (uniform distribution)
+Aging Factor: 0.95 ± 0.05 (after 15 years)
+\`\`\`
+
+## Monte Carlo Process
+
+### Step 1: Sample Input Variables
+\`\`\`python
+import numpy as np
+
+n_samples = 10000
+
+fiber_strength = np.random.normal(4900, 245, n_samples)
+fiber_angle = np.random.normal(54.7, 1.0, n_samples)
+wall_thickness = np.random.normal(20, 0.5, n_samples)
+# ... etc
+\`\`\`
+
+### Step 2: Run Analysis for Each Sample
+\`\`\`python
+burst_pressures = []
+
+for i in range(n_samples):
+    # Use sampled values in stress analysis
+    burst_p = calculate_burst_pressure(
+        fiber_strength[i],
+        fiber_angle[i],
+        wall_thickness[i],
+        # ... etc
+    )
+    burst_pressures.append(burst_p)
+\`\`\`
+
+### Step 3: Statistical Analysis
+\`\`\`python
+mean_burst = np.mean(burst_pressures)
+std_burst = np.std(burst_pressures)
+p_failure = np.sum(burst_pressures < 157.5) / n_samples
+
+print(f"Mean burst: {mean_burst:.1f} MPa")
+print(f"Std dev: {std_burst:.1f} MPa")
+print(f"P(burst < 157.5 MPa): {p_failure*100:.4f}%")
+\`\`\`
+
+## Output: Probability Distribution
+\`\`\`
+Burst Pressure Distribution:
+  Mean:   180.2 MPa
+  Median: 180.0 MPa
+  Std:    8.3 MPa
+
+Percentiles:
+  1%:     162.7 MPa
+  5%:     167.5 MPa
+  50%:    180.0 MPa
+  95%:    192.5 MPa
+  99%:    197.7 MPa
+
+Probability of failure (P < 157.5 MPa): 0.0023%
+Reliability: 99.9977%
+\`\`\`
+
+## Design Decisions from Monte Carlo
+
+### Approach 1: Target Reliability
+\`\`\`
+Requirement: 99.99% reliability
+Current: 99.9977% ✅ PASS
+\`\`\`
+
+### Approach 2: Target Percentile
+\`\`\`
+Requirement: 1st percentile > 157.5 MPa
+Current: 162.7 MPa ✅ PASS (margin = 3.3%)
+\`\`\`
+
+## Sensitivity Analysis
+Which variable has biggest impact?
+
+\`\`\`
+Fiber Strength:     70% of variance
+Wall Thickness:     15% of variance
+Fiber Angle:        10% of variance
+Other:              5% of variance
+\`\`\`
+
+**Conclusion:** Tighten fiber quality control (biggest impact).
+
+## Validation
+- Run 100 physical burst tests
+- Compare distribution to Monte Carlo prediction
+- Adjust input distributions if needed
+    `,
+    relatedTopics: ['reliability-analysis', 'uncertainty-quantification', 'statistical-validation'],
+  },
+  {
+    id: 'stress-concentration',
+    title: 'Stress Concentration Factors',
+    category: 'analysis',
+    keywords: ['stress', 'concentration', 'boss', 'notch', 'scf'],
+    content: `
+# Stress Concentration Factors (SCF)
+
+## Definition
+Stress Concentration Factor (K_t):
+\`\`\`
+K_t = σ_max / σ_nominal
+\`\`\`
+
+## Common Sources in H₂ Tanks
+
+### 1. Boss/Port Opening
+**Worst stress concentration in tank design**
+
+\`\`\`
+Nominal stress (away from boss): 100 MPa
+Maximum stress (at boss edge): 300 MPa
+K_t = 300 / 100 = 3.0
+\`\`\`
+
+**Factors affecting K_t:**
+- Boss diameter (larger = higher SCF)
+- Dome radius (smaller = higher SCF)
+- Boss shoulder radius (sharper = higher SCF)
+- Composite layup (helical plies reduce SCF)
+
+### 2. Geometric Discontinuities
+- **Cylinder-to-dome transition:** K_t = 1.2-1.5
+- **Cutouts, holes:** K_t = 2.0-3.0
+- **Sharp corners:** K_t = 3.0-5.0
+
+### 3. Material Discontinuities
+- **Metal boss in composite dome:** K_t = 2.0-3.0
+- **Adhesive bondline:** Shear stress concentration
+
+## Mitigation Strategies
+
+### 1. Generous Fillet Radii
+\`\`\`
+Sharp corner (r = 1 mm):  K_t = 4.2
+Rounded (r = 5 mm):       K_t = 2.8
+Large radius (r = 10 mm): K_t = 2.1
+\`\`\`
+
+### 2. Composite Reinforcement
+- Extra helical plies around boss
+- Typical: 2-4 additional ±20° layers
+- **Reduction:** K_t from 3.0 to 2.2
+
+### 3. Boss Design Optimization
+**Poor design:**
+\`\`\`
+- Flat boss shoulder
+- Small radius
+- K_t = 3.5
+\`\`\`
+
+**Good design:**
+\`\`\`
+- Tapered boss
+- Large radius (10-15 mm)
+- Gradual transition
+- K_t = 2.0
+\`\`\`
+
+### 4. Load Path Engineering
+- Distribute load over larger area
+- Gradual stiffness transition
+- Avoid abrupt changes
+
+## Fatigue Implications
+Fatigue life heavily influenced by SCF:
+
+\`\`\`
+Cycles to failure ∝ 1 / (K_t)^m
+
+where m ≈ 3-6 for composites
+
+Example:
+K_t = 2.0: 1,000,000 cycles
+K_t = 3.0: 148,000 cycles (6.7× reduction!)
+\`\`\`
+
+## FEA Best Practices
+1. **Mesh refinement** at stress concentrations
+2. **Submodeling** for critical regions
+3. **Verify convergence** (mesh independence)
+4. **Compare to analytical** (Peterson's handbook)
+
+## Acceptance Criteria
+\`\`\`
+At nominal working pressure (70 MPa):
+  σ_max = K_t × σ_nominal
+  σ_max < σ_allowable / SF
+
+Typical:
+  σ_nominal = 150 MPa (hoop stress)
+  K_t = 2.5 (at boss)
+  σ_max = 375 MPa
+
+Carbon fiber allowable: 1,500 MPa
+Safety factor required: 375 / 1500 = 0.25 (4.0 SF) ✅
+\`\`\`
+
+## Most Critical: Boss Fatigue
+- 90% of tank failures occur at boss
+- SCF + fatigue cycling = critical combination
+- **Design focus:** Minimize boss SCF
+    `,
+    relatedTopics: ['boss-design', 'fatigue-cycles', 'fea-analysis'],
+  },
+
+  // STANDARDS TOPICS
+  {
+    id: 'iso-11119-3',
+    title: 'ISO 11119-3 Overview',
+    category: 'standards',
+    keywords: ['iso', '11119', 'standard', 'composite', 'cylinder'],
+    content: `
+# ISO 11119-3: Gas Cylinders - Composite Construction
+
+## Scope
+ISO 11119-3 covers composite gas cylinders with:
+- Non-load-sharing liners (Type IV)
+- Working pressure > 450 bar
+- Permanent gases (including H₂)
+
+## Key Requirements
+
+### 1. Design Safety Factor
+- **Burst pressure** ≥ 2.25 × Nominal Working Pressure
+- **Hydrostatic test** = 1.5 × NWP
+- **Service pressure** = 1.25 × NWP (worst case)
+
+### 2. Pressure Cycling Test
+- **Cycles:** 11,000 minimum
+- **Range:** 2 MPa to NWP
+- **No leakage or visible damage**
+
+### 3. Burst Test
+- **Hydraulic test** (not pneumatic - safety)
+- **Failure mode:** Fiber fracture, not liner
+- **Location:** Away from boss (if boss fails, redesign)
+
+### 4. Environmental Tests
+- **Ambient temperature cycling:** -40°C to +65°C
+- **Hydraulic pressure at extremes**
+- **Permeation test:** After environmental exposure
+
+### 5. Fire Test
+- **Bonfire simulation:** 590°C for 100 seconds
+- **Pressure Relief Device (PRD) must activate**
+- **No fragmentation allowed**
+
+### 6. Flaw Tolerance
+- **Impact test:** 10 J impact at 2× working pressure
+- **Penetration test:** 6 mm drill hole
+- **Must survive without burst**
+
+### 7. Permeation Limit
+- **≤ 46 NmL/hr/L** for hydrogen
+- Measured after environmental aging
+
+## Testing Sequence
+
+### Prototype Qualification
+\`\`\`
+1. Burst test (3 specimens) → verify ≥ 2.25× NWP
+2. Pressure cycling (3 specimens) → 11,000 cycles
+3. Environmental cycling (3 specimens)
+4. Fire test (1 specimen)
+5. Flaw tolerance (3 specimens)
+6. Permeation (3 specimens)
+
+Total: 16 prototype tanks destroyed
+\`\`\`
+
+### Production Testing
+\`\`\`
+Every tank:
+  - Visual inspection
+  - Hydrostatic test to 1.5× NWP
+  - Hold for 30 seconds
+  - No leakage, no permanent expansion
+
+Batch sampling (1 in 2000):
+  - Burst test
+  - Must meet ≥ 2.25× NWP
+\`\`\`
+
+## Certification Process
+1. **Design validation:** FEA predictions
+2. **Prototype testing:** Per ISO 11119-3
+3. **Type approval:** Certification body (e.g., TÜV, BAM)
+4. **Production quality system:** ISO 9001
+5. **Periodic audits:** Annual production testing
+
+## Marking Requirements
+Each cylinder marked with:
+- Standard: ISO 11119-3
+- Manufacturer
+- Serial number
+- Manufacturing date
+- Working pressure
+- Test pressure
+- Water capacity
+- Tare weight
+- Retest date (every 3-5 years for automotive)
+
+## Geographic Applicability
+- **Europe:** Required for EC 79 type approval
+- **Global:** Accepted in most markets
+- **USA:** Consider DOT-SP for equivalency
+    `,
+    relatedTopics: ['un-r134', 'ec-79', 'burst-testing'],
+  },
+  {
+    id: 'un-r134',
+    title: 'UN R134 Requirements',
+    category: 'standards',
+    keywords: ['un', 'r134', 'regulation', 'automotive', 'hydrogen'],
+    content: `
+# UN R134: Hydrogen-Powered Vehicles
+
+## Scope
+UN Regulation No. 134 covers:
+- Hydrogen fuel systems for road vehicles
+- Compressed gaseous hydrogen (CGH2)
+- Fuel cell and internal combustion vehicles
+
+## Key Differences from ISO 11119-3
+
+### Additional Automotive Requirements:
+1. **Crash Safety**
+2. **Vibration Testing**
+3. **System-Level Testing** (not just tank)
+4. **On-board leak detection**
+
+## Container Requirements (Overlap with ISO)
+
+### 1. Pressure Requirements
+Same as ISO 11119-3:
+- Burst ≥ 2.25× NWP
+- Settle pressure after fast fill
+- Temperature effects on pressure
+
+### 2. Fire Safety (More Stringent)
+**Bonfire test:**
+- 590°C flame temperature
+- Complete engulfment
+- PRD must activate before burst
+- **If PRD fails:** No fragments > 5 grams allowed
+
+### 3. Vehicle Installation Requirements
+- **Mounting:** Survive 20g crash pulse
+- **Protection:** Shield from stones, debris
+- **Ventilation:** Garage hydrogen accumulation limits
+- **Location:** Minimize crash exposure
+
+## Crash Testing (Automotive-Specific)
+
+### 1. Drop Test
+- **Height:** 1.8 m
+- **Surface:** Concrete
+- **Orientation:** Most critical
+- **Requirement:** No leakage, no burst
+
+### 2. Penetration Resistance
+- **Projectile:** Conical steel (6 mm tip)
+- **Energy:** 10 J
+- **Pressure:** 2× NWP during test
+- **Requirement:** No burst
+
+### 3. Simulated Crash
+- **Crush test:** 20,000 kg load
+- **Impact test:** 20g deceleration
+- **Requirement:** PRD activation acceptable, no leak at valves
+
+## System-Level Requirements
+
+### 1. Leak Detection
+- **Hydrogen sensor** in vehicle
+- **Warning to driver** at 2% H₂ concentration
+- **System shutdown** at 4% H₂
+
+### 2. Pressure Relief Device (PRD)
+- **Activation:** 110-130°C (before fire weakens tank)
+- **Flow rate:** Empty 200 L in < 120 seconds
+- **Jet direction:** Upward, away from vehicle
+
+### 3. Automatic Shut-Off Valves
+- **Crash sensor triggered**
+- **Manual emergency shut-off**
+- **Isolation of damaged sections**
+
+## Refueling Safety
+
+### 1. Communication Protocol
+- **Vehicle → Station** (tank temperature, pressure)
+- **Station → Vehicle** (fill rate control)
+- **Temperature limit:** +85°C during fill
+
+### 2. Fueling Receptacle
+- **Check valve:** Prevent reverse flow
+- **Breakaway coupling:** Disconnect if drive-away
+- **Grounding:** Prevent static discharge
+
+## Certification Process
+1. **ISO 11119-3 compliance** (tank level)
+2. **UN R134 additional tests** (system level)
+3. **Type approval** by national authority
+4. **Conformity of Production** (CoP) audits
+
+## Marking (Additional to ISO)
+- "UN R134 Approved"
+- Vehicle manufacturer
+- Tank serial number (VIN linkage)
+
+## Geographic Applicability
+- **EU:** Mandatory via EC 79
+- **Japan:** JIS B 8238 (similar to UN R134)
+- **Korea:** Similar national standard
+- **USA:** SAE J2579 (different but similar intent)
+
+## Recertification
+- **Periodic inspection:** Every 3 years
+- **Visual examination:** Damage, corrosion
+- **Leak test:** Pressurize and hold
+- **Hydrostatic test:** Every 9 years (or never, debate ongoing)
+    `,
+    relatedTopics: ['iso-11119-3', 'ec-79', 'crash-safety'],
+  },
+  {
+    id: 'ec-79',
+    title: 'EC 79 Compliance (Europe)',
+    category: 'standards',
+    keywords: ['ec', '79', 'europe', 'type', 'approval'],
+    content: `
+# EC 79: Type Approval for Hydrogen Vehicles (Europe)
+
+## Overview
+EC 79 is the European Commission regulation for type approval of hydrogen-powered vehicles.
+
+## Regulatory Framework
+\`\`\`
+EC 79 (Type Approval Regulation)
+  ↓ References
+UN R134 (Technical Requirements)
+  ↓ References
+ISO 11119-3 (Tank Design & Testing)
+\`\`\`
+
+**In practice:** Comply with ISO 11119-3 + UN R134 → EC 79 approved
+
+## Type Approval Process
+
+### 1. Tank Manufacturer
+- Design tank to ISO 11119-3
+- Prototype testing
+- **Certification:** TÜV, BAM, or other EU notified body
+- **Result:** ISO 11119-3 certificate
+
+### 2. Vehicle Manufacturer
+- Install certified tanks
+- System-level testing (UN R134)
+- **Whole vehicle approval:** National authority
+- **Result:** EC Type Approval Certificate
+
+### 3. Production Surveillance
+- **Annual audits:** Production quality
+- **Batch testing:** Random tank samples
+- **Corrective actions:** If non-conformities found
+
+## Technical Requirements (via UN R134)
+All UN R134 requirements apply:
+- Tank: ISO 11119-3 certified
+- Installation: Crash protection
+- System: Leak detection, PRD, shut-off valves
+- Refueling: Communication protocol
+
+## Additional EC Requirements
+
+### 1. Electromagnetic Compatibility (EMC)
+- Hydrogen sensors must work in EM fields
+- Valves must not open due to interference
+
+### 2. On-Board Diagnostics (OBD)
+- Pressure sensor monitoring
+- Temperature sensor monitoring
+- Leak detector self-check
+
+### 3. End-of-Life Requirements
+- Tank disposal procedures
+- Carbon fiber recycling guidance
+- Environmental impact assessment
+
+## Marking Requirements
+Tank label must include:
+- EC type-approval number
+- ISO 11119-3 compliance
+- e-mark (circle with approval code)
+
+Example:
+\`\`\`
+e1*134/2013*00012*00
+│ │        │     │
+│ │        │     └─ Serial within type
+│ │        └─ Type approval number
+│ └─ Regulation number (134/2013 = UN R134)
+└─ Country code (1 = Germany)
+\`\`\`
+
+## Member State Variations
+- **Germany (TÜV):** Most stringent, sets de facto standard
+- **Netherlands:** Focus on hydrogen safety training
+- **France:** Additional fire safety requirements
+
+## Market Access
+EC Type Approval grants access to:
+- All 27 EU member states
+- EFTA countries (Norway, Switzerland, Iceland)
+- Often accepted in other markets (recognition agreements)
+
+## Timeline & Cost
+\`\`\`
+Tank certification:   6-12 months, €100k-200k
+Vehicle approval:     3-6 months, €50k-100k
+Total to market:      12-18 months from design freeze
+\`\`\`
+
+## Recertification Triggers
+- Design change (material, dimensions)
+- Manufacturing process change
+- Supplier change (fiber, resin)
+- Non-conformance in production testing
+
+## Current Status (2025)
+- 5+ hydrogen vehicle models approved
+- ~50 tank designs certified
+- Harmonization with UN R134 ongoing
+    `,
+    relatedTopics: ['un-r134', 'iso-11119-3', 'type-approval'],
+  },
+  {
+    id: 'sae-j2579',
+    title: 'SAE J2579 Reference (USA)',
+    category: 'standards',
+    keywords: ['sae', 'j2579', 'usa', 'standard', 'recommended'],
+    content: `
+# SAE J2579: Technical Information Report (USA)
+
+## Status: Recommended Practice (Not Regulation)
+Unlike Europe (EC 79 mandatory), SAE J2579 is:
+- **Not legally required** in USA
+- **Industry best practice**
+- **Referenced by insurance, liability**
+- **Used for DOT special permits**
+
+## Regulatory Landscape (USA)
+
+### Federal Level
+- **DOT/NHTSA:** No specific H₂ vehicle regulation yet
+- **DOT PHMSA:** Cylinder transport regulations (not vehicle)
+- **Result:** Manufacturers self-certify using SAE J2579
+
+### State Level
+- California (most stringent): References SAE J2579
+- Other states: Generally follow California
+
+## SAE J2579 Scope
+Covers hydrogen fuel systems for:
+- Light-duty vehicles (passenger cars)
+- Fuel cell electric vehicles (FCEV)
+- H₂ internal combustion engines
+
+## Comparison to UN R134
+
+| Requirement | UN R134 | SAE J2579 |
+|-------------|---------|-----------|
+| Burst ratio | 2.25× | 2.25× (same) |
+| Pressure cycles | 11,000 | 11,000-22,000 |
+| Permeation | 46 NmL/hr/L | 46 NmL/hr/L (same) |
+| Fire test | Bonfire | Bonfire (stricter interpretation) |
+| Drop test | 1.8 m | 2.0 m (slightly higher) |
+
+**Key difference:** SAE J2579 often more conservative.
+
+## Tank Requirements
+References ISO 11119-3 for:
+- Design methodology
+- Material requirements
+- Manufacturing quality
+
+**Additional SAE requirements:**
+- More detailed failure mode analysis (FMEA)
+- Fault tree analysis (FTA)
+- Quantitative risk assessment
+
+## System Safety Requirements
+
+### 1. Hydrogen Detection
+- **Two independent sensors** (redundancy)
+- **Alarm threshold:** 1% H₂ (lower than UN R134's 2%)
+- **Shutdown threshold:** 2% H₂
+
+### 2. Ventilation
+- **Enclosed spaces:** 1 air change per hour minimum
+- **Garage accumulation:** Model worst-case permeation
+- **Parking structures:** H₂ rise analysis
+
+### 3. Crash Safety
+Similar to UN R134:
+- 20g frontal crash
+- 20g side crash
+- Rear-end collision analysis
+- **PRD protection:** From crash damage
+
+## Fueling Interface
+- **SAE J2601:** Fueling protocol (separate standard)
+- **Communication:** Tank temp, pressure, fill rate
+- **Pre-cooling:** Hydrogen cooled to -40°C for fast fill
+- **Ramp rate limits:** Prevent over-temperature
+
+## Risk Assessment Requirements
+
+### Hazard Analysis
+Must identify:
+1. Leak sources (joints, permeation, PRD)
+2. Ignition sources (electrical, static, hot surfaces)
+3. Enclosed spaces (garage, cabin, trunk)
+4. Failure modes (crash, fatigue, defect)
+
+### Probability Targets
+\`\`\`
+Catastrophic hazard (death): < 10⁻⁶ per vehicle-year
+Serious injury:              < 10⁻⁵ per vehicle-year
+Minor injury/property:       < 10⁻⁴ per vehicle-year
+\`\`\`
+
+## Quality Assurance
+- **ISO 9001** manufacturing
+- **Production testing:** Every tank hydrostatically tested
+- **Traceability:** Full material and process records
+- **Non-destructive testing (NDT):** Ultrasonic, X-ray
+
+## Current Adoption
+**Manufacturers following SAE J2579:**
+- Toyota Mirai
+- Honda Clarity
+- Hyundai Nexo
+- Heavy-duty truck manufacturers
+
+**Certification bodies:**
+- CSA (Canadian Standards Association)
+- UL (Underwriters Laboratories)
+- Not government type-approval (unlike Europe)
+
+## Future Direction
+- NHTSA considering mandatory regulation
+- Likely to adopt SAE J2579 as baseline
+- Harmonization with UN R134 desired
+
+## Key Takeaway
+For USA market:
+- Use SAE J2579 as design guide
+- Meet or exceed all recommendations
+- If also selling in Europe: UN R134 usually more stringent
+    `,
+    relatedTopics: ['un-r134', 'iso-11119-3', 'usa-regulations'],
+  },
+
+  // PHYSICS TOPICS
+  {
+    id: 'hoop-stress-formula',
+    title: 'Hoop Stress Formula (σ = PR/t)',
+    category: 'physics',
+    keywords: ['hoop', 'stress', 'formula', 'thin', 'wall', 'pressure'],
+    content: `
+# Hoop Stress in Thin-Walled Pressure Vessels
+
+## Fundamental Formula
+\`\`\`
+σ_hoop = P × R / t
+\`\`\`
+
+Where:
+- σ_hoop = hoop stress (circumferential stress)
+- P = internal pressure
+- R = radius (to centerline of wall)
+- t = wall thickness
+
+## Derivation (from equilibrium)
+
+Consider half cylinder cut along length:
+
+\`\`\`
+Internal pressure force (pushing outward):
+F_pressure = P × (2R × L)
+
+Resisting force in wall (hoop stress):
+F_wall = σ_hoop × (2t × L)
+
+Equilibrium: F_pressure = F_wall
+P × 2RL = σ_hoop × 2tL
+σ_hoop = PR/t
+\`\`\`
+
+## Assumptions (Thin-Wall Theory)
+1. **Thin wall:** t/R < 0.1 (typically < 0.05)
+2. **Uniform stress:** Through thickness (not true for thick wall)
+3. **Linear elastic:** No plasticity
+4. **Isotropic material:** Same properties all directions
+
+## Example: H₂ Tank Cylinder
+
+### Given:
+\`\`\`
+P = 70 MPa (working pressure)
+R = 200 mm (inner radius + t/2)
+t = 20 mm (composite wall)
+\`\`\`
+
+### Calculate:
+\`\`\`
+σ_hoop = (70 MPa) × (200 mm) / (20 mm)
+σ_hoop = 700 MPa
+\`\`\`
+
+**Interpretation:**
+- Carbon fiber must resist 700 MPa tension
+- Fiber allowable: 1,500-2,500 MPa
+- Safety factor: 2.1 - 3.6 ✅
+
+## Axial Stress (Longitudinal)
+
+In a closed cylinder:
+\`\`\`
+σ_axial = P × R / (2t) = σ_hoop / 2
+\`\`\`
+
+**For our example:**
+\`\`\`
+σ_axial = 350 MPa (half of hoop stress)
+\`\`\`
+
+## Stress Ratio Consequence
+\`\`\`
+σ_hoop / σ_axial = 2:1
+\`\`\`
+
+**This is why:**
+- Hoop winding (90°) carries 2× more load
+- Helical winding (±54.74°) optimizes both
+- Can't use purely axial winding (would fail in hoop)
+
+## When Thin-Wall Fails
+
+For thick-wall vessels (t/R > 0.1):
+
+**Lamé Equations (thick wall):**
+\`\`\`
+σ_hoop(r) = P × [a² + r²] / [b² - a²]
+
+where:
+  a = inner radius
+  b = outer radius
+  r = radial position
+\`\`\`
+
+**Key difference:** Stress varies through thickness
+- Maximum at inner surface
+- Decreases toward outer surface
+
+## Composite Tank Reality
+Thin-wall formula is approximation:
+- Each fiber layer sees different stress
+- Resin carries some load
+- Stress redistribution with damage
+
+**But:** Still excellent starting point for design.
+
+## Design Check
+\`\`\`
+Required wall thickness:
+t = P × R / σ_allowable
+
+With safety factor:
+t = P × R × SF / σ_ultimate
+
+Example (70 MPa, R=200 mm, CF σ=2000 MPa, SF=2.25):
+t = 70 × 200 × 2.25 / 2000 = 15.75 mm minimum
+\`\`\`
+    `,
+    relatedTopics: ['netting-theory', 'composite-stress', 'fiber-orientation'],
+  },
+  {
+    id: 'netting-theory',
+    title: 'Netting Theory (54.74° Angle)',
+    category: 'physics',
+    keywords: ['netting', 'theory', '54.74', 'angle', 'helical', 'optimal'],
+    content: `
+# Netting Theory: The Magic 54.74° Angle
+
+## What is Netting Theory?
+Assumes:
+1. **Only fibers carry load** (resin is just matrix)
+2. **Fibers have no bending stiffness** (like netting/fabric)
+3. **No shear between layers**
+
+## Why 54.74°? (The Math)
+
+### Stress State in Cylinder
+\`\`\`
+σ_hoop = PR/t
+σ_axial = PR/2t
+σ_hoop / σ_axial = 2:1
+\`\`\`
+
+### Helical Winding
+Fiber at angle α to cylinder axis:
+- Contributes to both hoop and axial strength
+- Load shared based on geometry
+
+### Optimal Angle Derivation
+For helical fiber at angle α:
+
+**Hoop contribution:**
+\`\`\`
+σ_hoop = σ_fiber × sin²(α)
+\`\`\`
+
+**Axial contribution:**
+\`\`\`
+σ_axial = σ_fiber × cos²(α)
+\`\`\`
+
+**For optimal load sharing:**
+\`\`\`
+σ_hoop / σ_axial = 2 = sin²(α) / cos²(α) = tan²(α)
+tan(α) = √2
+α = arctan(√2) = 54.74°
+\`\`\`
+
+**The geodesic angle!**
+
+## Why This Matters
+
+### Equal Fiber Stress
+At 54.74°:
+- Hoop direction: Optimally reinforced
+- Axial direction: Optimally reinforced
+- **Result:** Fibers equally stressed (most efficient)
+
+### Alternative Angles
+
+| Angle | Hoop:Axial | Efficiency | Application |
+|-------|------------|------------|-------------|
+| 90° (hoop) | ∞:1 | Poor | Combined with helical |
+| 54.74° | 2:1 | Optimal | Geodesic |
+| 45° | 1:1 | Suboptimal | General composite |
+| 0° (axial) | 1:∞ | Very poor | Never used alone |
+
+## Geodesic Winding Path
+54.74° is also the **natural geodesic path** on a cylinder:
+- Fiber wants to follow shortest path
+- Minimum tension during winding
+- Self-stabilizing on mandrel
+- **Bonus:** Easy to manufacture
+
+## Real Tank Layup
+Never use only 54.74°! Typical:
+
+\`\`\`
+Layer  Angle    Purpose
+1      ±15°     Axial strength, boss reinforcement
+2      ±54°     Optimal helical (geodesic)
+3      90°      Hoop reinforcement
+4      ±54°     Optimal helical
+5      ±15°     Axial strength
+6      90°      Hoop reinforcement
+\`\`\`
+
+**Why mixed?**
+- Boss area needs axial reinforcement
+- Hoop layers maximize burst strength
+- Helical layers optimize weight
+- Manufacturing constraints
+
+## Example Calculation
+
+### Tank Parameters:
+\`\`\`
+P = 70 MPa
+R = 200 mm
+Target: SF = 2.25 at burst (157.5 MPa)
+\`\`\`
+
+### Stress at Burst:
+\`\`\`
+σ_hoop = 157.5 × 200 / t = 31,500 / t
+σ_axial = 157.5 × 200 / (2t) = 15,750 / t
+\`\`\`
+
+### Fiber Stress (54.74° helical):
+\`\`\`
+σ_fiber = σ_hoop / sin²(54.74°)
+        = σ_hoop / 0.667
+        = 1.5 × σ_hoop
+\`\`\`
+
+### Required Thickness:
+\`\`\`
+σ_fiber_allowable = 2000 MPa (carbon fiber)
+σ_hoop = 2000 / 1.5 = 1333 MPa
+t = 31,500 / 1333 = 23.6 mm
+\`\`\`
+
+## Deviation from 54.74°
+
+Small deviations acceptable:
+- ±50° to ±60°: Still good efficiency (>95%)
+- <±45°: Significant efficiency loss
+- >±60°: Hoop-dominated, axial weak
+
+## Historical Note
+Developed in 1960s for rocket motor cases. Same physics applies to:
+- Pressure vessels
+- Filament-wound tubes
+- Pipeline wrapping
+- Any cylindrical pressure structure
+    `,
+    relatedTopics: ['hoop-stress-formula', 'geodesic-winding', 'fiber-orientation'],
+  },
+  {
+    id: 'isotensoid-dome',
+    title: 'Isotensoid Dome Profile',
+    category: 'physics',
+    keywords: ['isotensoid', 'dome', 'shape', 'profile', 'end', 'cap'],
+    content: `
+# Isotensoid Dome Profile
+
+## What is Isotensoid?
+"Iso-tensoid" = Equal tension
+
+**Definition:** Dome shape where fiber tension is **constant** along entire fiber path.
+
+## Why It Matters
+- **Optimal strength-to-weight ratio**
+- **Uniform fiber utilization** (no weak points)
+- **Geodesic winding compatibility**
+- **Minimizes stress concentrations**
+
+## The Problem: Hemispheric Dome (Not Optimal)
+
+Hemisphere radius = Cylinder radius:
+\`\`\`
+Problem: Fiber stress NOT constant
+- High stress near boss (polar opening)
+- Lower stress at equator
+- Inefficient fiber usage
+\`\`\`
+
+## Isotensoid Solution: Elliptical Dome
+
+**Profile equation (complex):**
+\`\`\`
+r(θ) derived from:
+  dθ/ds × r = constant (geodesic condition)
+  σ_fiber = constant (isotensoid condition)
+
+Result: Elongated ellipsoid
+  - Semi-major axis (axial): ~1.4 × R
+  - Semi-minor axis (radial): R
+\`\`\`
+
+## Practical Approximation
+Instead of solving differential equations:
+
+**Use empirical ratio:**
+\`\`\`
+Dome height (h) ≈ 0.7 × Cylinder radius (R)
+
+For R = 200 mm:
+h ≈ 140 mm
+\`\`\`
+
+## Fiber Path on Isotensoid
+
+### Geodesic Angle Variation
+At cylinder (equator): α = 54.74°
+Moving toward pole: α decreases
+At polar opening: α ≈ 20-30° (depends on boss size)
+
+**This is natural!** Fiber follows geodesic automatically.
+
+## Boss Opening (Polar Hole)
+Can't wind completely to pole (need opening for valve):
+
+**Boss diameter:** Typically 50-80 mm
+**Consequence:** Stress concentration here
+**Solution:** Helical reinforcement (±15° layers)
+
+## Manufacturing Advantages
+
+### Geodesic Winding
+- Fiber naturally follows isotensoid path
+- No slippage during winding
+- Stable on mandrel
+- Repeatable layup
+
+### Mandrel Design
+\`\`\`
+Cylinder section: Straight (easy)
+Dome section: Elliptical profile (CNC-machined)
+Boss area: Metal insert (wound over)
+\`\`\`
+
+## Stress Analysis: Isotensoid vs Hemisphere
+
+### Isotensoid Dome:
+\`\`\`
+σ_fiber = Constant = 700 MPa (example)
+Max/Min ratio = 1.0 (perfect)
+\`\`\`
+
+### Hemispherical Dome:
+\`\`\`
+σ_fiber at pole = 1200 MPa
+σ_fiber at equator = 700 MPa
+Max/Min ratio = 1.7 (inefficient)
+\`\`\`
+
+**Weight savings:** Isotensoid ~15% lighter for same burst strength.
+
+## Design Trade-offs
+
+### Pure Isotensoid (Optimal)
+- Best structural efficiency
+- Longest tank (packaging issue)
+- Complex shape
+
+### Shortened Dome (Compromise)
+- Reduce dome height for packaging
+- Stress concentration increases
+- More fiber needed (weight penalty)
+
+**Automotive reality:** Often use semi-elliptical compromise
+- h ≈ 0.5-0.6 × R (shorter than true isotensoid)
+- 5-10% weight penalty
+- Fits in vehicle package
+
+## Verification
+
+### FEA Analysis
+Check stress distribution:
+\`\`\`
+Target: σ_fiber variation < 10%
+Typical: σ_fiber variation = 5-8% (good)
+Poor design: >20% variation (redesign)
+\`\`\`
+
+### Photoelastic Testing
+- Transparent model under pressure
+- Visualize stress concentrations
+- Validate FEA predictions
+
+## Boss Transition
+Critical region where:
+- Isotensoid dome meets boss opening
+- Stress concentration unavoidable
+- Requires local reinforcement
+
+**Solution:**
+- Extra ±15° helical plies
+- Gradual thickness transition
+- Large fillet radius (10-15 mm)
+    `,
+    relatedTopics: ['dome-design', 'geodesic-winding', 'stress-concentration'],
+  },
+  {
+    id: 'composite-lamination-theory',
+    title: 'Composite Lamination Theory',
+    category: 'physics',
+    keywords: ['composite', 'lamination', 'theory', 'clt', 'laminate'],
+    content: `
+# Classical Lamination Theory (CLT)
+
+## Purpose
+Predict behavior of multi-layer composite laminates:
+- **Input:** Ply properties, fiber angles, thickness
+- **Output:** Laminate stiffness, strength, thermal expansion
+
+## Why Not Simple Averaging?
+Composite laminate is NOT isotropic:
+- Each ply has directional properties
+- Plies interact (couple bending/extension)
+- Thermal expansion differs by ply
+
+## The Analysis Hierarchy
+
+### Level 1: Fiber + Matrix → Ply Properties
+**Micromechanics** (Rule of Mixtures):
+
+\`\`\`
+E₁ = E_fiber × V_f + E_matrix × V_m
+  (longitudinal modulus, fiber-dominated)
+
+E₂ = E_m × E_f / [V_f × E_m + V_m × E_f]
+  (transverse modulus, matrix-dominated)
+
+where:
+  V_f = fiber volume fraction (~0.60)
+  V_m = matrix volume fraction (~0.40)
+\`\`\`
+
+**Typical carbon/epoxy ply:**
+\`\`\`
+E₁ = 150 GPa  (fiber direction)
+E₂ = 10 GPa   (transverse)
+G₁₂ = 5 GPa   (in-plane shear)
+ν₁₂ = 0.3     (Poisson's ratio)
+\`\`\`
+
+### Level 2: Ply Properties → Ply Stiffness Matrix
+**For single ply at angle θ:**
+
+\`\`\`
+[Q̄] = Transformed stiffness matrix (3×3)
+\`\`\`
+
+Contains:
+- Q̄₁₁, Q̄₂₂ = Normal stiffnesses
+- Q̄₁₂ = Coupling term
+- Q̄₆₆ = Shear stiffness
+
+**Function of ply angle θ** (rotation transformation)
+
+### Level 3: Stack Plies → Laminate Stiffness
+**ABD Matrix (6×6):**
+
+\`\`\`
+[A] = Extensional stiffness (how stiff in tension)
+[B] = Bending-extension coupling (usually zero for symmetric)
+[D] = Bending stiffness (how stiff in flexure)
+\`\`\`
+
+**Calculation:**
+\`\`\`
+A_ij = Σ [Q̄_ij]_k × (z_k - z_{k-1})
+D_ij = (1/3) × Σ [Q̄_ij]_k × (z_k³ - z_{k-1}³)
+
+where:
+  k = ply index
+  z = distance from laminate midplane
+\`\`\`
+
+### Level 4: Laminate → Ply Stresses
+**Load applied to laminate:**
+
+\`\`\`
+{ε} = [A]⁻¹ × {N}  (strains from forces)
+\`\`\`
+
+**Transform to each ply:**
+\`\`\`
+{σ}_ply_k = [Q̄]_k × {ε}
+\`\`\`
+
+**Rotate to ply coordinates:**
+\`\`\`
+{σ₁, σ₂, τ₁₂} = [T] × {σₓ, σᵧ, τₓᵧ}
+\`\`\`
+
+### Level 5: Ply Stresses → Failure Check
+**Apply failure criterion to each ply:**
+
+\`\`\`
+Tsai-Wu, Hashin, Max Stress, etc.
+\`\`\`
+
+## Example: Pressure Vessel Laminate
+
+### Layup:
+\`\`\`
+[±15 / ±54 / 90 / ±54 / ±15]
+Total: 9 plies × 0.25 mm = 2.25 mm per cycle
+\`\`\`
+
+### Applied Load (from pressure):
+\`\`\`
+N_hoop = σ_hoop × t = PR (per unit width)
+N_axial = σ_axial × t = PR/2
+\`\`\`
+
+### CLT Process:
+1. Build [Q̄] for each angle (±15°, ±54°, 90°)
+2. Assemble [A], [B], [D] matrices
+3. Calculate laminate strains {ε}
+4. Calculate stress in each ply
+5. Check Tsai-Wu in each ply
+6. Find first ply failure (FPF)
+
+## Symmetry Simplification
+**Symmetric laminate:** [+θ / -θ / +θ / -θ / ...]
+
+**Benefit:** [B] = 0 (no bending-extension coupling)
+- Pressure vessel: Always symmetric
+- Simpler analysis
+- No warping during cure
+
+## Thermal Residual Stresses
+Composite cured at ~120°C, operates at -40°C to +85°C:
+
+**Mismatch in thermal expansion:**
+\`\`\`
+α₁ (fiber direction) = -0.5 × 10⁻⁶ /°C (slightly negative!)
+α₂ (transverse) = 30 × 10⁻⁶ /°C (matrix-dominated)
+\`\`\`
+
+**Result:** Residual stresses in laminate
+- Must include in failure analysis
+- Typically 10-30 MPa magnitude
+
+## Software Implementation
+No one does this by hand!
+
+**Tools:**
+- **ANSYS ACP:** Full CLT + FEA
+- **Abaqus Composite:** Similar
+- **LS-DYNA:** For crash analysis
+- **MATLAB:** Custom CLT scripts
+
+## Key Insights from CLT
+
+1. **No single "composite modulus"** - depends on layup
+2. **Angle matters greatly** - [0/90] ≠ [±45]
+3. **Stacking sequence affects strength** - not just total thickness
+4. **Thermal effects are significant** - can't ignore
+
+## Validation
+- Coupon testing (flat laminates)
+- Match test data to CLT predictions
+- Adjust material properties if needed
+- Then apply to 3D pressure vessel
+    `,
+    relatedTopics: ['composite-materials', 'tsai-wu-criterion', 'ply-stacking'],
+  },
+
+  // WORKFLOW TOPICS
+  {
+    id: 'design-workflow',
+    title: 'Design Workflow Overview',
+    category: 'workflow',
+    keywords: ['workflow', 'process', 'design', 'steps', 'procedure'],
+    content: `
+# H2 Tank Design Workflow
+
+## Phase 1: Requirements Definition
+1. **Specify operating conditions:**
+   - Working pressure (35 or 70 MPa)
+   - Volume (L)
+   - Temperature range
+   - Fatigue life (cycles)
+
+2. **Select standards:**
+   - ISO 11119-3 (global)
+   - UN R134 (automotive)
+   - SAE J2579 (USA reference)
+
+3. **Define constraints:**
+   - Weight target (gravimetric %)
+   - Package space (L × W × H)
+   - Cost target ($/kg H₂)
+
+## Phase 2: Preliminary Design
+1. **Tank type selection:** Type IV (for automotive)
+2. **Geometry definition:**
+   - Cylinder diameter (optimize for package)
+   - Cylinder length (from volume requirement)
+   - Dome profile (isotensoid)
+   - Boss locations (refueling, pressure relief)
+
+3. **Material selection:**
+   - Liner: HDPE or PA6
+   - Fiber: T700 or T800 carbon
+   - Resin: Epoxy (automotive grade)
+
+## Phase 3: Analytical Design
+1. **Netting theory calculations:**
+   - Required wall thickness
+   - Fiber angles
+   - Layup sequence
+
+2. **Stress analysis:**
+   - Hoop stress (σ = PR/t)
+   - Axial stress (σ = PR/2t)
+   - Boss stress concentration
+
+3. **Initial weight estimate:**
+   - Fiber weight
+   - Liner weight
+   - Boss/valve weight
+   - **Gravimetric % = H₂_mass / Tank_mass**
+
+## Phase 4: FEA Analysis
+1. **Build geometry:**
+   - 3D CAD (isotensoid profile)
+   - Boss detail
+   - Mounting features
+
+2. **Mesh composite layers:**
+   - Shell elements for cylinder
+   - Solid elements for boss
+   - Each ply as separate layer
+
+3. **Apply loads:**
+   - Internal pressure (burst)
+   - Temperature (thermal stress)
+   - Boss reaction loads
+
+4. **Evaluate results:**
+   - Tsai-Wu failure index (each ply)
+   - First ply failure pressure
+   - Ultimate burst prediction
+   - Stress concentrations
+
+## Phase 5: Optimization
+1. **Design iterations:**
+   - Adjust ply angles
+   - Modify layup sequence
+   - Refine boss geometry
+   - **Goal:** Minimize weight while meeting burst requirement
+
+2. **Parametric studies:**
+   - Fiber angle sweep (±10° to ±60°)
+   - Wall thickness optimization
+   - Boss fillet radius
+
+## Phase 6: Probabilistic Analysis
+1. **Define uncertainties:**
+   - Material property variation (CV = 5-10%)
+   - Manufacturing tolerances (±0.5 mm)
+   - Environmental factors (-40°C to +85°C)
+
+2. **Monte Carlo simulation:**
+   - 10,000 samples
+   - Predict burst distribution
+   - **Target:** 99.99% reliability at 2.25× working pressure
+
+## Phase 7: Prototype Testing
+1. **Build prototypes:** 16+ tanks
+2. **Burst test:** Verify ≥ 2.25× NWP (3 tanks)
+3. **Pressure cycling:** 11,000 cycles (3 tanks)
+4. **Environmental:** Temp cycling + burst (3 tanks)
+5. **Fire test:** Bonfire + PRD activation (1 tank)
+6. **Flaw tolerance:** Impact + pressure (3 tanks)
+7. **Permeation:** ≤ 46 NmL/hr/L (3 tanks)
+
+## Phase 8: Certification
+1. **Compile test data**
+2. **Submit to notified body:** TÜV, BAM (Europe) or CSA (USA)
+3. **Type approval:** ISO 11119-3 certificate
+4. **Vehicle integration:** UN R134 compliance
+5. **Production approval:** Quality system audit
+
+## Phase 9: Production
+1. **Manufacturing setup:**
+   - Filament winding machine
+   - Rotomolding for liner
+   - Cure oven
+   - Hydrostatic test station
+
+2. **Quality control:**
+   - Every tank: Visual + hydrostatic test
+   - Batch sampling: Burst test (1 in 2000)
+   - Traceability: Serial number tracking
+
+## Phase 10: In-Service Monitoring
+1. **Periodic inspection:** Every 3 years
+2. **Incident tracking:** Failures, leaks
+3. **Design feedback:** Continuous improvement
+
+## Timeline Example
+\`\`\`
+Requirements:       2 weeks
+Preliminary design: 4 weeks
+FEA analysis:       6 weeks
+Optimization:       4 weeks
+Prototype build:    8 weeks
+Testing:            12 weeks
+Certification:      16 weeks
+Production setup:   12 weeks
+
+Total: ~64 weeks (~15 months)
+\`\`\`
+
+## This Software Supports
+- ✅ Requirements definition (traceability)
+- ✅ Material selection
+- ✅ Analytical design (netting theory)
+- ✅ FEA analysis (integration)
+- ✅ Optimization (parametric)
+- ✅ Monte Carlo simulation
+- ✅ Compliance checking (standards)
+- ✅ Test planning
+- ✅ Traceability (RTM)
+    `,
+    relatedTopics: ['requirements-traceability', 'fea-workflow', 'certification-process'],
+  },
+
+  // TROUBLESHOOTING TOPICS
+  {
+    id: 'common-analysis-errors',
+    title: 'Common Analysis Errors',
+    category: 'troubleshooting',
+    keywords: ['errors', 'troubleshooting', 'problems', 'issues', 'debug'],
+    content: `
+# Common Analysis Errors and Solutions
+
+## 1. Burst Pressure Too Low
+**Symptom:** Predicted burst < 2.25× NWP
+
+**Possible causes:**
+- ❌ Insufficient wall thickness
+- ❌ Wrong fiber angle (too far from 54.74°)
+- ❌ Material properties too conservative
+- ❌ Stress concentration at boss ignored
+
+**Solutions:**
+- ✅ Increase composite thickness
+- ✅ Add hoop (90°) layers
+- ✅ Validate material data (test coupons)
+- ✅ Refine boss geometry (larger radius)
+
+## 2. FEA Won't Converge
+**Symptom:** Analysis stops with convergence error
+
+**Possible causes:**
+- ❌ Mesh quality (distorted elements)
+- ❌ Over-constrained boundary conditions
+- ❌ Material instability (negative modulus)
+- ❌ Contact/interface issues
+
+**Solutions:**
+- ✅ Refine mesh (especially at boss)
+- ✅ Check constraints (allow thermal expansion)
+- ✅ Verify material properties (positive-definite)
+- ✅ Use penalty contact (not rigid)
+
+## 3. Weight Exceeds Target
+**Symptom:** Gravimetric % < 6%
+
+**Possible causes:**
+- ❌ Over-designed (too much safety margin)
+- ❌ Heavy liner material
+- ❌ Inefficient fiber angles
+- ❌ Thick boss/mounting features
+
+**Solutions:**
+- ✅ Optimize layup (iterative FEA)
+- ✅ Consider PA6 liner (vs HDPE)
+- ✅ Use geodesic (54.74°) primary layers
+- ✅ Minimize boss size
+
+## 4. Permeation Exceeds Limit
+**Symptom:** > 46 NmL/hr/L measured
+
+**Possible causes:**
+- ❌ Liner too thin
+- ❌ HDPE instead of PA6
+- ❌ Liner damage during winding
+- ❌ Temperature too high during test
+
+**Solutions:**
+- ✅ Increase liner thickness
+- ✅ Switch to PA6 or multi-layer
+- ✅ Improve mandrel surface finish
+- ✅ Control test temperature (±2°C)
+
+## 5. Fatigue Failure Before 11,000 Cycles
+**Symptom:** Tank bursts during pressure cycling
+
+**Possible causes:**
+- ❌ Stress concentration at boss
+- ❌ Poor fiber-resin adhesion
+- ❌ Liner cracking (propagates to composite)
+- ❌ Manufacturing defect (dry fiber)
+
+**Solutions:**
+- ✅ Redesign boss transition (gradual)
+- ✅ Improve fiber sizing/surface treatment
+- ✅ Optimize liner material (toughness)
+- ✅ NDT inspection (ultrasonic)
+
+## 6. Monte Carlo Shows Low Reliability
+**Symptom:** P(burst < 157.5 MPa) > 0.01%
+
+**Possible causes:**
+- ❌ Material variability too high (CV > 10%)
+- ❌ Manufacturing tolerance too loose
+- ❌ Design mean burst too close to limit
+- ❌ Wrong distribution assumptions
+
+**Solutions:**
+- ✅ Improve material quality control
+- ✅ Tighten manufacturing tolerances
+- ✅ Increase design margin (higher mean burst)
+- ✅ Use actual test data for distributions
+
+## 7. Boss Stress Concentration Too High
+**Symptom:** K_t > 3.0
+
+**Possible causes:**
+- ❌ Sharp fillet radius (< 5 mm)
+- ❌ Boss diameter too large
+- ❌ Insufficient helical reinforcement
+- ❌ Stiff metal boss in soft composite
+
+**Solutions:**
+- ✅ Increase fillet radius (10-15 mm)
+- ✅ Minimize boss opening
+- ✅ Add ±15° helical plies locally
+- ✅ Use composite boss (not metal)
+
+## 8. FEA Results Don't Match Test
+**Symptom:** Test burst ≠ FEA prediction
+
+**Possible causes:**
+- ❌ Wrong material properties
+- ❌ Progressive failure not modeled
+- ❌ Residual stresses ignored
+- ❌ Manufacturing defects in test article
+
+**Solutions:**
+- ✅ Test coupons to validate E, σ, ν
+- ✅ Use progressive failure analysis
+- ✅ Include thermal residual stress
+- ✅ NDT test specimens before burst
+
+## 9. Software Crashes During Analysis
+**Symptom:** Simulation terminates unexpectedly
+
+**Possible causes:**
+- ❌ Out of memory (large mesh)
+- ❌ Corrupt geometry
+- ❌ Incompatible units
+- ❌ Software bug
+
+**Solutions:**
+- ✅ Simplify geometry (2D axisymmetric)
+- ✅ Rebuild geometry from scratch
+- ✅ Check units (MPa vs Pa)
+- ✅ Update software, report bug
+
+## 10. Can't Meet All Requirements Simultaneously
+**Symptom:** Weight + Burst + Permeation trade-off
+
+**Reality:** This is design!
+
+**Solutions:**
+- ✅ Multi-objective optimization
+- ✅ Prioritize requirements (weight > cost?)
+- ✅ Iterate with stakeholders
+- ✅ Consider alternative technologies (Type V?)
+    `,
+    relatedTopics: ['debugging-fea', 'design-optimization', 'testing-validation'],
+  },
+];
+
+/**
+ * Search help topics by keywords
+ */
+export function searchHelpTopics(query: string): HelpTopic[] {
+  const lowerQuery = query.toLowerCase();
+
+  return HELP_TOPICS.filter(topic => {
+    // Search in title
+    if (topic.title.toLowerCase().includes(lowerQuery)) return true;
+
+    // Search in keywords
+    if (topic.keywords.some(kw => kw.toLowerCase().includes(lowerQuery))) return true;
+
+    // Search in content (first 500 chars)
+    if (topic.content.substring(0, 500).toLowerCase().includes(lowerQuery)) return true;
+
+    return false;
+  });
+}
+
+/**
+ * Get topic by ID
+ */
+export function getTopicById(id: string): HelpTopic | undefined {
+  return HELP_TOPICS.find(topic => topic.id === id);
+}
+
+/**
+ * Get topics by category
+ */
+export function getTopicsByCategory(category: HelpCategory): HelpTopic[] {
+  return HELP_TOPICS.filter(topic => topic.category === category);
+}

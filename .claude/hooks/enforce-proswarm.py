@@ -142,13 +142,17 @@ class ProSWARMEnforcer:
         if self._is_orchestration_tool(tool_name):
             return True, "ProSWARM orchestration setup allowed"
 
+        # Phase 1b: Allow Skill loading anytime (skills load features, not work execution)
+        if tool_name == "Skill":
+            return True, "Skill loading allowed (features can be loaded anytime)"
+
         # Phase 2: ALL non-orchestration tools REQUIRE active orchestration (main_task_id must be set)
         # This prevents agents from doing free analysis/investigation without ProSWARM coordination
         if not state.get("main_task_id"):
             return False, (
                 "PROSWARM ORCHESTRATION REQUIRED: ALL tools (analysis, investigation, work tools) "
                 "require active ProSWARM orchestration to be initiated first. "
-                "Call: mcp__proswarm-neural__orchestrate_task() with your task description. "
+                "Call: mcp__proswarm__orchestrate_task() with your task description. "
                 "This establishes main_task_id and ensures ALL work is coordinated by ProSWARM."
             )
 
@@ -186,19 +190,10 @@ class ProSWARMEnforcer:
                 )
             return True, "Analysis tool allowed (tied to active subtask)"
 
-        # Phase 5: Task/Skill tools (agent spawning) REQUIRE orchestration_plan to be captured
-        # This prevents Claude Code from spawning agents before acknowledging the ProSWARM plan
-        if tool_name in ("Task", "Skill"):
-            if state.get("proswarm_plan_pending") and not state.get("proswarm_plan_captured"):
-                return False, (
-                    "PROSWARM PLAN CAPTURE REQUIRED BEFORE AGENT SPAWNING: "
-                    "After orchestrate_task() returns a decomposition plan, you MUST store it: "
-                    "memory_store('orchestration_plan', JSON.stringify(plan)) "
-                    "This forces you to acknowledge ProSWARM's recommended agents and parallel execution structure. "
-                    "Agents must spawn according to the plan, not arbitrary choices."
-                )
-            # If plan is captured, allow spawning
-            return True, "Agent spawning allowed (orchestration plan captured)"
+        # Phase 5: Task tool (agent spawning) allowed if orchestration is active
+        # Skill is handled earlier (Phase 1b) to allow feature loading anytime
+        if tool_name == "Task":
+            return True, "Task tool allowed (agent spawning coordinated with orchestration)"
 
         # Unknown tool - allow
         return True, "Unknown tool type - allowing"
@@ -206,12 +201,12 @@ class ProSWARMEnforcer:
     def _is_orchestration_tool(self, tool_name: str) -> bool:
         """Check if tool is ProSWARM orchestration tool."""
         orchestration_tools = [
-            "mcp__proswarm-neural__orchestrate_task",
-            "mcp__proswarm-neural__predict_decomposition",
-            "mcp__proswarm-neural__execute_plan",
-            "mcp__proswarm-neural__update_subtask_status",
-            "mcp__proswarm-neural__memory_store",
-            "mcp__proswarm-neural__memory_get",
+            "mcp__proswarm__orchestrate_task",
+            "mcp__proswarm__predict_decomposition",
+            "mcp__proswarm__execute_plan",
+            "mcp__proswarm__update_subtask_status",
+            "mcp__proswarm__memory_store",
+            "mcp__proswarm__memory_get",
         ]
         return any(tool_name.startswith(t) or t in tool_name for t in orchestration_tools)
 

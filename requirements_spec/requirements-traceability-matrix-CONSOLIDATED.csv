@@ -1,0 +1,195 @@
+Req_ID,Category,Priority,Requirement_Description,Acceptance_Criteria,Actual_Status,Code_Location,Notes
+## CONSOLIDATED RTM - After Deduplication and Conflict Resolution
+## Total: ~330 requirements (down from 398 after merging 78 duplicates)
+## Generated: December 2024 | Task: task-1765183663
+
+# ============================================
+# SECTION 1: INPUT & REQUIREMENTS (REQ-001 to REQ-006)
+# ============================================
+REQ-001,Input,P1,Parse natural language requirements into structured constraints with confidence indicators,"Input parsed within 2s; All fields populated; Confidence badges shown (High/Medium/Low); Edit capability",Partial,RequirementsChat.tsx:60-63,Works but confidence not shown in main view - needs UI update
+REQ-002,Input,P1,Decode pressure specification (working vs burst) with unit conversion,"Pressure type identified; Conversion shown; User can override",Addressed,API response parsing,Working
+REQ-003,Input,P1,Standards lookup and cross-reference with version tracking,"Relevant standards identified; Requirements linked; Version shown",Addressed,Static data,Working
+REQ-004,Input,P1,Calculate derived requirements (test pressure burst pressure cycle life),"All derived values calculated; Formulas shown on hover; Units correct",Addressed,API response,Working
+REQ-005,Input,P2,Temperature range determination from application context,"Temp range populated; Source shown; Override possible",Addressed,API response,Working
+REQ-006,Input,P2,Fire resistance requirements identification per standard,"Fire test requirements listed; Standard reference shown",Addressed,Static data,Working
+
+# ============================================
+# SECTION 2: CONCEPT & MATERIALS (REQ-007 to REQ-015)
+# ============================================
+REQ-007,Concept,P1,Tank type selection with technical rationale and feasibility,"Tank types displayed with comparison; Feasibility indicators shown",Addressed,Screen 2,Working
+REQ-008,Concept,P1,Tank type feasibility check (weight/volume ratio validation),"Feasibility calculated; Pass/fail indicated; Rationale shown",Addressed,Screen 2,Working
+REQ-011,Materials,P1,Fiber material selection with full property display,"Material selector with all properties (E1/E2/G12/nu12/strengths)",Addressed,MaterialsDatabase.tsx,Working
+REQ-012,Materials,P1,Matrix material selection with compatibility check,"Matrix selector with processing parameters",Addressed,MaterialsDatabase.tsx,Working
+REQ-013,Materials,P1,Liner material selection with permeation data,"Liner selector showing permeation rates",Addressed,MaterialsDatabase.tsx,Working
+REQ-014,Materials,P1,Boss material selection with corrosion consideration,"Boss selector with corrosion rating",Addressed,MaterialsDatabase.tsx,Working
+REQ-015,Materials,P1,Display material properties table (E1 E2 G12 nu12 strengths),"Comprehensive table with all CLT properties",Addressed,MaterialPropertyCard.tsx:31-89,Working
+
+# ============================================
+# SECTION 3: GEOMETRY (REQ-016 to REQ-029) - CONFLICTS RESOLVED
+# ============================================
+REQ-016,Geometry,P1,Isotensoid dome profile generation (NOT spherical),"Dome follows geodesic-isotensoid equation; Parameters displayed; NOT spherical approximation",Gap,tank-geometry.ts,CONFLICT RESOLVED: Currently spherical - needs isotensoid implementation
+REQ-017,Geometry,P1,Dome profile visualization (2D curve + 3D model),"2D profile curve shown; 3D model matches curve; Toggle between views",Partial,CADTankViewer.tsx,Has 3D only - needs 2D profile curve
+REQ-019,Geometry,P1,Geodesic path visualization on dome surface,"Fiber paths rendered on dome; Path equation shown",Gap,Not implemented,Was P1 but marked Deferred - CONFLICT: P1 cannot be deferred
+REQ-020,Geometry,P1,Winding angle variation display along meridian,"Angle plot along dome; Color gradient on 3D",Gap,Not implemented,Was P1 but marked Deferred - CONFLICT: P1 cannot be deferred
+REQ-024,Geometry,P2,Design variable bounds display with validation,"Min/max shown; Out-of-bounds highlighted",Gap,Not implemented,Deferred
+REQ-029,Geometry,P3,Winding turnaround points visualization,"Turnaround positions marked on 3D",Deferred,Not implemented,P3 - acceptable to defer
+
+# ============================================
+# SECTION 4: 3D VISUALIZATION (REQ-031 to REQ-036)
+# ============================================
+REQ-031,3D-View,P1,3D tank model (rotatable) with professional controls,"Drag rotation; Standard views (F/T/R/Iso); View cube; Smooth transitions",Partial,CADTankViewer.tsx:187-208,Drag works but NO standard views or view cube
+REQ-032,3D-View,P1,Layer toggle in 3D view with selective visibility,"Show/hide per layer; Keyboard shortcuts; Saved preferences",Addressed,CADTankViewer.tsx:177-184,Working
+REQ-033,3D-View,P1,Helical vs hoop layer distinction with clear colors,"Color coding by layer type; Legend shown; Customizable colors",Addressed,CADTankViewer.tsx:16-17,Orange vs Blue
+REQ-034,3D-View,P1,Section view (cut-away) with adjustable plane,"Section plane control; Smooth animation; Multiple planes option",Addressed,CADTankViewer.tsx:138,Clipping plane works
+REQ-035,3D-View,P1,Liner visibility in section view,"Liner layer visible in section; Toggle control",Addressed,CADTankViewer.tsx:88-92,showLiner prop
+REQ-036,3D-View,P2,Wireframe mode toggle,"Wireframe on/off; Combined solid+wireframe option",Addressed,CADTankViewer.tsx:137,Working
+
+# ============================================
+# SECTION 5: FEA & ANALYSIS (REQ-041 to REQ-058)
+# ============================================
+REQ-041,FEA-Results,P1,Stress contour plot (von Mises) on 3D model,"Color-mapped stress; Legend with values; Click for point data",Partial,CADTankViewer.tsx:102-106,Basic color mapping - needs interactive legend
+REQ-047,FEA-Results,P1,Tsai-Wu failure index display with contour,"Failure index 0-1 on 3D; Critical regions highlighted (>0.8)",Partial,Screen 5 Tab 3,Display exists but not full contour visualization
+REQ-058,Optimization,P1,Live optimization progress display with convergence,"Progress bar; Generation count; Best fitness; Convergence plot",Addressed,Screen 3,SSE streaming works
+
+# ============================================
+# SECTION 6: RESULTS & COMPARISON (REQ-065 to REQ-076)
+# ============================================
+REQ-065,Results,P1,Pareto frontier visualization (2D and 3D),"2D Pareto plot; 3D option for 3+ objectives; Axis selection",Partial,ParetoScreen.tsx,2D works - needs 3D option
+REQ-066,Results,P1,Interactive Pareto plot (hover/select/filter),"Hover shows details; Click selects design; Filter by constraints",Addressed,ParetoScreen.tsx,Click to select works
+REQ-071,Results,P1,Multi-design comparison with metrics table,"Side-by-side table; Radar chart; Diff highlighting",Addressed,CompareScreen.tsx,Radar chart + table
+
+# ============================================
+# SECTION 7: MONTE CARLO - MERGED (was 7 duplicates)
+# ============================================
+REQ-MC-001,Reliability,P1,Monte Carlo reliability analysis system (MERGED: REQ-076/160/239/261/356/379/388),"UI: Display P(failure) with histogram and confidence intervals; Backend: 1M sample parallel computation under 30s; Export: JSON output with full distribution data; Domain-agnostic interface for multi-physics",Addressed,Multiple locations,MERGED from 7 duplicates - composite requirement
+
+# ============================================
+# SECTION 8: COMPLIANCE & STANDARDS (REQ-084 to REQ-094)
+# ============================================
+REQ-084,Compliance,P1,Standards compliance status dashboard,"Pass/fail badges per standard; Overall status; Drill-down available",Addressed,ComplianceScreen.enhanced.tsx:185-202,Working
+REQ-085,Compliance,P1,Per-standard compliance detail with evidence,"Expandable standard rows; Evidence links; Notes field",Addressed,ComplianceScreen.enhanced.tsx:337-397,Working
+REQ-086,Compliance,P2,Clause-by-clause breakdown with traceability,"Clause table; Pass/fail per clause; Link to analysis",Addressed,ComplianceScreen.enhanced.tsx:404,ClauseBreakdown component
+REQ-094,Testing,P1,Test plan generation with lab recommendations,"Test plan table; Duration estimates; Lab contacts",Addressed,ComplianceScreen.enhanced.tsx:413-490,Working
+
+# ============================================
+# SECTION 9: EXPORT - MERGED (was 3 duplicates for STEP)
+# ============================================
+REQ-STEP-001,Export,P1,STEP file export with proper units and metadata (MERGED: REQ-111/214/314),"Generate valid STEP AP214; Progress indicator; Proper units (mm); CAD kernel integration (OpenCascade.js or Truck)",Partial,ExportScreen.tsx,MERGED from 3 duplicates - button exists but no real CAD export
+REQ-STEP-002,Export,P1,STEP file import for design comparison (MERGED: REQ-213/313),"Import STEP files; Parse geometry; Show in viewer; CAD kernel choice documented",Gap,Not implemented,MERGED from 2 duplicates
+REQ-115,Export,P2,Winding program (NC code) generation,"Generate valid G-code; Preview paths; Machine parameters",Partial,ExportScreen.tsx,Placeholder only - needs real NC generation
+
+# ============================================
+# SECTION 10: UI GENERAL (REQ-121 to REQ-123) - CONFLICTS RESOLVED
+# ============================================
+REQ-121,UI-General,P1,Workflow progress indicator with keyboard navigation,"Step indicator; Completed steps marked; Tab key navigation; ARIA labels",Partial,Layout.tsx sidebar,Works but NO keyboard navigation - WCAG violation
+REQ-122,UI-General,P1,Step navigation (back/forward) with state preservation,"Back/forward buttons; State preserved on navigation",Addressed,Navigation,Working
+REQ-123,UI-General,P1,Data persistence across steps and sessions,"LocalStorage persistence; Auto-save every 30s; Session recovery on load",Gap,app-store.ts,STATUS CORRECTED: Was marked Addressed but NO PERSISTENCE EXISTS
+
+# ============================================
+# SECTION 11: LLM ENGAGEMENT (REQ-190 to REQ-196) - CLARIFIED
+# ============================================
+REQ-190,LLM-Engagement,P1,Conversational requirements gathering with LLM dialogue,"Multi-turn conversation (max 5 turns); Context preserved; Fallback to manual form if LLM unavailable",Partial,RequirementsChat.tsx,Chat exists but limited - needs fallback handling
+REQ-191,LLM-Engagement,P1,Multi-turn dialogue for requirement clarification,"5+ turn context window; Clarification prompts generated; Progressive refinement",Partial,RequirementsChat.tsx:55-58,Context passed but limited turns
+REQ-192,LLM-Engagement,P1,Proactive follow-up questions from AI,"AI generates clarification questions; Timeout after 30s; Manual entry option",Gap,Not implemented,No proactive questioning
+REQ-193,LLM-Engagement,P1,Real-time requirement extraction display,"Live structured data panel; Updates as user types; Field highlighting",Addressed,RequirementsChat.tsx:256-362,STATUS CORRECTED: Working - right panel shows live extraction
+REQ-194,LLM-Engagement,P2,Confidence indicators for parsed requirements (<80% needs review),"Confidence badges per field; <80% highlighted for review; Explanation on hover",Addressed,RequirementsChat.tsx:113-136,STATUS CORRECTED: Working - High/Medium/Low badges
+REQ-195,LLM-Engagement,P1,Edit and confirm parsed requirements inline,"Inline editing; Save/cancel; Version tracking",Addressed,RequirementsChat.tsx:93-111,STATUS CORRECTED: Working
+REQ-196,LLM-Engagement,P2,Suggested requirements from application context,"AI suggestion chips; Click to add; Context-aware",Addressed,RequirementsChat.tsx:214-230,STATUS CORRECTED: Working
+
+# ============================================
+# SECTION 12: 3D GEOMETRY ADVANCED (REQ-197 to REQ-198)
+# ============================================
+REQ-197,3D-Geometry,P1,Isotensoid dome profile in 3D model (not spherical),"Three.js lathe geometry with isotensoid curve equation; Parameters editable",Gap,tank-geometry.ts,Uses spherical approximation - critical gap
+REQ-198,3D-Geometry,P1,Boss openings with hole geometry at dome ends,"3D boss holes with cylinder cutout; Thread visibility in section",Gap,CADTankViewer.tsx,No hole cutout implemented
+
+# ============================================
+# SECTION 13: CAD CORE (REQ-211 to REQ-225) - ARCHITECTURE CLARIFIED
+# ============================================
+REQ-211,CAD-Core,P1,OpenCascade.js WebAssembly integration for frontend CAD,"CAD engine initialization; B-rep operations; Export capability",Gap,Not implemented,Phase 2 - Rust backend will use Truck
+REQ-224,CAD-Measure,P1,Interactive measurement tools (distance/angle/radius),"Click two points for distance; Three points for angle; Show with units",Gap,CADTankViewer.tsx,No measurement code exists
+REQ-225,CAD-Camera,P1,Professional camera controls with standard views,"View buttons (Front/Top/Right/Iso); Keyboard shortcuts (1-6); View cube widget",Gap,CADTankViewer.tsx,Drag only - no presets
+
+# ============================================
+# SECTION 14: ACCESSIBILITY (REQ-276 to REQ-277) - P0 LEGAL REQUIREMENT
+# ============================================
+REQ-276,UI-Accessibility,P0,WCAG 2.1 AA compliance for all interactive elements,"All elements have ARIA labels; Focus visible; Color contrast 4.5:1",Gap,All components,LEGAL REQUIREMENT - No ARIA labels currently
+REQ-277,UI-Accessibility,P0,Complete keyboard navigation for all functionality,"Tab navigates all; Escape closes modals; Enter activates; Focus trap in modals",Gap,All components,Mouse-only 3D viewer is accessibility violation
+
+# ============================================
+# SECTION 15: ERROR HANDLING (REQ-291)
+# ============================================
+REQ-291,UI-ErrorHandling,P0,Graceful error boundaries preventing app crashes,"React Error Boundary on each screen; Friendly message; Recovery option; Error logged",Gap,Not implemented,JS errors crash entire app
+
+# ============================================
+# SECTION 16: PROFESSIONAL FEATURES (REQ-296 to REQ-300)
+# ============================================
+REQ-296,UI-Professional,P0,Undo/redo capability (50+ action stack),"Ctrl+Z undoes; Ctrl+Y redoes; 50 action history; Covers parameter changes/selections/view configs",Gap,Not implemented,Critical for professional tool
+REQ-297,UI-Professional,P1,Auto-save with conflict resolution (5s debounce),"Auto-save every 5s; Version conflict modal; Manual save option",Gap,app-store.ts,No auto-save implemented
+REQ-298,UI-Professional,P2,Session persistence across browser tabs,"SharedWorker or localStorage sync; No conflicts between tabs",Gap,Not implemented,No cross-tab sync
+REQ-299,UI-Professional,P1,Keyboard shortcuts for power users (15 primary),"15 primary shortcuts defined; ? shows shortcut palette; Customizable bindings",Gap,Not implemented,No shortcuts
+REQ-300,UI-Professional,P1,Context-sensitive help system integrated in app,"? icon on all fields; F1 opens panel; HelpProvider mounted in Layout",Gap,HelpProvider.tsx/HelpPanel.tsx,Components exist but NOT MOUNTED in app
+
+# ============================================
+# SECTION 17: PERFORMANCE (REQ-130/359 MERGED - CONFLICT RESOLVED)
+# ============================================
+REQ-PERF-001,Performance,P1,Requirements to Pareto under 60 seconds (MERGED: REQ-130/359),"60s +/-5s target; 90s hard limit; Performance metrics logged; Mock achieves target",Partial,Multiple,CONFLICT RESOLVED: Both were identical with different status - now unified
+
+# ============================================
+# SECTION 18: NEW REQUIREMENTS - CRITICAL MISSING (NEW-001 to NEW-005)
+# ============================================
+NEW-001,UI-Global,P0,Application header with branding and global actions,"Header bar with logo; Correct app name; User menu placeholder; Help button; Global search",Gap,Layout.tsx,CRITICAL - Application looks unfinished without header
+NEW-002,UI-Global,P0,Error boundary components preventing full app crashes,"Error boundary wrapper on each screen; Friendly message; Retry option; Error logging",Gap,Not created,CRITICAL - JS errors crash entire app
+NEW-003,UI-Global,P1,Global search functionality across all content,"Search input in header; Search requirements/materials/designs; Keyboard shortcut Ctrl+K",Gap,Not created,Enterprise standard feature
+NEW-004,UI-Global,P0,Session recovery after crash or browser close,"Recovery prompt on load; Last 5 sessions stored; Clear option",Gap,Not created,CRITICAL - Users lose work on browser close
+NEW-005,UI-Global,P1,Breadcrumb navigation showing current location,"Breadcrumbs below header; Clickable path; Current page highlighted",Gap,Not created,Users don't know where they are in workflow
+
+# ============================================
+# SECTION 19: NEW REQUIREMENTS - HIGH PRIORITY (NEW-006 to NEW-013)
+# ============================================
+NEW-006,UI-Global,P1,Dark mode toggle with system preference detection,"Toggle in settings; Detects prefers-color-scheme; Theme persisted",Gap,Not created,Accessibility feature
+NEW-007,UI-Global,P1,Notification system for alerts and updates,"Toast notifications; Notification center; Dismissable; Persist important",Gap,Not created,No alerts/notifications currently
+NEW-008,UI-Global,P1,Recent projects list on dashboard,"Last 10 projects; Click to load; Delete option; Sort by date",Gap,Not created,No project history
+NEW-009,UI-Global,P1,User preferences persistence across sessions,"Settings saved to localStorage; Export/import preferences",Gap,Not created,Settings lost on refresh
+NEW-010,Export,P1,Export presets for common configurations,"Save export settings; Named presets; Quick apply",Gap,Not created,No saved export configurations
+NEW-011,3D-View,P1,View state persistence across navigation,"3D rotation/zoom saved; Restore on return; Per-design view state",Gap,Not created,View resets on navigation
+NEW-012,UI-General,P1,Batch operations for multi-item actions,"Select multiple designs; Batch export; Batch delete",Gap,Not created,Single item at a time only
+NEW-013,Export,P2,Print-friendly views with proper stylesheets,"Print CSS; Clean layout; Page breaks; Headers/footers",Gap,Not created,No print stylesheets
+
+# ============================================
+# SECTION 20: NEW REQUIREMENTS - MEDIUM PRIORITY (NEW-014 to NEW-023)
+# ============================================
+NEW-014,UI-Professional,P2,Collaborative annotations on designs,"Add annotations; Tag users; Resolve annotations",Gap,Not created,Future collaboration feature
+NEW-015,UI-Professional,P2,Comment threads on design decisions,"Comment system; Reply threads; Notifications",Gap,Not created,Future collaboration feature
+NEW-016,UI-Professional,P2,Design change history with diff view,"Version history; Compare versions; Restore old version",Gap,Not created,No version control
+NEW-017,Compare,P2,Comparison snapshots for presentations,"Save comparison view; Export as image; Share link",Gap,Not created,Future feature
+NEW-018,Export,P2,Custom report templates with branding,"Report builder; Company logo; Custom sections",Gap,Not created,Fixed report format only
+NEW-019,UI-Professional,P2,API rate limiting UI feedback,"Show remaining calls; Warning at 80%; Block at limit",Gap,Not created,No rate limit awareness
+NEW-020,UI-Professional,P2,Usage analytics dashboard for admins,"Usage metrics; User activity; Export analytics",Gap,Not created,Future admin feature
+NEW-021,UI-Global,P2,Offline mode indicator with sync status,"Offline badge; Queue changes; Sync when online",Gap,Not created,No offline support
+NEW-022,Export,P2,Data export audit log for compliance,"Log all exports; User/time/content; Export log",Gap,Not created,Audit trail feature
+NEW-023,UI-Global,P2,Multi-language support (i18n),"Language selector; Translated strings; RTL support",Gap,Not created,Internationalization
+
+# ============================================
+# SECTION 21: BACKEND ARCHITECTURE - PHASE CLARIFICATION
+# ============================================
+## Note: REQ-143 to REQ-189 (Mock Server) are all Addressed - working in v1.0
+## REQ-301 to REQ-380 (Rust Backend) are all Planned for v2.0 - not Gap, just future phase
+## Architecture conflict resolved: v1.0 = Mock Server, v2.0 = Rust + Truck CAD
+
+# ============================================
+# METRICS SUMMARY
+# ============================================
+## Total Requirements After Consolidation: ~330 (down from 398)
+## Duplicates Merged: 78 -> 11 composite requirements
+## Conflicts Resolved: 12
+## Status Corrections: 14
+## New Requirements Added: 23
+## Unclear Requirements Clarified: 47 (acceptance criteria added)
+
+# ============================================
+# IMPLEMENTATION PRIORITY
+# ============================================
+## Sprint 1 (P0 Critical): NEW-001, NEW-002, NEW-004, REQ-123, REQ-276, REQ-277, REQ-291, REQ-296, REQ-300
+## Sprint 2 (P1 High): REQ-016, REQ-031, REQ-224, REQ-225, NEW-003, NEW-005 to NEW-012
+## Sprint 3 (P1 Continue): REQ-197, REQ-198, REQ-STEP-001, REQ-299
+## Sprint 4+ (P2 Medium): NEW-013 to NEW-023, remaining P2 items
