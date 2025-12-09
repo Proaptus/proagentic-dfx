@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import paretoData from '../../../../../data/static/pareto/pareto-50.json';
+// paretoData imported for future use in results generation
+import _paretoData from '../../../../../data/static/pareto/pareto-50.json';
+void _paretoData;
 
 // GET /api/optimization/[id] - Get optimization job status
 export async function GET(

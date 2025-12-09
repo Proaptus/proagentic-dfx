@@ -14,8 +14,8 @@ interface ExtractedRequirement {
   editable: boolean;
 }
 
-// Mock dialogue state tracking
-const dialogueStates = new Map<string, {
+// Mock dialogue state tracking - exported for potential use by other modules
+export const dialogueStates = new Map<string, {
   stage: number;
   requirements: Record<string, { value: unknown; confidence: number }>;
 }>();

@@ -93,21 +93,53 @@ export async function GET(
         percentile_95: Math.round(burstStats.percentile95),
         histogram: generateHistogram(burstStats.mean, burstStats.std)
       },
+      // Uncertainty breakdown with correct field names for PieChart
       uncertainty_breakdown: design.reliability?.uncertainty_breakdown || [
-        { source: 'Fiber strength variability', cov: 0.08, variance_contribution: 0.52 },
-        { source: 'Thickness variability', cov: 0.05, variance_contribution: 0.28 },
-        { source: 'Fiber volume fraction', cov: 0.03, variance_contribution: 0.15 },
-        { source: 'Angle variability', cov: 0.02, variance_contribution: 0.05 }
+        { name: 'Material Properties', value: 47, color: '#3B82F6' },
+        { name: 'Manufacturing Tolerances', value: 28, color: '#10B981' },
+        { name: 'Testing Variability', value: 15, color: '#F59E0B' },
+        { name: 'Environmental Factors', value: 10, color: '#EF4444' }
       ],
       key_insight: design.reliability?.key_insight ||
         'Fiber strength dominates uncertainty. Tighter QC on incoming fiber would improve reliability most effectively.',
-      sensitivity: design.reliability?.sensitivity || [
-        { parameter: 'Fiber strength', effect_bar_per_percent: 17.2 },
-        { parameter: 'Hoop layer thickness', effect_bar_per_percent: 12.1 },
-        { parameter: 'Helical layer thickness', effect_bar_per_percent: 8.4 },
-        { parameter: 'Fiber volume fraction', effect_bar_per_percent: 5.2 },
-        { parameter: 'Helical angle', effect_bar_per_percent: -2.8 },
-        { parameter: 'Liner thickness', effect_bar_per_percent: 0.3 }
+      // Sensitivity data with tornado chart format (negative/positive %)
+      // Transform from effect_bar_per_percent format if needed
+      sensitivity: (() => {
+        const rawSensitivity = design.reliability?.sensitivity;
+        if (!rawSensitivity) {
+          return [
+            { parameter: 'Fiber Tensile Strength', negative: -52, positive: 52 },
+            { parameter: 'Hoop Layer Thickness', negative: -28, positive: 28 },
+            { parameter: 'Helical Layer Thickness', negative: -15, positive: 15 },
+            { parameter: 'Fiber Volume Fraction', negative: -12, positive: 12 },
+            { parameter: 'Helical Winding Angle', negative: -8, positive: 8 },
+            { parameter: 'Liner Thickness', negative: -3, positive: 3 }
+          ];
+        }
+        // Check if data needs transformation (has effect_bar_per_percent instead of negative/positive)
+        if (rawSensitivity[0]?.effect_bar_per_percent !== undefined) {
+          return rawSensitivity.map((item: { parameter: string; effect_bar_per_percent: number }) => ({
+            parameter: item.parameter,
+            negative: -Math.abs(Math.round(item.effect_bar_per_percent * 3)), // Scale effect to percentage
+            positive: Math.abs(Math.round(item.effect_bar_per_percent * 3))
+          }));
+        }
+        return rawSensitivity;
+      })(),
+      // Safety factor components for decomposition table
+      safety_factor_components: [
+        { component: 'Base Safety Factor', factor: 1.5, description: 'Minimum code requirement (ASME Sec VIII Div 2)' },
+        { component: 'Material Uncertainty', factor: 1.15, description: 'Accounts for batch-to-batch variation' },
+        { component: 'Manufacturing Tolerance', factor: 1.10, description: 'Compensates for process variability' },
+        { component: 'Load Uncertainty', factor: 1.05, description: 'Accounts for dynamic loading conditions' },
+        { component: 'Environmental', factor: 1.08, description: 'Temperature and humidity effects' }
+      ],
+      // Confidence intervals for burst pressure visualization
+      confidence_intervals: [
+        { level: '68%', lower: Math.round(burstStats.mean - burstStats.std), upper: Math.round(burstStats.mean + burstStats.std), mean: Math.round(burstStats.mean) },
+        { level: '90%', lower: Math.round(burstStats.mean - 1.645 * burstStats.std), upper: Math.round(burstStats.mean + 1.645 * burstStats.std), mean: Math.round(burstStats.mean) },
+        { level: '95%', lower: Math.round(burstStats.mean - 1.96 * burstStats.std), upper: Math.round(burstStats.mean + 1.96 * burstStats.std), mean: Math.round(burstStats.mean) },
+        { level: '99%', lower: Math.round(burstStats.mean - 2.576 * burstStats.std), upper: Math.round(burstStats.mean + 2.576 * burstStats.std), mean: Math.round(burstStats.mean) }
       ]
     };
 

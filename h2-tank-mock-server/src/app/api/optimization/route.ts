@@ -9,7 +9,8 @@ const optimizationJobs = new Map<string, {
 // POST /api/optimization - Start optimization job
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const _body = await request.json();
+    void _body; // Will be used for optimization parameters
 
     // Generate unique job ID
     const jobId = `opt-${Date.now().toString(36)}-${Math.random().toString(36).substr(2, 4)}`;

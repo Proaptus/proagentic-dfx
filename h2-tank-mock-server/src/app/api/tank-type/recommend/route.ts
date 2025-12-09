@@ -82,8 +82,8 @@ function calculateTankTypeRecommendation(
     rationale = `Weight target suggests Type V but marine environment requires Type IV for proven certification path. Type V is unproven for UN R134 marine applications.`;
   }
 
-  // Build alternatives
-  const alternatives = type_comparison
+  // Build alternatives (detailed format for debugging - kept for future use)
+  const _alternatives = type_comparison
     .filter(t => t.type !== recommendedType)
     .map(t => {
       let reason = '';
@@ -112,6 +112,7 @@ function calculateTankTypeRecommendation(
         risk
       };
     });
+  void _alternatives; // Suppress unused warning - kept for debugging
 
   // Format for frontend compatibility
   const formattedAlternatives = type_comparison

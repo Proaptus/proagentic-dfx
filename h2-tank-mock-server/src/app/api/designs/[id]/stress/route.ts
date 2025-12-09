@@ -22,7 +22,8 @@ interface LayerStress {
   margin_percent: number;
 }
 
-interface StressConcentration {
+// Exported for type reuse in other modules
+export interface StressConcentration {
   location: { z_mm?: number; r_mm?: number; theta_deg?: number };
   scf: number;
   peak_stress_mpa: number;
@@ -84,8 +85,8 @@ function calculateLayerStressMultiplier(layerPosition: number): number {
   return 0.7 + 0.3 * (1 - layerPosition);
 }
 
-// Calculate fiber angle effect on local stress (REQ-206)
-function applyFiberAngleEffect(baseStress: number, fiberAngle: number, theta: number): number {
+// Calculate fiber angle effect on local stress (REQ-206) - exported for reuse
+export function applyFiberAngleEffect(baseStress: number, fiberAngle: number, theta: number): number {
   // Stress varies with angle from fiber direction
   // Peak stress at ±15° from joint line for helical layers
   const angleDiff = Math.abs(theta - fiberAngle);

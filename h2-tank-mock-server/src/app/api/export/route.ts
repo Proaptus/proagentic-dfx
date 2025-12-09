@@ -15,7 +15,9 @@ interface ExportRequest {
 // POST /api/export - Start export package generation
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json() as ExportRequest;
+    // Parse request body - will be used for actual export generation
+    const _body = await request.json() as ExportRequest;
+    void _body; // Suppress unused warning until export logic is implemented
 
     const exportId = `exp-${Date.now().toString(36)}-${Math.random().toString(36).substr(2, 4)}`;
 
