@@ -82,7 +82,7 @@ export function applyFiberAngleEffect(baseStress: number, fiberAngle: number, th
   return baseStress * angleEffect;
 }
 
-// Calculate stress at position
+// Calculate stress at position with stress type-dependent distribution
 export function calculateLocalStress(
   z: number,
   r: number,
@@ -93,7 +93,8 @@ export function calculateLocalStress(
   wallThickness: number,
   transitionSCF: number,
   bossSCF: number,
-  bossID: number
+  bossID: number,
+  stressType: string = 'vonMises'
 ): { stress: number; region: 'boss' | 'dome' | 'transition' | 'cylinder' } {
   let region: 'boss' | 'dome' | 'transition' | 'cylinder';
   if (z <= cylinderLength * 0.9) {
@@ -107,25 +108,111 @@ export function calculateLocalStress(
   }
 
   const radialPosition = Math.min(1, Math.max(0, (r - innerRadius) / wallThickness));
-  const thicknessMultiplier = 1.0 - 0.3 * radialPosition;
+
+  // Different radial distribution patterns for different stress types
+  let thicknessMultiplier: number;
+  switch (stressType.toLowerCase()) {
+    case 'hoop':
+      // Hoop stress highest at inner surface, decreases outward
+      thicknessMultiplier = 1.0 - 0.4 * radialPosition;
+      break;
+    case 'axial':
+      // Axial stress more uniform through thickness
+      thicknessMultiplier = 1.0 - 0.15 * radialPosition;
+      break;
+    case 'shear':
+      // Shear stress peaks in middle of thickness
+      thicknessMultiplier = 0.6 + 0.4 * Math.sin(radialPosition * Math.PI);
+      break;
+    case 'vonmises':
+    default:
+      // Von Mises combines effects
+      thicknessMultiplier = 1.0 - 0.3 * radialPosition;
+      break;
+  }
 
   let stressFactor = 0.7;
 
   if (region === 'cylinder') {
-    stressFactor = 0.7;
+    // Different axial distribution for different stress types
+    switch (stressType.toLowerCase()) {
+      case 'hoop':
+        // Hoop stress very uniform in cylinder
+        stressFactor = 0.85;
+        break;
+      case 'axial':
+        // Axial stress lower in cylinder body
+        stressFactor = 0.5;
+        break;
+      case 'shear':
+        // Shear minimal in cylinder
+        stressFactor = 0.35;
+        break;
+      default:
+        stressFactor = 0.7;
+    }
   } else if (region === 'transition') {
     const transitionProgress = (z - cylinderLength * 0.9) / (cylinderLength * 0.25);
     const peakFactor = Math.sin(Math.min(1, transitionProgress) * Math.PI);
-    stressFactor = 0.7 + (transitionSCF - 1.0) * peakFactor * 0.4;
+
+    // Stress concentrations differ by type
+    switch (stressType.toLowerCase()) {
+      case 'hoop':
+        // Hoop stress concentration at transition
+        stressFactor = 0.85 + (transitionSCF - 0.8) * peakFactor * 0.5;
+        break;
+      case 'axial':
+        // Axial stress increases sharply at transition (membrane bending)
+        stressFactor = 0.5 + (transitionSCF + 0.3) * peakFactor * 0.6;
+        break;
+      case 'shear':
+        // Shear peaks strongly at geometric discontinuity
+        stressFactor = 0.35 + transitionSCF * peakFactor * 0.7;
+        break;
+      default:
+        stressFactor = 0.7 + (transitionSCF - 1.0) * peakFactor * 0.4;
+    }
   } else if (region === 'dome') {
     const domeProgress = (z - cylinderLength) / (totalLength - cylinderLength);
-    stressFactor = 0.75 + 0.2 * domeProgress;
+
+    switch (stressType.toLowerCase()) {
+      case 'hoop':
+        // Hoop stress decreases toward apex (smaller radius)
+        stressFactor = 0.85 - 0.25 * domeProgress;
+        break;
+      case 'axial':
+        // Axial/meridional stress increases toward apex
+        stressFactor = 0.6 + 0.35 * domeProgress;
+        break;
+      case 'shear':
+        // Shear moderate in dome
+        stressFactor = 0.4 + 0.2 * Math.sin(domeProgress * Math.PI);
+        break;
+      default:
+        stressFactor = 0.75 + 0.2 * domeProgress;
+    }
   } else if (region === 'boss') {
     const distFromBossEdge = Math.sqrt(
       Math.pow(z - (totalLength - 20), 2) + Math.pow(r - bossID / 2, 2)
     );
     const bossFactor = Math.exp(-distFromBossEdge / 20);
-    stressFactor = 0.85 + (bossSCF - 1.0) * bossFactor * 0.4;
+
+    switch (stressType.toLowerCase()) {
+      case 'hoop':
+        // Hoop stress concentration around hole
+        stressFactor = 0.7 + (bossSCF - 0.5) * bossFactor * 0.5;
+        break;
+      case 'axial':
+        // Axial stress very high at boss (load transfer)
+        stressFactor = 0.8 + bossSCF * bossFactor * 0.5;
+        break;
+      case 'shear':
+        // Shear extremely high at boss interface
+        stressFactor = 0.5 + (bossSCF + 0.5) * bossFactor * 0.6;
+        break;
+      default:
+        stressFactor = 0.85 + (bossSCF - 1.0) * bossFactor * 0.4;
+    }
   }
 
   return {
@@ -144,7 +231,8 @@ export function generateFEAMesh2D(
   transitionSCF: number,
   bossSCF: number,
   bossID: number,
-  domeProfile: DomeProfilePoint[]
+  domeProfile: DomeProfilePoint[],
+  stressType: string = 'vonMises'
 ): FEAMesh {
   const nodes: MeshNode[] = [];
   const elements: MeshElement[] = [];
@@ -164,7 +252,7 @@ export function generateFEAMesh2D(
       const r = innerRadius + (j / numRadialLayers) * wallThickness;
       const { stress } = calculateLocalStress(
         z, r, maxStress, cylinderLength, totalLength,
-        innerRadius, wallThickness, transitionSCF, bossSCF, bossID
+        innerRadius, wallThickness, transitionSCF, bossSCF, bossID, stressType
       );
       nodes.push({ id: nodeId, r, z, stress });
       row.push(nodeId);
@@ -198,7 +286,7 @@ export function generateFEAMesh2D(
       const r = localInnerR + (j / numRadialLayers) * (domeOuterR - localInnerR);
       const { stress } = calculateLocalStress(
         domeZ, r, maxStress, cylinderLength, totalLength,
-        innerRadius, wallThickness, transitionSCF, bossSCF, bossID
+        innerRadius, wallThickness, transitionSCF, bossSCF, bossID, stressType
       );
       nodes.push({ id: nodeId, r, z: domeZ, stress });
       row.push(nodeId);
@@ -220,7 +308,7 @@ export function generateFEAMesh2D(
       const avgR = (nodes[n1].r + nodes[n2].r) / 2;
       const { region } = calculateLocalStress(
         avgZ, avgR, maxStress, cylinderLength, totalLength,
-        innerRadius, wallThickness, transitionSCF, bossSCF, bossID
+        innerRadius, wallThickness, transitionSCF, bossSCF, bossID, stressType
       );
 
       elements.push({

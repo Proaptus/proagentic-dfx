@@ -1,23 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
-import { EquationDisplay } from './EquationDisplay';
+import { useState, useEffect } from 'react';
 import { StressContourChart } from '@/components/charts';
+import { EquationDisplay } from './EquationDisplay';
 import type { DesignStress } from '@/lib/types';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from 'recharts';
 
 interface StressAnalysisPanelProps {
   data: DesignStress;
+  designId?: string;
 }
 
 type StressType = 'von_mises' | 'hoop' | 'axial' | 'shear';
@@ -36,31 +26,59 @@ const LOAD_CASES: Record<LoadCase, string> = {
   operating_pressure: 'Operating Pressure (1.0×)',
 };
 
-export function StressAnalysisPanel({ data }: StressAnalysisPanelProps) {
+const getTypeParam = (type: StressType): string => {
+  const typeMap: Record<StressType, string> = {
+    von_mises: 'vonMises',
+    hoop: 'hoop',
+    axial: 'axial',
+    shear: 'shear',
+  };
+  return typeMap[type];
+};
+
+const getLoadCaseParam = (loadCase: LoadCase): string => {
+  const loadMap: Record<LoadCase, string> = {
+    test_pressure: 'test',
+    burst_pressure: 'burst',
+    operating_pressure: 'operating',
+  };
+  return loadMap[loadCase];
+};
+
+export function StressAnalysisPanel({ data: initialData, designId = 'C' }: StressAnalysisPanelProps) {
+  const [stressData, setStressData] = useState<DesignStress>(initialData);
   const [selectedStressType, setSelectedStressType] = useState<StressType>('von_mises');
   const [selectedLoadCase, setSelectedLoadCase] = useState<LoadCase>('test_pressure');
+  const [isLoading, setIsLoading] = useState(false);
+  const [showEquations, setShowEquations] = useState(false);
 
-  // Use per-layer stress data from API props (fallback to empty array)
-  const layerStressData = data.per_layer_stress || [];
+  useEffect(() => {
+    const fetchStressData = async () => {
+      setIsLoading(true);
+      try {
+        const typeParam = getTypeParam(selectedStressType);
+        const loadCaseParam = getLoadCaseParam(selectedLoadCase);
+        const response = await fetch(
+          `/api/designs/${designId}/stress?type=${typeParam}&load_case=${loadCaseParam}`
+        );
+        if (response.ok) {
+          const newData = await response.json();
+          setStressData(newData);
+        }
+      } catch (error) {
+        console.error('Failed to fetch stress data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  // Through-thickness stress gradient
-  const thicknessGradient = [
-    { depth_pct: 0, stress: data.max_stress.value_mpa },
-    { depth_pct: 20, stress: data.max_stress.value_mpa * 0.95 },
-    { depth_pct: 40, stress: data.max_stress.value_mpa * 0.88 },
-    { depth_pct: 60, stress: data.max_stress.value_mpa * 0.92 },
-    { depth_pct: 80, stress: data.max_stress.value_mpa * 0.85 },
-    { depth_pct: 100, stress: data.max_stress.value_mpa * 0.78 },
-  ];
-
-  // Use stress concentration factor from API props (fallback to 1.0 if not provided)
-  const scf = data.stress_concentration_factor || 1.0;
-  const safetyMargin = data.max_stress.margin_percent;
+    fetchStressData();
+  }, [selectedStressType, selectedLoadCase, designId]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Controls Row */}
-      <div className="flex gap-4">
+      <div className="flex gap-4 items-end">
         <div className="flex-1">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Load Case
@@ -69,6 +87,7 @@ export function StressAnalysisPanel({ data }: StressAnalysisPanelProps) {
             value={selectedLoadCase}
             onChange={(e) => setSelectedLoadCase(e.target.value as LoadCase)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            disabled={isLoading}
           >
             {Object.entries(LOAD_CASES).map(([key, label]) => (
               <option key={key} value={key}>
@@ -86,6 +105,7 @@ export function StressAnalysisPanel({ data }: StressAnalysisPanelProps) {
             value={selectedStressType}
             onChange={(e) => setSelectedStressType(e.target.value as StressType)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            disabled={isLoading}
           >
             {Object.entries(STRESS_TYPES).map(([key, label]) => (
               <option key={key} value={key}>
@@ -94,175 +114,83 @@ export function StressAnalysisPanel({ data }: StressAnalysisPanelProps) {
             ))}
           </select>
         </div>
+
+        <button
+          onClick={() => setShowEquations(!showEquations)}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            showEquations
+              ? 'bg-blue-100 text-blue-700 border border-blue-300'
+              : 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200'
+          }`}
+        >
+          {showEquations ? 'Hide Equations' : 'Show Equations'}
+        </button>
       </div>
 
-      {/* Maximum Stress Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Maximum Stress</CardTitle>
-        </CardHeader>
-        <div className="space-y-4">
-          <div className="text-5xl font-bold text-gray-900">
-            {data.max_stress.value_mpa}{' '}
-            <span className="text-lg font-normal text-gray-500">MPa</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span
-              className={`px-3 py-1 rounded-lg text-sm font-medium ${
-                safetyMargin > 20
-                  ? 'bg-green-100 text-green-700'
-                  : safetyMargin > 10
-                  ? 'bg-yellow-100 text-yellow-700'
-                  : 'bg-red-100 text-red-700'
-              }`}
-            >
-              +{safetyMargin}% margin
-            </span>
-            <span className="text-gray-500 text-sm">
-              vs {data.max_stress.allowable_mpa} MPa allowable
-            </span>
-          </div>
-
-          <dl className="space-y-2 text-sm border-t pt-4">
-            <div className="flex justify-between">
-              <dt className="text-gray-500">Load Case:</dt>
-              <dd className="font-medium">{data.load_case}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-gray-500">Pressure:</dt>
-              <dd className="font-medium">{data.load_pressure_bar} bar</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-gray-500">Location:</dt>
-              <dd className="font-medium">
-                {data.max_stress.region.replace(/_/g, ' ')}
-              </dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-gray-500">Coordinates:</dt>
-              <dd className="font-mono text-xs">
-                ({data.max_stress.location.r.toFixed(1)}, {data.max_stress.location.z.toFixed(1)}, {data.max_stress.location.theta.toFixed(1)}°)
-              </dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-gray-500">SCF (Stress Concentration):</dt>
-              <dd className="font-medium">{scf.toFixed(2)}</dd>
-            </div>
-          </dl>
+      {/* Loading Indicator */}
+      {isLoading && (
+        <div className="text-sm text-gray-500 text-center py-2">
+          Loading {STRESS_TYPES[selectedStressType]} analysis...
         </div>
-      </Card>
+      )}
 
-      {/* Large Interactive Stress Contour Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Stress Contour ({STRESS_TYPES[selectedStressType]})</CardTitle>
-        </CardHeader>
-        <div className="h-[500px]">
-          <StressContourChart
-            stressData={data}
-            onExport={(format) => console.log(`Exporting stress contour as ${format}`)}
+      {/* Main Stress Chart - Full featured with all views */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm h-[700px]">
+        <StressContourChart
+          stressData={stressData}
+          onExport={(format) => console.log(`Exporting stress contour as ${format}`)}
+        />
+      </div>
+
+      {/* Collapsible Equations Section */}
+      {showEquations && (
+        <div className="space-y-4 pt-4 border-t">
+          <h3 className="text-lg font-semibold text-gray-900">Engineering Equations</h3>
+
+          <EquationDisplay
+            title="Hoop Stress (Thin-Wall Approximation)"
+            equation="σ_h = (P × r) / t"
+            variables={[
+              { symbol: 'σ_h', description: 'Hoop stress (circumferential)', value: `${Math.round(stressData.max_stress.value_mpa)} MPa` },
+              { symbol: 'P', description: 'Internal pressure', value: `${stressData.load_pressure_bar} bar` },
+              { symbol: 'r', description: 'Mean radius', value: '140 mm' },
+              { symbol: 't', description: 'Wall thickness', value: '12 mm' },
+            ]}
+            explanation="For cylindrical pressure vessels, hoop stress is the primary stress component and is twice the axial stress in thin-wall approximation."
+          />
+
+          <EquationDisplay
+            title="Axial Stress"
+            equation="σ_a = (P × r) / (2t)"
+            variables={[
+              { symbol: 'σ_a', description: 'Axial stress (longitudinal)', value: `${Math.round(stressData.max_stress.value_mpa / 2)} MPa` },
+            ]}
+            explanation="Axial stress acts along the length of the cylinder and is half the hoop stress for thin-wall cylinders."
+          />
+
+          <EquationDisplay
+            title="Von Mises Stress"
+            equation="σ_vm = √(σ_h² + σ_a² - σ_h·σ_a)"
+            variables={[
+              { symbol: 'σ_vm', description: 'Von Mises equivalent stress', value: `${Math.round(stressData.max_stress.value_mpa)} MPa` },
+              { symbol: 'σ_h', description: 'Hoop stress', value: 'From above' },
+              { symbol: 'σ_a', description: 'Axial stress', value: 'From above' },
+            ]}
+            explanation="Von Mises stress combines all stress components into a single equivalent stress metric for comparing against material yield strength."
+          />
+
+          <EquationDisplay
+            title="Safety Margin Calculation"
+            equation="Margin = ((σ_allowable - σ_max) / σ_max) × 100%"
+            variables={[
+              { symbol: 'σ_allowable', description: 'Allowable stress (with safety factor)', value: `${stressData.max_stress.allowable_mpa} MPa` },
+              { symbol: 'σ_max', description: 'Maximum stress (FEA)', value: `${stressData.max_stress.value_mpa} MPa` },
+              { symbol: 'Margin', description: 'Safety margin', value: `${stressData.max_stress.margin_percent}%` },
+            ]}
+            explanation="Positive margin indicates design is safe. Typical aerospace requirement: ≥10% margin."
           />
         </div>
-      </Card>
-
-      {/* Layer-by-Layer Stress Breakdown */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Per-Layer Stress Breakdown</CardTitle>
-        </CardHeader>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="text-left p-3 font-medium">Layer</th>
-                <th className="text-left p-3 font-medium">Type</th>
-                <th className="text-right p-3 font-medium">Hoop (MPa)</th>
-                <th className="text-right p-3 font-medium">Axial (MPa)</th>
-                <th className="text-right p-3 font-medium">Shear (MPa)</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {layerStressData.map((layer, i) => (
-                <tr key={i} className="hover:bg-gray-50">
-                  <td className="p-3 font-medium">{layer.layer}</td>
-                  <td className="p-3 text-gray-600">{layer.type}</td>
-                  <td className="p-3 text-right font-mono">{layer.hoop}</td>
-                  <td className="p-3 text-right font-mono">{layer.axial}</td>
-                  <td className="p-3 text-right font-mono">{layer.shear}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-
-      {/* Through-Thickness Stress Gradient */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Through-Thickness Stress Gradient</CardTitle>
-        </CardHeader>
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={thicknessGradient}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-              <XAxis
-                dataKey="depth_pct"
-                label={{ value: 'Depth (%)', position: 'insideBottom', offset: -5 }}
-                tick={{ fontSize: 11 }}
-              />
-              <YAxis
-                label={{ value: 'Stress (MPa)', angle: -90, position: 'insideLeft' }}
-                tick={{ fontSize: 11 }}
-              />
-              <Tooltip />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="stress"
-                stroke="#3B82F6"
-                strokeWidth={2}
-                name="von Mises Stress"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-        <p className="text-xs text-gray-500 text-center mt-2">
-          Stress variation from inner (liner) to outer surface of composite
-        </p>
-      </Card>
-
-      {/* Stress Equations */}
-      <EquationDisplay
-        title="Hoop Stress (Thin-Wall Approximation)"
-        equation="σ_h = (P × r) / t"
-        variables={[
-          { symbol: 'σ_h', description: 'Hoop stress (circumferential)', value: '1650 MPa' },
-          { symbol: 'P', description: 'Internal pressure', value: `${data.load_pressure_bar} bar` },
-          { symbol: 'r', description: 'Mean radius', value: '140 mm' },
-          { symbol: 't', description: 'Wall thickness', value: '12 mm' },
-        ]}
-        explanation="For cylindrical pressure vessels, hoop stress is the primary stress component and is twice the axial stress in thin-wall approximation."
-      />
-
-      <EquationDisplay
-        title="Axial Stress"
-        equation="σ_a = (P × r) / (2t)"
-        variables={[
-          { symbol: 'σ_a', description: 'Axial stress (longitudinal)', value: '825 MPa' },
-        ]}
-        explanation="Axial stress acts along the length of the cylinder and is half the hoop stress for thin-wall cylinders."
-      />
-
-      <EquationDisplay
-        title="Safety Margin Calculation"
-        equation="Margin = ((σ_allowable - σ_max) / σ_max) × 100%"
-        variables={[
-          { symbol: 'σ_allowable', description: 'Allowable stress (with safety factor)', value: `${data.max_stress.allowable_mpa} MPa` },
-          { symbol: 'σ_max', description: 'Maximum stress (FEA)', value: `${data.max_stress.value_mpa} MPa` },
-          { symbol: 'Margin', description: 'Safety margin', value: `${safetyMargin}%` },
-        ]}
-        explanation="Positive margin indicates design is safe. Typical aerospace requirement: ≥10% margin."
-      />
+      )}
     </div>
   );
 }

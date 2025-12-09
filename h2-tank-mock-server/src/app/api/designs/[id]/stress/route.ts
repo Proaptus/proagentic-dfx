@@ -36,9 +36,27 @@ export async function GET(
     const fileContent = await fs.readFile(filePath, 'utf-8');
     const design = JSON.parse(fileContent);
 
-    const loadPressure = loadCase === 'burst' ?
-      design.summary.burst_pressure_bar :
-      Math.round(design.summary.burst_pressure_bar / 2.25 * 1.5);
+    // Calculate load pressure based on load case
+    // Operating = 1.0x working pressure, Test = 1.5x, Burst = 2.25x
+    const workingPressure = Math.round(design.summary.burst_pressure_bar / 2.25);
+    let loadPressure: number;
+    let loadCaseLabel: string;
+
+    switch (loadCase) {
+      case 'burst':
+        loadPressure = design.summary.burst_pressure_bar;
+        loadCaseLabel = 'Burst Pressure (2.25×)';
+        break;
+      case 'operating':
+        loadPressure = workingPressure;
+        loadCaseLabel = 'Operating Pressure (1.0×)';
+        break;
+      case 'test':
+      default:
+        loadPressure = Math.round(workingPressure * 1.5);
+        loadCaseLabel = 'Test Pressure (1.5×)';
+        break;
+    }
 
     const pressureMPa = loadPressure * 0.1;
     const radiusM = design.geometry.dimensions.inner_radius_mm * 0.001;
@@ -123,6 +141,7 @@ export async function GET(
     const response = {
       design_id: design.id,
       load_case: loadCase,
+      load_case_label: loadCaseLabel,
       load_pressure_bar: loadPressure,
       stress_type: stressType,
       max_stress: {
@@ -175,7 +194,8 @@ export async function GET(
           transitionSCF,
           bossSCF,
           bossID,
-          domeProfile
+          domeProfile,
+          stressType
         );
 
         const mesh3D = generateFEAMesh3D(mesh2D, 24);

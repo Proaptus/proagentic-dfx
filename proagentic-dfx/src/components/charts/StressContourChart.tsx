@@ -1,290 +1,744 @@
 'use client';
 
-import { useMemo, useState, useRef } from 'react';
-import type { DesignStress, CompositeLayer, MeshNode, MeshElement } from '@/lib/types';
+import { useMemo, useState, useCallback, useRef } from 'react';
+import { Group } from '@visx/group';
+import { scaleLinear } from '@visx/scale';
+import { ParentSize } from '@visx/responsive';
+import { useTooltip, TooltipWithBounds, defaultStyles } from '@visx/tooltip';
+import { LinearGradient } from '@visx/gradient';
+import { AxisLeft, AxisBottom } from '@visx/axis';
+import { GridRows, GridColumns } from '@visx/grid';
+import type { DesignStress, MeshElement, MeshNode } from '@/lib/types';
+
+// ============================================================================
+// Types
+// ============================================================================
 
 interface StressContourChartProps {
   stressData: DesignStress;
-  layers?: CompositeLayer[];
   onExport?: (format: 'png' | 'svg') => void;
 }
 
-type StressColorMode = 'jet' | 'thermal' | 'safety';
-
-const COLORMAPS: Record<StressColorMode, Array<{ pos: number; rgb: [number, number, number] }>> = {
-  jet: [
-    { pos: 0.0, rgb: [0, 0, 131] },
-    { pos: 0.125, rgb: [0, 60, 170] },
-    { pos: 0.25, rgb: [5, 255, 255] },
-    { pos: 0.375, rgb: [0, 255, 0] },
-    { pos: 0.5, rgb: [255, 255, 0] },
-    { pos: 0.625, rgb: [255, 170, 0] },
-    { pos: 0.75, rgb: [255, 0, 0] },
-    { pos: 0.875, rgb: [200, 0, 0] },
-    { pos: 1.0, rgb: [128, 0, 0] },
-  ],
-  thermal: [
-    { pos: 0.0, rgb: [30, 58, 138] },
-    { pos: 0.25, rgb: [59, 130, 246] },
-    { pos: 0.5, rgb: [34, 197, 94] },
-    { pos: 0.75, rgb: [251, 191, 36] },
-    { pos: 1.0, rgb: [220, 38, 38] },
-  ],
-  safety: [
-    { pos: 0.0, rgb: [34, 197, 94] },
-    { pos: 0.5, rgb: [251, 191, 36] },
-    { pos: 0.75, rgb: [249, 115, 22] },
-    { pos: 1.0, rgb: [220, 38, 38] },
-  ],
-};
-
-const REGION_COLORS: Record<string, string> = {
-  boss: '#EF4444',
-  dome: '#8B5CF6',
-  transition: '#F59E0B',
-  cylinder: '#06B6D4',
-};
-
-function interpolateColor(colormap: Array<{ pos: number; rgb: [number, number, number] }>, value: number): string {
-  const clamped = Math.max(0, Math.min(1, value));
-  for (let i = 0; i < colormap.length - 1; i++) {
-    const c1 = colormap[i];
-    const c2 = colormap[i + 1];
-    if (clamped >= c1.pos && clamped <= c2.pos) {
-      const t = (clamped - c1.pos) / (c2.pos - c1.pos);
-      const r = Math.round(c1.rgb[0] + (c2.rgb[0] - c1.rgb[0]) * t);
-      const g = Math.round(c1.rgb[1] + (c2.rgb[1] - c1.rgb[1]) * t);
-      const b = Math.round(c1.rgb[2] + (c2.rgb[2] - c1.rgb[2]) * t);
-      return `rgb(${r},${g},${b})`;
-    }
-  }
-  const last = colormap[colormap.length - 1].rgb;
-  return `rgb(${last[0]},${last[1]},${last[2]})`;
+interface TooltipData {
+  element: MeshElement;
+  stress: number;
+  region: string;
+  x: number;
+  y: number;
 }
 
-export function StressContourChart({ stressData, layers, onExport }: StressContourChartProps) {
-  const [selectedLayer, setSelectedLayer] = useState<number | 'all'>('all');
-  const [showRegionOutlines, setShowRegionOutlines] = useState(false);
-  const [colorMode, setColorMode] = useState<StressColorMode>('jet');
-  const [hoveredElement, setHoveredElement] = useState<MeshElement | null>(null);
-  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
-  const svgRef = useRef<SVGSVGElement>(null);
+type ColorScale = 'jet' | 'viridis' | 'plasma' | 'turbo' | 'cool';
 
-  const mesh = stressData.contour_data?.mesh;
-  const minStress = stressData.contour_data?.min_value ?? 0;
-  const maxStress = stressData.contour_data?.max_value ?? 1;
-  const stressRange = maxStress - minStress || 1;
+// ============================================================================
+// Color Scales - Professional Engineering Colormaps
+// ============================================================================
 
-  const nodeMap = useMemo(() => {
-    if (!mesh) return new Map<number, MeshNode>();
-    return new Map(mesh.nodes.map(n => [n.id, n]));
-  }, [mesh]);
+const COLORMAPS: Record<ColorScale, string[]> = {
+  jet: ['#000080', '#0000FF', '#00FFFF', '#00FF00', '#FFFF00', '#FF8000', '#FF0000', '#800000'],
+  viridis: ['#440154', '#482878', '#3E4A89', '#31688E', '#26828E', '#1F9E89', '#35B779', '#6DCD59', '#B4DE2C', '#FDE725'],
+  plasma: ['#0D0887', '#46039F', '#7201A8', '#9C179E', '#BD3786', '#D8576B', '#ED7953', '#FB9F3A', '#FDC328', '#F0F921'],
+  turbo: ['#30123B', '#4662D7', '#35AAD1', '#3DDB6E', '#A6D820', '#FAC127', '#F57D15', '#D23105', '#7A0403'],
+  cool: ['#00FFFF', '#0080FF', '#0000FF', '#8000FF', '#FF00FF'],
+};
 
-  const viewConfig = useMemo(() => {
-    if (!mesh) return { width: 800, height: 500, scaleR: 1, scaleZ: 1, offsetR: 0, offsetZ: 0, r_min: 0, z_max: 0, rRange: 1, zRange: 1, z_min: 0, r_max: 0 };
-    const { r_min, r_max, z_min, z_max } = mesh.bounds;
-    // Extend r range to include centerline (r=0) for full tank cross-section context
-    const fullR_min = 0; // Start from centerline
-    const fullR_max = r_max * 1.1; // Add 10% padding
-    const rRange = fullR_max - fullR_min || 1;
-    const zRange = z_max - z_min || 1;
-    const paddingLeft = 60;
-    const paddingRight = 30;
-    const paddingTop = 50;
-    const paddingBottom = 45;
-    // Use landscape aspect ratio (800x500) for better display in typical containers
-    const width = 800;
-    const height = 500;
-    // Use independent scales for r and z to fill the viewport properly
-    // This is standard for 2D axisymmetric FEA visualization
-    const scaleR = (width - paddingLeft - paddingRight) / rRange;
-    const scaleZ = (height - paddingTop - paddingBottom) / zRange;
-    return { width, height, scaleR, scaleZ, offsetR: paddingLeft, offsetZ: paddingTop, r_min: fullR_min, r_max: fullR_max, z_min, z_max, rRange, zRange, mesh_r_min: r_min, mesh_r_max: r_max };
-  }, [mesh]);
+// ============================================================================
+// Utility Functions
+// ============================================================================
 
-  const transformPoint = (r: number, z: number) => {
-    const { scaleR, scaleZ, offsetR, offsetZ, z_max, r_min } = viewConfig;
-    return { x: (r - r_min) * scaleR + offsetR, y: (z_max - z) * scaleZ + offsetZ };
-  };
+function interpolateColor(scale: string[], t: number): string {
+  const clampedT = Math.max(0, Math.min(1, t));
+  const idx = clampedT * (scale.length - 1);
+  const lower = Math.floor(idx);
+  const upper = Math.ceil(idx);
+  const frac = idx - lower;
 
-  const handleExport = (format: 'png' | 'svg') => {
-    if (!svgRef.current) return;
-    if (format === 'svg') {
-      const svgData = new XMLSerializer().serializeToString(svgRef.current);
-      const blob = new Blob([svgData], { type: 'image/svg+xml' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `stress-contour-${stressData.design_id}.svg`;
-      a.click();
-      URL.revokeObjectURL(url);
+  if (lower === upper) return scale[lower];
+
+  const c1 = scale[lower];
+  const c2 = scale[upper];
+
+  // Parse hex colors
+  const r1 = parseInt(c1.slice(1, 3), 16);
+  const g1 = parseInt(c1.slice(3, 5), 16);
+  const b1 = parseInt(c1.slice(5, 7), 16);
+  const r2 = parseInt(c2.slice(1, 3), 16);
+  const g2 = parseInt(c2.slice(3, 5), 16);
+  const b2 = parseInt(c2.slice(5, 7), 16);
+
+  // Interpolate
+  const r = Math.round(r1 + (r2 - r1) * frac);
+  const g = Math.round(g1 + (g2 - g1) * frac);
+  const b = Math.round(b1 + (b2 - b1) * frac);
+
+  return `rgb(${r},${g},${b})`;
+}
+
+function formatStress(value: number): string {
+  if (value >= 1000) return `${(value / 1000).toFixed(1)}k`;
+  return value.toFixed(0);
+}
+
+// ============================================================================
+// Mesh Element Component - Renders a single triangular element
+// ============================================================================
+
+interface MeshTriangleProps {
+  element: MeshElement;
+  nodeMap: Map<number, MeshNode>;
+  xScale: (r: number) => number;
+  yScale: (z: number) => number;
+  colorScale: (stress: number) => string;
+  minStress: number;
+  maxStress: number;
+  onHover?: (data: TooltipData | null) => void;
+  isHovered?: boolean;
+}
+
+function MeshTriangle({
+  element,
+  nodeMap,
+  xScale,
+  yScale,
+  colorScale,
+  onHover,
+  isHovered,
+}: MeshTriangleProps) {
+  const [n1Id, n2Id, n3Id] = element.nodes;
+  const n1 = nodeMap.get(n1Id);
+  const n2 = nodeMap.get(n2Id);
+  const n3 = nodeMap.get(n3Id);
+
+  if (!n1 || !n2 || !n3) return null;
+
+  const x1 = xScale(n1.r);
+  const y1 = yScale(n1.z);
+  const x2 = xScale(n2.r);
+  const y2 = yScale(n2.z);
+  const x3 = xScale(n3.r);
+  const y3 = yScale(n3.z);
+
+  const fillColor = colorScale(element.centroid_stress);
+  const centroidX = (x1 + x2 + x3) / 3;
+  const centroidY = (y1 + y2 + y3) / 3;
+
+  const handleMouseEnter = () => {
+    if (onHover) {
+      onHover({
+        element,
+        stress: element.centroid_stress,
+        region: element.region,
+        x: centroidX,
+        y: centroidY,
+      });
     }
-    onExport?.(format);
   };
 
-  if (!mesh || mesh.nodes.length === 0) {
+  const handleMouseLeave = () => {
+    if (onHover) {
+      onHover(null);
+    }
+  };
+
+  return (
+    <polygon
+      points={`${x1},${y1} ${x2},${y2} ${x3},${y3}`}
+      fill={fillColor}
+      stroke={isHovered ? '#fff' : fillColor}
+      strokeWidth={isHovered ? 2 : 0.5}
+      strokeLinejoin="round"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        cursor: 'crosshair',
+        transition: 'fill 0.4s ease-out, stroke 0.4s ease-out, stroke-width 0.1s ease',
+      }}
+    />
+  );
+}
+
+// ============================================================================
+// Tank Contour Inner Component (receives dimensions from ParentSize)
+// ============================================================================
+
+interface ContourInnerProps {
+  width: number;
+  height: number;
+  stressData: DesignStress;
+  colorScaleName: ColorScale;
+  showGrid: boolean;
+  showAxes: boolean;
+  showLegend: boolean;
+  mirrorView: boolean;
+}
+
+function ContourInner({
+  width,
+  height,
+  stressData,
+  colorScaleName,
+  showGrid,
+  showAxes,
+  showLegend,
+  mirrorView,
+}: ContourInnerProps) {
+  const {
+    tooltipOpen,
+    tooltipData,
+    tooltipLeft,
+    tooltipTop,
+    showTooltip,
+    hideTooltip,
+  } = useTooltip<TooltipData>();
+
+  const [hoveredElement, setHoveredElement] = useState<number | null>(null);
+
+  // Margins for axes
+  const margin = { top: 20, right: showLegend ? 100 : 20, bottom: 50, left: 60 };
+  const innerWidth = width - margin.left - margin.right;
+  const innerHeight = height - margin.top - margin.bottom;
+
+  // Get mesh data
+  const mesh = stressData.contour_data?.mesh;
+
+  // Process mesh data
+  const { nodeMap, minStress, maxStress, bounds } = useMemo(() => {
+    if (!mesh || !mesh.nodes || mesh.nodes.length === 0) {
+      return {
+        nodeMap: new Map<number, MeshNode>(),
+        minStress: 0,
+        maxStress: 100,
+        bounds: { r_min: 0, r_max: 100, z_min: 0, z_max: 200 },
+      };
+    }
+
+    const map = new Map<number, MeshNode>();
+    mesh.nodes.forEach((node) => map.set(node.id, node));
+
+    const stresses = mesh.elements.map((e) => e.centroid_stress);
+    const minS = Math.min(...stresses);
+    const maxS = Math.max(...stresses);
+
+    return {
+      nodeMap: map,
+      minStress: minS,
+      maxStress: maxS,
+      bounds: mesh.bounds || { r_min: 0, r_max: 150, z_min: 0, z_max: 400 },
+    };
+  }, [mesh]);
+
+  // Scales
+  const xScale = useMemo(() => {
+    const domain = mirrorView
+      ? [-bounds.r_max, bounds.r_max]
+      : [bounds.r_min, bounds.r_max];
+    return scaleLinear({
+      domain,
+      range: [0, innerWidth],
+      nice: true,
+    });
+  }, [bounds, innerWidth, mirrorView]);
+
+  const yScale = useMemo(() => {
+    return scaleLinear({
+      domain: [bounds.z_min, bounds.z_max],
+      range: [innerHeight, 0], // Flip for SVG coordinates
+      nice: true,
+    });
+  }, [bounds, innerHeight]);
+
+  const colorScale = useCallback(
+    (stress: number) => {
+      const t = maxStress > minStress
+        ? (stress - minStress) / (maxStress - minStress)
+        : 0.5;
+      return interpolateColor(COLORMAPS[colorScaleName], t);
+    },
+    [minStress, maxStress, colorScaleName]
+  );
+
+  // Create color scale for legend
+  const legendScale = useMemo(() => {
+    return scaleLinear({
+      domain: [minStress, maxStress],
+      range: [0, 1],
+    });
+  }, [minStress, maxStress]);
+
+  const handleElementHover = useCallback(
+    (data: TooltipData | null) => {
+      if (data) {
+        setHoveredElement(data.element.id);
+        showTooltip({
+          tooltipData: data,
+          tooltipLeft: data.x + margin.left,
+          tooltipTop: data.y + margin.top,
+        });
+      } else {
+        setHoveredElement(null);
+        hideTooltip();
+      }
+    },
+    [showTooltip, hideTooltip, margin]
+  );
+
+  // Render elements (either single side or mirrored)
+  const renderElements = useCallback(
+    (flip: boolean = false) => {
+      if (!mesh?.elements) return null;
+
+      return mesh.elements.map((element) => {
+        // For mirrored view, we need to flip the r coordinates
+        const adjustedNodeMap = flip
+          ? new Map(
+              Array.from(nodeMap.entries()).map(([id, node]) => [
+                id,
+                { ...node, r: -node.r },
+              ])
+            )
+          : nodeMap;
+
+        return (
+          <MeshTriangle
+            key={`${flip ? 'mirror-' : ''}${element.id}`}
+            element={element}
+            nodeMap={adjustedNodeMap}
+            xScale={xScale}
+            yScale={yScale}
+            colorScale={colorScale}
+            minStress={minStress}
+            maxStress={maxStress}
+            onHover={handleElementHover}
+            isHovered={hoveredElement === element.id}
+          />
+        );
+      });
+    },
+    [mesh, nodeMap, xScale, yScale, colorScale, minStress, maxStress, handleElementHover, hoveredElement]
+  );
+
+  if (!mesh || !mesh.elements || mesh.elements.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-50 rounded-lg border border-gray-200">
-        <div className="text-center p-8">
-          <p className="text-lg font-medium text-gray-700">No FEA Mesh Data</p>
-          <p className="text-sm text-gray-500 mt-2">Stress contour requires mesh data from analysis server.</p>
+      <div className="flex items-center justify-center h-full text-gray-500">
+        <div className="text-center">
+          <div className="text-lg font-medium mb-2">No Mesh Data Available</div>
+          <div className="text-sm">FEA mesh data required for contour visualization</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between mb-3 px-4 flex-wrap gap-2">
-        <div className="flex items-center gap-4 flex-wrap">
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-gray-700">Layer:</label>
-            <select value={selectedLayer} onChange={(e) => setSelectedLayer(e.target.value === 'all' ? 'all' : Number(e.target.value))} className="px-2 py-1 border border-gray-300 rounded text-sm">
-              <option value="all">All Layers</option>
-              {layers?.map((layer) => (<option key={layer.layer} value={layer.layer}>Layer {layer.layer} ({layer.type})</option>))}
-            </select>
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-gray-700">Colormap:</label>
-            <select value={colorMode} onChange={(e) => setColorMode(e.target.value as StressColorMode)} className="px-2 py-1 border border-gray-300 rounded text-sm">
-              <option value="jet">Jet</option>
-              <option value="thermal">Thermal</option>
-              <option value="safety">Safety</option>
-            </select>
-          </div>
-          <label className="flex items-center gap-2 text-sm cursor-pointer">
-            <input type="checkbox" checked={showRegionOutlines} onChange={(e) => setShowRegionOutlines(e.target.checked)} className="rounded" />
-            Region Outlines
-          </label>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-600"><span className="font-medium">{stressData.load_pressure_bar}</span> bar ({stressData.load_case})</span>
-          {onExport && (<div className="flex gap-1"><button onClick={() => handleExport('png')} className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded">PNG</button><button onClick={() => handleExport('svg')} className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded">SVG</button></div>)}
-        </div>
-      </div>
+    <div className="relative">
+      <svg
+        width={width}
+        height={height}
+      >
+        {/* Gradient definitions for legend */}
+        <defs>
+          <linearGradient id="stress-gradient" x1="0%" y1="100%" x2="0%" y2="0%">
+            {COLORMAPS[colorScaleName].map((color, i) => (
+              <stop
+                key={i}
+                offset={`${(i / (COLORMAPS[colorScaleName].length - 1)) * 100}%`}
+                stopColor={color}
+              />
+            ))}
+          </linearGradient>
+        </defs>
 
-      <div className="flex items-center gap-3 mb-3 px-4">
-        <span className="text-sm font-medium text-gray-700">von Mises (MPa):</span>
-        <div className="flex items-center gap-1">
-          <span className="text-xs text-gray-600 w-12 text-right">{minStress.toFixed(0)}</span>
-          <div className="flex h-4 w-56 rounded overflow-hidden border border-gray-300">
-            {Array.from({ length: 100 }).map((_, i) => (<div key={i} style={{ backgroundColor: interpolateColor(COLORMAPS[colorMode], i / 99), flex: 1 }} />))}
-          </div>
-          <span className="text-xs text-gray-600 w-12">{maxStress.toFixed(0)}</span>
-        </div>
-        <div className="text-xs text-gray-600 ml-2">
-          Peak: <span className="font-bold text-red-600">{stressData.max_stress.value_mpa.toFixed(0)} MPa</span> @ <span className="capitalize">{stressData.max_stress.region.replace(/_/g, ' ')}</span> | Margin: <span className={stressData.max_stress.margin_percent >= 0 ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>{stressData.max_stress.margin_percent >= 0 ? '+' : ''}{stressData.max_stress.margin_percent.toFixed(1)}%</span>
-        </div>
-      </div>
+        {/* Background */}
+        <rect
+          x={margin.left}
+          y={margin.top}
+          width={innerWidth}
+          height={innerHeight}
+          fill="#f8fafc"
+          rx={4}
+        />
 
-      <div className="flex-1 relative bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <svg ref={svgRef} viewBox={`0 0 ${viewConfig.width} ${viewConfig.height}`} className="w-full h-full" preserveAspectRatio="xMidYMid meet" style={{ background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)' }} onMouseMove={(e) => { const rect = svgRef.current?.getBoundingClientRect(); if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top }); }} onMouseLeave={() => { setHoveredElement(null); setMousePos(null); }}>
-          <text x={viewConfig.width / 2} y="25" textAnchor="middle" fill="#374151" style={{ fontSize: '14px', fontWeight: 600 }}>2D Axisymmetric Stress Contour — Design {stressData.design_id}</text>
-          <text x={viewConfig.width / 2} y="42" textAnchor="middle" fill="#6B7280" style={{ fontSize: '11px' }}>{stressData.stress_type} under {stressData.load_case} loading</text>
+        <Group left={margin.left} top={margin.top}>
+          {/* Grid */}
+          {showGrid && (
+            <>
+              <GridRows
+                scale={yScale}
+                width={innerWidth}
+                stroke="#e2e8f0"
+                strokeDasharray="2,2"
+                numTicks={8}
+              />
+              <GridColumns
+                scale={xScale}
+                height={innerHeight}
+                stroke="#e2e8f0"
+                strokeDasharray="2,2"
+                numTicks={mirrorView ? 10 : 5}
+              />
+            </>
+          )}
 
-          {/* Tank interior fill (to show cavity clearly) - drawn first as background */}
-          {(() => {
-            const innerNodes = mesh.nodes.filter((n, i, arr) => {
-              const nodesAtZ = arr.filter(node => Math.abs(node.z - n.z) < 1);
-              const minR = Math.min(...nodesAtZ.map(node => node.r));
-              return Math.abs(n.r - minR) < 1;
-            });
-            const sorted = [...new Map(innerNodes.map(n => [Math.round(n.z), n])).values()].sort((a, b) => a.z - b.z);
-            if (sorted.length < 2) return null;
-            const pts = sorted.map(n => transformPoint(n.r, n.z));
-            const centerTop = transformPoint(0, sorted[sorted.length - 1].z);
-            const centerBottom = transformPoint(0, sorted[0].z);
-            const pathD = `M ${centerBottom.x} ${centerBottom.y} ` +
-              pts.map(pt => `L ${pt.x} ${pt.y}`).join(' ') +
-              ` L ${centerTop.x} ${centerTop.y} Z`;
-            return <path d={pathD} fill="rgba(226, 232, 240, 0.6)" stroke="none" />;
-          })()}
+          {/* Centerline for mirrored view */}
+          {mirrorView && (
+            <line
+              x1={xScale(0)}
+              y1={0}
+              x2={xScale(0)}
+              y2={innerHeight}
+              stroke="#94a3b8"
+              strokeWidth={1}
+              strokeDasharray="4,4"
+            />
+          )}
 
-          {/* Centerline (axis of symmetry) */}
-          <line x1={transformPoint(0, viewConfig.z_min).x} y1={transformPoint(0, viewConfig.z_min).y} x2={transformPoint(0, viewConfig.z_max).x} y2={transformPoint(0, viewConfig.z_max).y} stroke="#64748B" strokeWidth="1.5" strokeDasharray="8,4" />
-          <text x={transformPoint(0, viewConfig.z_max).x} y={transformPoint(0, viewConfig.z_max).y - 5} textAnchor="middle" fill="#475569" style={{ fontSize: '9px', fontWeight: 500 }}>Axis</text>
-
-          {/* FEA mesh elements with stress coloring */}
-          <g>
-            {mesh.elements.map((elem) => {
-              const [n1Id, n2Id, n3Id] = elem.nodes;
-              const n1 = nodeMap.get(n1Id);
-              const n2 = nodeMap.get(n2Id);
-              const n3 = nodeMap.get(n3Id);
-              if (!n1 || !n2 || !n3) return null;
-              const p1 = transformPoint(n1.r, n1.z);
-              const p2 = transformPoint(n2.r, n2.z);
-              const p3 = transformPoint(n3.r, n3.z);
-              const normalized = (elem.centroid_stress - minStress) / stressRange;
-              const fillColor = interpolateColor(COLORMAPS[colorMode], normalized);
-              const isHovered = hoveredElement?.id === elem.id;
-              return (<polygon key={elem.id} points={`${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y}`} fill={fillColor} stroke={showRegionOutlines ? REGION_COLORS[elem.region] : 'rgba(255,255,255,0.3)'} strokeWidth={showRegionOutlines ? 1.5 : 0.5} opacity={isHovered ? 1 : 0.95} onMouseEnter={() => setHoveredElement(elem)} onMouseLeave={() => setHoveredElement(null)} style={{ cursor: 'crosshair' }} />);
-            })}
+          {/* Mesh elements - render right side */}
+          <g className="mesh-elements">
+            {renderElements(false)}
           </g>
 
-          {/* Inner wall profile outline (drawn on top of mesh) */}
-          {(() => {
-            const innerNodes = mesh.nodes.filter((n, i, arr) => {
-              const nodesAtZ = arr.filter(node => Math.abs(node.z - n.z) < 1);
-              const minR = Math.min(...nodesAtZ.map(node => node.r));
-              return Math.abs(n.r - minR) < 1;
-            });
-            const sorted = [...new Map(innerNodes.map(n => [Math.round(n.z), n])).values()].sort((a, b) => a.z - b.z);
-            if (sorted.length < 2) return null;
-            const pathD = sorted.map((n, i) => {
-              const pt = transformPoint(n.r, n.z);
-              return i === 0 ? `M ${pt.x} ${pt.y}` : `L ${pt.x} ${pt.y}`;
-            }).join(' ');
-            return <path d={pathD} fill="none" stroke="#1E293B" strokeWidth="1.5" />;
-          })()}
+          {/* Mesh elements - render mirrored left side */}
+          {mirrorView && (
+            <g className="mesh-elements-mirrored">
+              {renderElements(true)}
+            </g>
+          )}
 
-          {/* Outer wall profile outline */}
-          {(() => {
-            const outerNodes = mesh.nodes.filter((n, i, arr) => {
-              const nodesAtZ = arr.filter(node => Math.abs(node.z - n.z) < 1);
-              const maxR = Math.max(...nodesAtZ.map(node => node.r));
-              return Math.abs(n.r - maxR) < 1;
-            });
-            const sorted = [...new Map(outerNodes.map(n => [Math.round(n.z), n])).values()].sort((a, b) => a.z - b.z);
-            if (sorted.length < 2) return null;
-            const pathD = sorted.map((n, i) => {
-              const pt = transformPoint(n.r, n.z);
-              return i === 0 ? `M ${pt.x} ${pt.y}` : `L ${pt.x} ${pt.y}`;
-            }).join(' ');
-            return <path d={pathD} fill="none" stroke="#1E293B" strokeWidth="1.5" />;
-          })()}
+          {/* Axes */}
+          {showAxes && (
+            <>
+              <AxisLeft
+                scale={yScale}
+                numTicks={8}
+                stroke="#64748b"
+                tickStroke="#64748b"
+                tickLabelProps={{
+                  fill: '#64748b',
+                  fontSize: 10,
+                  textAnchor: 'end',
+                  dx: -4,
+                  dy: 3,
+                }}
+                label="Axial Position (mm)"
+                labelOffset={40}
+                labelProps={{
+                  fill: '#475569',
+                  fontSize: 11,
+                  fontWeight: 500,
+                  textAnchor: 'middle',
+                }}
+              />
+              <AxisBottom
+                scale={xScale}
+                top={innerHeight}
+                numTicks={mirrorView ? 10 : 5}
+                stroke="#64748b"
+                tickStroke="#64748b"
+                tickLabelProps={{
+                  fill: '#64748b',
+                  fontSize: 10,
+                  textAnchor: 'middle',
+                  dy: 4,
+                }}
+                label="Radial Position (mm)"
+                labelOffset={30}
+                labelProps={{
+                  fill: '#475569',
+                  fontSize: 11,
+                  fontWeight: 500,
+                  textAnchor: 'middle',
+                }}
+              />
+            </>
+          )}
+        </Group>
 
-          <text x={viewConfig.width / 2} y={viewConfig.height - 15} textAnchor="middle" fill="#6B7280" style={{ fontSize: '11px' }}>Radial Position r (mm)</text>
-          <text x="18" y={viewConfig.height / 2} textAnchor="middle" transform={`rotate(-90, 18, ${viewConfig.height / 2})`} fill="#6B7280" style={{ fontSize: '11px' }}>Axial Position z (mm)</text>
+        {/* Color Scale Legend */}
+        {showLegend && (
+          <Group left={width - margin.right + 20} top={margin.top + 20}>
+            <rect
+              x={-5}
+              y={-5}
+              width={70}
+              height={innerHeight - 30}
+              fill="white"
+              stroke="#e2e8f0"
+              rx={4}
+            />
+            <text
+              x={25}
+              y={10}
+              fontSize={10}
+              fontWeight={600}
+              fill="#475569"
+              textAnchor="middle"
+            >
+              Stress
+            </text>
+            <text
+              x={25}
+              y={22}
+              fontSize={9}
+              fill="#64748b"
+              textAnchor="middle"
+            >
+              (MPa)
+            </text>
+            <rect
+              x={10}
+              y={30}
+              width={20}
+              height={innerHeight - 90}
+              fill="url(#stress-gradient)"
+              stroke="#64748b"
+              strokeWidth={0.5}
+            />
+            <text x={35} y={35} fontSize={9} fill="#64748b">
+              {formatStress(maxStress)}
+            </text>
+            <text x={35} y={innerHeight - 65} fontSize={9} fill="#64748b">
+              {formatStress(minStress)}
+            </text>
+          </Group>
+        )}
+      </svg>
 
-          <g fill="#9CA3AF" style={{ fontSize: '10px' }}>
-            {[0, 0.25, 0.5, 0.75, 1].map((frac) => { const r = viewConfig.r_min + frac * viewConfig.rRange; const pt = transformPoint(r, viewConfig.z_min); return (<g key={`r-${frac}`}><line x1={pt.x} y1={pt.y} x2={pt.x} y2={pt.y + 5} stroke="#9CA3AF" /><text x={pt.x} y={pt.y + 18} textAnchor="middle">{r.toFixed(0)}</text></g>); })}
-            {[0, 0.25, 0.5, 0.75, 1].map((frac) => { const z = viewConfig.z_min + frac * viewConfig.zRange; const pt = transformPoint(viewConfig.r_min, z); return (<g key={`z-${frac}`}><line x1={pt.x - 5} y1={pt.y} x2={pt.x} y2={pt.y} stroke="#9CA3AF" /><text x={pt.x - 8} y={pt.y + 4} textAnchor="end">{z.toFixed(0)}</text></g>); })}
-          </g>
-
-          {(() => { const maxNode = mesh.nodes.reduce((max, n) => n.stress > max.stress ? n : max, mesh.nodes[0]); const pt = transformPoint(maxNode.r, maxNode.z); return (<g><circle cx={pt.x} cy={pt.y} r="8" fill="none" stroke="#DC2626" strokeWidth="2" strokeDasharray="3,2" /><circle cx={pt.x} cy={pt.y} r="3" fill="#DC2626" /><text x={pt.x + 12} y={pt.y - 5} fill="#DC2626" style={{ fontSize: '11px', fontWeight: 500 }}>MAX</text></g>); })()}
-        </svg>
-
-        {hoveredElement && mousePos && (
-          <div className="absolute bg-white/95 backdrop-blur p-3 rounded-lg shadow-xl border text-sm pointer-events-none z-10" style={{ left: Math.min(mousePos.x + 15, viewConfig.width - 180), top: mousePos.y + 15 }}>
-            <div className="font-semibold mb-2 capitalize flex items-center gap-2"><span className="w-3 h-3 rounded" style={{ backgroundColor: REGION_COLORS[hoveredElement.region] }} />{hoveredElement.region} Region</div>
-            <div className="space-y-1 text-gray-600">
-              <div className="flex justify-between gap-4"><span>Stress:</span><span className="font-bold" style={{ color: interpolateColor(COLORMAPS[colorMode], (hoveredElement.centroid_stress - minStress) / stressRange) }}>{hoveredElement.centroid_stress.toFixed(1)} MPa</span></div>
-              <div className="flex justify-between gap-4"><span>Element:</span><span className="font-mono text-xs">#{hoveredElement.id}</span></div>
-              <div className="flex justify-between gap-4"><span>Utilization:</span><span className="font-medium">{((hoveredElement.centroid_stress / stressData.max_stress.allowable_mpa) * 100).toFixed(1)}%</span></div>
+      {/* Tooltip */}
+      {tooltipOpen && tooltipData && (
+        <TooltipWithBounds
+          left={tooltipLeft}
+          top={tooltipTop}
+          style={{
+            ...defaultStyles,
+            backgroundColor: 'white',
+            border: '1px solid #e2e8f0',
+            borderRadius: '8px',
+            padding: '12px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+            fontSize: '12px',
+            lineHeight: 1.5,
+          }}
+        >
+          <div className="font-semibold text-gray-900 mb-1 capitalize">
+            {tooltipData.region} Region
+          </div>
+          <div className="space-y-0.5 text-gray-600">
+            <div className="flex justify-between gap-4">
+              <span>Stress:</span>
+              <span className="font-bold text-gray-900">
+                {tooltipData.stress.toFixed(1)} MPa
+              </span>
+            </div>
+            <div className="flex justify-between gap-4">
+              <span>Utilization:</span>
+              <span
+                className="font-bold"
+                style={{
+                  color:
+                    (tooltipData.stress / stressData.max_stress.allowable_mpa) > 0.9
+                      ? '#ef4444'
+                      : (tooltipData.stress / stressData.max_stress.allowable_mpa) > 0.7
+                      ? '#f59e0b'
+                      : '#10b981',
+                }}
+              >
+                {((tooltipData.stress / stressData.max_stress.allowable_mpa) * 100).toFixed(1)}%
+              </span>
+            </div>
+            <div className="flex justify-between gap-4 text-xs text-gray-400">
+              <span>Element:</span>
+              <span>#{tooltipData.element.id}</span>
             </div>
           </div>
-        )}
+        </TooltipWithBounds>
+      )}
+    </div>
+  );
+}
+
+// ============================================================================
+// Main Component with Controls
+// ============================================================================
+
+export function StressContourChart({
+  stressData,
+  onExport,
+}: StressContourChartProps) {
+  const [colorScaleName, setColorScaleName] = useState<ColorScale>('jet');
+  const [showGrid, setShowGrid] = useState(true);
+  const [showAxes, setShowAxes] = useState(true);
+  const [showLegend, setShowLegend] = useState(true);
+  const [mirrorView, setMirrorView] = useState(true);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <div className="flex flex-col h-full" ref={containerRef}>
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">
+            FEA Stress Contour — {stressData.stress_type}
+          </h3>
+          <p className="text-sm text-gray-500">
+            {stressData.load_case} @ {stressData.load_pressure_bar} bar
+          </p>
+        </div>
+
+        {/* Controls */}
+        <div className="flex items-center gap-3">
+          {/* Color Scale */}
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-medium text-gray-600">Colormap:</label>
+            <select
+              value={colorScaleName}
+              onChange={(e) => setColorScaleName(e.target.value as ColorScale)}
+              className="text-xs px-2 py-1 border border-gray-300 rounded bg-white"
+            >
+              <option value="jet">Jet</option>
+              <option value="viridis">Viridis</option>
+              <option value="plasma">Plasma</option>
+              <option value="turbo">Turbo</option>
+              <option value="cool">Cool</option>
+            </select>
+          </div>
+
+          {/* Toggles */}
+          <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
+            <button
+              onClick={() => setMirrorView(!mirrorView)}
+              className={`px-2 py-1 text-xs rounded ${
+                mirrorView ? 'bg-white shadow-sm' : 'text-gray-600'
+              }`}
+              title="Toggle mirror view"
+            >
+              Mirror
+            </button>
+            <button
+              onClick={() => setShowGrid(!showGrid)}
+              className={`px-2 py-1 text-xs rounded ${
+                showGrid ? 'bg-white shadow-sm' : 'text-gray-600'
+              }`}
+              title="Toggle grid"
+            >
+              Grid
+            </button>
+            <button
+              onClick={() => setShowAxes(!showAxes)}
+              className={`px-2 py-1 text-xs rounded ${
+                showAxes ? 'bg-white shadow-sm' : 'text-gray-600'
+              }`}
+              title="Toggle axes"
+            >
+              Axes
+            </button>
+            <button
+              onClick={() => setShowLegend(!showLegend)}
+              className={`px-2 py-1 text-xs rounded ${
+                showLegend ? 'bg-white shadow-sm' : 'text-gray-600'
+              }`}
+              title="Toggle legend"
+            >
+              Legend
+            </button>
+          </div>
+
+          {/* Export */}
+          {onExport && (
+            <div className="flex gap-1 ml-2">
+              <button
+                onClick={() => onExport('png')}
+                className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
+              >
+                PNG
+              </button>
+              <button
+                onClick={() => onExport('svg')}
+                className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
+              >
+                SVG
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="flex items-center justify-between mt-2 px-4 text-xs text-gray-500">
-        <div className="flex items-center gap-4">
-          {showRegionOutlines && (<><span className="font-medium text-gray-600">Regions:</span>{Object.entries(REGION_COLORS).map(([region, color]) => (<div key={region} className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: color }} /><span className="capitalize">{region}</span></div>))}</>)}
+      {/* Key Metrics */}
+      <div className="grid grid-cols-4 gap-3 px-4 py-3 bg-gray-50 border-b border-gray-200">
+        <div className="bg-white rounded-lg p-2 border border-gray-200">
+          <div className="text-xs text-gray-500">Max Stress</div>
+          <div className="text-lg font-bold text-gray-900">
+            {stressData.max_stress.value_mpa.toFixed(0)}{' '}
+            <span className="text-sm font-normal text-gray-500">MPa</span>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <span>Nodes: <span className="font-medium text-gray-700">{mesh.nodes.length}</span></span>
-          <span>Elements: <span className="font-medium text-gray-700">{mesh.elements.length}</span></span>
-          <span>Type: <span className="font-medium text-gray-700">Tri3</span></span>
+        <div className="bg-white rounded-lg p-2 border border-gray-200">
+          <div className="text-xs text-gray-500">Allowable</div>
+          <div className="text-lg font-bold text-gray-900">
+            {stressData.max_stress.allowable_mpa.toFixed(0)}{' '}
+            <span className="text-sm font-normal text-gray-500">MPa</span>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg p-2 border border-gray-200">
+          <div className="text-xs text-gray-500">Safety Margin</div>
+          <div
+            className={`text-lg font-bold ${
+              stressData.max_stress.margin_percent >= 20
+                ? 'text-green-600'
+                : stressData.max_stress.margin_percent >= 10
+                ? 'text-yellow-600'
+                : 'text-red-600'
+            }`}
+          >
+            +{stressData.max_stress.margin_percent.toFixed(1)}%
+          </div>
+        </div>
+        <div className="bg-white rounded-lg p-2 border border-gray-200">
+          <div className="text-xs text-gray-500">Critical Region</div>
+          <div className="text-lg font-bold text-gray-900 capitalize truncate">
+            {stressData.max_stress.region.replace(/_/g, ' ')}
+          </div>
+        </div>
+      </div>
+
+      {/* Chart Area */}
+      <div className="flex-1 p-4 min-h-[400px]">
+        <ParentSize debounceTime={50}>
+          {({ width, height }) => (
+            <ContourInner
+              width={width}
+              height={height}
+              stressData={stressData}
+              colorScaleName={colorScaleName}
+              showGrid={showGrid}
+              showAxes={showAxes}
+              showLegend={showLegend}
+              mirrorView={mirrorView}
+            />
+          )}
+        </ParentSize>
+      </div>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-t border-gray-200 text-xs text-gray-500">
+        <div className="flex items-center gap-4">
+          <span>
+            Design: <span className="font-medium text-gray-700">{stressData.design_id}</span>
+          </span>
+          <span>
+            Elements: <span className="font-medium text-gray-700">
+              {stressData.contour_data?.mesh?.elements?.length || 0}
+            </span>
+          </span>
+          <span>
+            Nodes: <span className="font-medium text-gray-700">
+              {stressData.contour_data?.mesh?.nodes?.length || 0}
+            </span>
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-gray-400">Max Location:</span>
+          <span className="font-mono">
+            r={stressData.max_stress.location.r.toFixed(1)}, z={stressData.max_stress.location.z.toFixed(1)}
+          </span>
         </div>
       </div>
     </div>

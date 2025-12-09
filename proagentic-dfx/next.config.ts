@@ -12,6 +12,16 @@ const nextConfig: NextConfig = {
     resolveExtensions: ['.ts', '.tsx', '.js', '.jsx', '.json', '.wasm'],
   },
 
+  // Proxy API requests to mock server
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:3001/api/:path*',
+      },
+    ];
+  },
+
   // Headers for API routes
   async headers() {
     return [
