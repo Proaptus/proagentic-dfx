@@ -40,8 +40,11 @@
     "turbo": "^2.6.3"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "eslint --fix"
+    "proagentic-dfx/**/*.{ts,tsx,js,jsx}": [
+      "eslint --config proagentic-dfx/eslint.config.mjs --fix"
+    ],
+    "h2-tank-mock-server/**/*.{ts,tsx,js,jsx}": [
+      "eslint --config h2-tank-mock-server/eslint.config.mjs --fix"
     ],
     "*.{json,md,yml,yaml}": [
       "prettier --write --ignore-unknown"

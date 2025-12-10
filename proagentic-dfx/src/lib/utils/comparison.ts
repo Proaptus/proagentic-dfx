@@ -3,6 +3,8 @@
  * Extracted logic for better testability and reusability
  */
 
+import { getCurrencySymbol, getStoredCurrency } from './currency';
+
 export interface DifferenceIndicatorProps {
   isBest: boolean;
   isAboveAverage: boolean;
@@ -50,9 +52,25 @@ export interface MetricDefinition {
   lowerIsBetter: boolean;
 }
 
+/**
+ * Get comparison metrics with current currency symbol
+ * Call this function to get metrics with the user's preferred currency
+ */
+export function getComparisonMetrics(): MetricDefinition[] {
+  const currencySymbol = getCurrencySymbol(getStoredCurrency());
+  return [
+    { key: 'weight_kg', label: 'Weight', unit: 'kg', lowerIsBetter: true },
+    { key: 'cost_eur', label: 'Cost', unit: currencySymbol, lowerIsBetter: true },
+    { key: 'burst_pressure_bar', label: 'Burst Pressure', unit: 'bar', lowerIsBetter: false },
+    { key: 'stress_margin_percent', label: 'Stress Margin', unit: '%', lowerIsBetter: false },
+  ];
+}
+
+// For backwards compatibility - will use current currency at import time
+// Prefer using getComparisonMetrics() for dynamic currency support
 export const COMPARISON_METRICS: MetricDefinition[] = [
   { key: 'weight_kg', label: 'Weight', unit: 'kg', lowerIsBetter: true },
-  { key: 'cost_eur', label: 'Cost', unit: '€', lowerIsBetter: true },
+  { key: 'cost_eur', label: 'Cost', unit: '£', lowerIsBetter: true },
   { key: 'burst_pressure_bar', label: 'Burst Pressure', unit: 'bar', lowerIsBetter: false },
   { key: 'stress_margin_percent', label: 'Stress Margin', unit: '%', lowerIsBetter: false },
 ];

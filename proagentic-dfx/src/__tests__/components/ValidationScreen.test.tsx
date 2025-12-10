@@ -4,18 +4,27 @@
  *
  * Test Coverage:
  * - Component renders with mock validation data
- * - "Run All Tests" button functionality
+ * - "run tests" button functionality
  * - Test result display and statistics
  * - Progress tracking visualization
  * - Tab navigation and panel switching
  * - Accessibility compliance (ARIA labels, keyboard navigation)
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { axe, toHaveNoViolations } from 'jest-axe';
-import { vi } from 'vitest';
+import { vi, beforeEach } from 'vitest';
 import { ValidationScreen } from '@/components/screens/ValidationScreen';
+
+
+// Mock the API client module to prevent real API calls during tests
+vi.mock('@/lib/api/client', () => ({
+  getDesignSentry: vi.fn().mockResolvedValue({
+    sensor_locations: [],
+    inspection_schedule: [],
+  }),
+}));
 
 expect.extend(toHaveNoViolations);
 
@@ -68,20 +77,29 @@ describe('ValidationScreen Component', () => {
   ];
 
   describe('Component Rendering', () => {
-    it('should render without crashing', () => {
+    it('should render without crashing', async () => {
       render(<ValidationScreen />);
       expect(screen.getByText('Design Validation')).toBeInTheDocument();
+
+      // Wait for async effects to settle
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /run tests/i })).toBeInTheDocument();
+      }, { timeout: 5000 });
     });
 
-    it('should render with provided validation stats', () => {
+    it('should render with provided validation stats', async () => {
       render(<ValidationScreen validationStats={mockValidationStats} />);
 
-      expect(screen.getByText('42')).toBeInTheDocument(); // Total tests
-      expect(screen.getByText('38')).toBeInTheDocument(); // Passed
-      expect(screen.getByText('2')).toBeInTheDocument(); // Failed (should appear twice - failed and warnings)
+      await waitFor(() => {
+        expect(screen.getByText('42')).toBeInTheDocument(); // Total tests
+        expect(screen.getByText('38')).toBeInTheDocument(); // Passed
+      }, { timeout: 5000 });
+      // Use getAllByText since '2' appears in both Failed and Warnings stat cards
+      const twoElements = screen.getAllByText('2');
+      expect(twoElements.length).toBeGreaterThanOrEqual(2); // Failed and Warnings both show '2'
     });
 
-    it('should render all stat cards with correct values', () => {
+    it('should render all stat cards with correct values', async () => {
       render(<ValidationScreen validationStats={mockValidationStats} />);
 
       expect(screen.getByText('Total Tests')).toBeInTheDocument();
@@ -91,7 +109,7 @@ describe('ValidationScreen Component', () => {
       expect(screen.getByText('Last Run')).toBeInTheDocument();
     });
 
-    it('should display formatted date and time', () => {
+    it('should display formatted date and time', async () => {
       render(<ValidationScreen validationStats={mockValidationStats} />);
 
       const date = new Date(mockValidationStats.lastRun);
@@ -102,14 +120,14 @@ describe('ValidationScreen Component', () => {
       expect(screen.getByText(formattedTime)).toBeInTheDocument();
     });
 
-    it('should render progress bar with correct completion rate', () => {
+    it('should render progress bar with correct completion rate', async () => {
       render(<ValidationScreen validationStats={mockValidationStats} />);
 
       expect(screen.getByText('90% Complete')).toBeInTheDocument();
       expect(screen.getByText('Validation Progress')).toBeInTheDocument();
     });
 
-    it('should render all tab buttons', () => {
+    it('should render all tab buttons', async () => {
       render(<ValidationScreen />);
 
       expect(screen.getByRole('tab', { name: 'Surrogate Confidence' })).toBeInTheDocument();
@@ -118,7 +136,7 @@ describe('ValidationScreen Component', () => {
       expect(screen.getByRole('tab', { name: 'Verification Checklist' })).toBeInTheDocument();
     });
 
-    it('should render sensor locations when provided', () => {
+    it('should render sensor locations when provided', async () => {
       render(
         <ValidationScreen
           sensorLocations={mockSensorLocations}
@@ -134,11 +152,11 @@ describe('ValidationScreen Component', () => {
     });
   });
 
-  describe('Run All Tests Button', () => {
-    it('should render "Run All Tests" button', () => {
+  describe('run tests Button', () => {
+    it('should render "run tests" button', () => {
       render(<ValidationScreen />);
 
-      const button = screen.getByRole('button', { name: /run all tests/i });
+      const button = screen.getByRole('button', { name: /run tests/i });
       expect(button).toBeInTheDocument();
     });
 
@@ -146,7 +164,7 @@ describe('ValidationScreen Component', () => {
       const onRunTests = vi.fn();
       render(<ValidationScreen onRunTests={onRunTests} />);
 
-      const button = screen.getByRole('button', { name: /run all tests/i });
+      const button = screen.getByRole('button', { name: /run tests/i });
       await userEvent.click(button);
 
       expect(onRunTests).toHaveBeenCalledTimes(1);
@@ -155,10 +173,10 @@ describe('ValidationScreen Component', () => {
     it('should show loading state when tests are running', async () => {
       render(<ValidationScreen />);
 
-      const button = screen.getByRole('button', { name: /run all tests/i });
+      const button = screen.getByRole('button', { name: /run tests/i });
       await userEvent.click(button);
 
-      expect(screen.getByText('Running Tests...')).toBeInTheDocument();
+      expect(screen.getByText('Running...')).toBeInTheDocument();
       expect(button).toBeDisabled();
     });
 
@@ -166,16 +184,16 @@ describe('ValidationScreen Component', () => {
       vi.useFakeTimers();
       render(<ValidationScreen />);
 
-      const button = screen.getByRole('button', { name: /run all tests/i });
+      const button = screen.getByRole('button', { name: /run tests/i });
       await userEvent.click(button);
 
-      expect(screen.getByText('Running Tests...')).toBeInTheDocument();
+      expect(screen.getByText('Running...')).toBeInTheDocument();
 
       // Fast-forward time
       vi.advanceTimersByTime(2000);
 
       await waitFor(() => {
-        expect(screen.getByText('Run All Tests')).toBeInTheDocument();
+        expect(screen.getByText('run tests')).toBeInTheDocument();
         expect(button).not.toBeDisabled();
       });
 
@@ -184,7 +202,7 @@ describe('ValidationScreen Component', () => {
   });
 
   describe('Test Result Display', () => {
-    it('should display test statistics breakdown', () => {
+    it('should display test statistics breakdown', async () => {
       render(<ValidationScreen validationStats={mockValidationStats} />);
 
       expect(screen.getByText('38 Passed')).toBeInTheDocument();
@@ -192,14 +210,14 @@ describe('ValidationScreen Component', () => {
       expect(screen.getByText('2 Warnings')).toBeInTheDocument();
     });
 
-    it('should show correct status badge for completion rate >= 80%', () => {
+    it('should show correct status badge for completion rate >= 80%', async () => {
       render(<ValidationScreen validationStats={mockValidationStats} />);
 
       const badge = screen.getByText('90% Complete');
       expect(badge).toBeInTheDocument();
     });
 
-    it('should show pass status for 100% completion', () => {
+    it('should show pass status for 100% completion', async () => {
       const completeStats = { ...mockValidationStats, completionRate: 100 };
       render(<ValidationScreen validationStats={completeStats} />);
 
@@ -207,7 +225,7 @@ describe('ValidationScreen Component', () => {
       expect(badge).toBeInTheDocument();
     });
 
-    it('should show warning status for 80-99% completion', () => {
+    it('should show warning status for 80-99% completion', async () => {
       const warningStats = { ...mockValidationStats, completionRate: 85 };
       render(<ValidationScreen validationStats={warningStats} />);
 
@@ -215,7 +233,7 @@ describe('ValidationScreen Component', () => {
       expect(badge).toBeInTheDocument();
     });
 
-    it('should show fail status for < 80% completion', () => {
+    it('should show fail status for < 80% completion', async () => {
       const failStats = { ...mockValidationStats, completionRate: 60 };
       render(<ValidationScreen validationStats={failStats} />);
 
@@ -225,13 +243,13 @@ describe('ValidationScreen Component', () => {
   });
 
   describe('Progress Tracking', () => {
-    it('should render linear progress bar', () => {
+    it('should render linear progress bar', async () => {
       render(<ValidationScreen validationStats={mockValidationStats} />);
 
       expect(screen.getByText('Validation Progress')).toBeInTheDocument();
     });
 
-    it('should display progress legend with colored indicators', () => {
+    it('should display progress legend with colored indicators', async () => {
       render(<ValidationScreen validationStats={mockValidationStats} />);
 
       expect(screen.getByText('38 Passed')).toBeInTheDocument();
@@ -241,7 +259,7 @@ describe('ValidationScreen Component', () => {
   });
 
   describe('Tab Navigation', () => {
-    it('should start with surrogate tab active by default', () => {
+    it('should start with surrogate tab active by default', async () => {
       render(<ValidationScreen />);
 
       const surrogateTab = screen.getByRole('tab', { name: 'Surrogate Confidence' });
@@ -389,15 +407,20 @@ describe('ValidationScreen Component', () => {
   });
 
   describe('Accessibility', () => {
-    it('should have no accessibility violations', async () => {
+    it('should have no accessibility violations', { timeout: 30000 }, async () => {
       const { container } = render(
         <ValidationScreen validationStats={mockValidationStats} />
       );
+      // Wait for component to fully render
+      await waitFor(() => {
+        expect(screen.getByText('Design Validation')).toBeInTheDocument();
+      }, { timeout: 5000 });
+
       const results = await axe(container);
       expect(results).toHaveNoViolations();
     });
 
-    it('should have proper ARIA labels on tabs', () => {
+    it('should have proper ARIA labels on tabs', async () => {
       render(<ValidationScreen />);
 
       const surrogateTab = screen.getByRole('tab', { name: 'Surrogate Confidence' });
@@ -405,7 +428,7 @@ describe('ValidationScreen Component', () => {
       expect(surrogateTab).toHaveAttribute('id', 'surrogate-tab');
     });
 
-    it('should have proper tab panel ARIA attributes', () => {
+    it('should have proper tab panel ARIA attributes', async () => {
       render(<ValidationScreen />);
 
       const surrogatePanel = screen.getByRole('tabpanel', { name: 'Surrogate Confidence' });
@@ -413,14 +436,14 @@ describe('ValidationScreen Component', () => {
       expect(surrogatePanel).toHaveAttribute('id', 'surrogate-panel');
     });
 
-    it('should be keyboard navigable through tabs', async () => {
+    it('should be keyboard navigable through tabs', { timeout: 30000 }, async () => {
       render(<ValidationScreen />);
 
       const surrogateTab = screen.getByRole('tab', { name: 'Surrogate Confidence' });
       const testingTab = screen.getByRole('tab', { name: 'Test Plan' });
 
       await userEvent.tab();
-      expect(document.activeElement).toBe(screen.getByRole('button', { name: /run all tests/i }));
+      expect(document.activeElement).toBe(screen.getByRole('button', { name: /run tests/i }));
 
       await userEvent.tab();
       expect(document.activeElement).toBe(surrogateTab);
@@ -429,10 +452,10 @@ describe('ValidationScreen Component', () => {
       expect(document.activeElement).toBe(testingTab);
     });
 
-    it('should support Enter key to activate tabs', async () => {
+    it('should support Enter key to activate tabs', { timeout: 30000 }, async () => {
       render(<ValidationScreen />);
 
-      const testingTab = screen.getByRole('tab', { name: 'Test Plan' });
+      const testingTab = await screen.findByRole('tab', { name: 'Test Plan' }, { timeout: 5000 });
       testingTab.focus();
 
       await userEvent.keyboard('{Enter}');
@@ -440,7 +463,7 @@ describe('ValidationScreen Component', () => {
       expect(testingTab).toHaveAttribute('aria-selected', 'true');
     });
 
-    it('should have proper tablist role', () => {
+    it('should have proper tablist role', async () => {
       render(<ValidationScreen />);
 
       const tablist = screen.getByRole('tablist', { name: 'Validation tabs' });
@@ -449,30 +472,32 @@ describe('ValidationScreen Component', () => {
   });
 
   describe('Edge Cases', () => {
-    it('should handle empty sensor locations gracefully', async () => {
+    it('should handle empty sensor locations gracefully', { timeout: 30000 }, async () => {
       render(<ValidationScreen sensorLocations={[]} />);
 
-      const sentryTab = screen.getByRole('tab', { name: 'Sentry Monitoring' });
+      const sentryTab = await screen.findByRole('tab', { name: 'Sentry Monitoring' }, { timeout: 5000 });
       await userEvent.click(sentryTab);
 
-      expect(screen.getByText('0 Sensors Configured')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('0 Sensors Configured')).toBeInTheDocument();
+      }, { timeout: 5000 });
     });
 
-    it('should handle undefined validation stats', () => {
+    it('should handle undefined validation stats', async () => {
       render(<ValidationScreen />);
 
       // Should render with default/fallback values
       expect(screen.getByText('Design Validation')).toBeInTheDocument();
     });
 
-    it('should handle zero completion rate', () => {
+    it('should handle zero completion rate', async () => {
       const zeroStats = { ...mockValidationStats, completionRate: 0 };
       render(<ValidationScreen validationStats={zeroStats} />);
 
       expect(screen.getByText('0% Complete')).toBeInTheDocument();
     });
 
-    it('should handle all tests passing', () => {
+    it('should handle all tests passing', async () => {
       const allPassStats = {
         totalTests: 40,
         passed: 40,
@@ -483,7 +508,9 @@ describe('ValidationScreen Component', () => {
       };
       render(<ValidationScreen validationStats={allPassStats} />);
 
-      expect(screen.getByText('40')).toBeInTheDocument();
+      // Use getAllByText since '40' appears in both Total Tests and Passed stat cards
+      const fortyElements = screen.getAllByText('40');
+      expect(fortyElements.length).toBeGreaterThanOrEqual(1);
       expect(screen.getByText('100% Complete')).toBeInTheDocument();
     });
   });

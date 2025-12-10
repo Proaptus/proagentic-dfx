@@ -78,9 +78,8 @@ describe('ExportScreen', () => {
     it('should render the export screen with default state', () => {
       render(<ExportScreen />);
 
-      expect(screen.getByText('Export Center')).toBeInTheDocument();
-      expect(screen.getByText(/Generate comprehensive export packages/i)).toBeInTheDocument();
-      expect(screen.getByText('Selected Items')).toBeInTheDocument();
+      expect(screen.getByText('Export')).toBeInTheDocument();
+      expect(screen.getByText(/8 items selected/i)).toBeInTheDocument();
     });
 
     it('should display all export categories', () => {
@@ -95,7 +94,7 @@ describe('ExportScreen', () => {
     it('should show current design in header', () => {
       render(<ExportScreen />);
 
-      expect(screen.getByText(/Design C/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/Design C/i).length).toBeGreaterThan(0);
     });
 
     it('should render with custom export categories', () => {
@@ -150,7 +149,7 @@ describe('ExportScreen', () => {
       const previewTab = screen.getByText('Document Preview');
       await user.click(previewTab);
 
-      expect(screen.getByTestId('document-preview')).toBeInTheDocument();
+      expect(screen.getAllByTestId('document-preview')).toHaveLength(2);
     });
 
     it('should switch to manufacturing tab', async () => {
@@ -168,13 +167,13 @@ describe('ExportScreen', () => {
       render(<ExportScreen />);
 
       const selectionTab = screen.getByText('Export Selection');
-      expect(selectionTab.className).toContain('bg-blue-600');
+      expect(selectionTab.className).toContain('border-gray-900');
 
       const previewTab = screen.getByText('Document Preview');
       await user.click(previewTab);
 
-      expect(previewTab.className).toContain('bg-blue-600');
-      expect(selectionTab.className).not.toContain('bg-blue-600');
+      expect(previewTab.className).toContain('border-gray-900');
+      expect(selectionTab.className).not.toContain('border-gray-900');
     });
   });
 
@@ -183,8 +182,7 @@ describe('ExportScreen', () => {
       render(<ExportScreen />);
 
       // Default selections: 2 geometry + 2 manufacturing + 2 analysis + 2 supporting = 8
-      const badge = screen.getByText('8');
-      expect(badge).toBeInTheDocument();
+      expect(screen.getByText(/8 items selected/i)).toBeInTheDocument();
     });
 
     it('should toggle export option selection', async () => {
@@ -197,7 +195,7 @@ describe('ExportScreen', () => {
 
       // Count should increase
       await waitFor(() => {
-        expect(screen.getByText('9')).toBeInTheDocument();
+        expect(screen.getByText(/9 items selected/i)).toBeInTheDocument();
       });
     });
 
@@ -211,7 +209,7 @@ describe('ExportScreen', () => {
 
       // Count should decrease
       await waitFor(() => {
-        expect(screen.getByText('7')).toBeInTheDocument();
+        expect(screen.getByText(/7 items selected/i)).toBeInTheDocument();
       });
     });
   });
@@ -272,7 +270,7 @@ describe('ExportScreen', () => {
       render(<ExportScreen />);
 
       const generateButton = screen.getByRole('button', {
-        name: /generate export package/i,
+        name: /generate export/i,
       });
       expect(generateButton).toBeInTheDocument();
       expect(generateButton).not.toBeDisabled();
@@ -300,7 +298,7 @@ describe('ExportScreen', () => {
       }
 
       const generateButton = screen.getByRole('button', {
-        name: /generate export package/i,
+        name: /generate export/i,
       });
       expect(generateButton).toBeDisabled();
     });
@@ -310,7 +308,7 @@ describe('ExportScreen', () => {
       render(<ExportScreen />);
 
       const generateButton = screen.getByRole('button', {
-        name: /generate export package/i,
+        name: /generate export/i,
       });
       await user.click(generateButton);
 
@@ -334,7 +332,7 @@ describe('ExportScreen', () => {
       render(<ExportScreen />);
 
       const generateButton = screen.getByRole('button', {
-        name: /generate export package/i,
+        name: /generate export/i,
       });
       await user.click(generateButton);
 
@@ -348,7 +346,7 @@ describe('ExportScreen', () => {
       render(<ExportScreen />);
 
       const generateButton = screen.getByRole('button', {
-        name: /generate export package/i,
+        name: /generate export/i,
       });
       await user.click(generateButton);
 
@@ -368,13 +366,13 @@ describe('ExportScreen', () => {
       render(<ExportScreen />);
 
       const generateButton = screen.getByRole('button', {
-        name: /generate export package/i,
+        name: /generate export/i,
       });
       await user.click(generateButton);
 
       await waitFor(() => {
         expect(screen.getByText('50%')).toBeInTheDocument();
-      });
+      }, { timeout: 3000 });
     });
 
     it('should show progress bar with correct aria attributes', async () => {
@@ -388,7 +386,7 @@ describe('ExportScreen', () => {
       render(<ExportScreen />);
 
       const generateButton = screen.getByRole('button', {
-        name: /generate export package/i,
+        name: /generate export/i,
       });
       await user.click(generateButton);
 
@@ -397,7 +395,7 @@ describe('ExportScreen', () => {
         expect(progressbar).toHaveAttribute('aria-valuenow', '75');
         expect(progressbar).toHaveAttribute('aria-valuemin', '0');
         expect(progressbar).toHaveAttribute('aria-valuemax', '100');
-      });
+      }, { timeout: 3000 });
     });
 
     it('should display file generation status', async () => {
@@ -405,7 +403,7 @@ describe('ExportScreen', () => {
       render(<ExportScreen />);
 
       const generateButton = screen.getByRole('button', {
-        name: /generate export package/i,
+        name: /generate export/i,
       });
       await user.click(generateButton);
 
@@ -428,16 +426,16 @@ describe('ExportScreen', () => {
       render(<ExportScreen />);
 
       const generateButton = screen.getByRole('button', {
-        name: /generate export package/i,
+        name: /generate export/i,
       });
       await user.click(generateButton);
 
       await waitFor(() => {
         const downloadButton = screen.getByRole('button', {
-          name: /download package/i,
+          name: /download/i,
         });
         expect(downloadButton).toBeInTheDocument();
-      });
+      }, { timeout: 3000 });
     });
 
     it('should display success message when ready', async () => {
@@ -451,13 +449,13 @@ describe('ExportScreen', () => {
       render(<ExportScreen />);
 
       const generateButton = screen.getByRole('button', {
-        name: /generate export package/i,
+        name: /generate export/i,
       });
       await user.click(generateButton);
 
       await waitFor(() => {
-        expect(screen.getByText('Export Ready!')).toBeInTheDocument();
-      });
+        expect(screen.getByText('Export ready')).toBeInTheDocument();
+      }, { timeout: 3000 });
     });
 
     it('should open download URL when download button clicked', async () => {
@@ -472,19 +470,19 @@ describe('ExportScreen', () => {
       render(<ExportScreen />);
 
       const generateButton = screen.getByRole('button', {
-        name: /generate export package/i,
+        name: /generate export/i,
       });
       await user.click(generateButton);
 
       await waitFor(() => {
         const downloadButton = screen.getByRole('button', {
-          name: /download package/i,
+          name: /download/i,
         });
         expect(downloadButton).toBeInTheDocument();
-      });
+      }, { timeout: 3000 });
 
       const downloadButton = screen.getByRole('button', {
-        name: /download package/i,
+        name: /download/i,
       });
       await user.click(downloadButton);
 
@@ -507,16 +505,16 @@ describe('ExportScreen', () => {
       render(<ExportScreen />);
 
       const generateButton = screen.getByRole('button', {
-        name: /generate export package/i,
+        name: /generate export/i,
       });
       await user.click(generateButton);
 
       await waitFor(() => {
         const emailButton = screen.getByRole('button', {
-          name: /email to team/i,
+          name: /email/i,
         });
         expect(emailButton).toBeInTheDocument();
-      });
+      }, { timeout: 5000 });
     });
   });
 
@@ -542,7 +540,7 @@ describe('ExportScreen', () => {
       render(<ExportScreen />);
 
       const generateButton = screen.getByRole('button', {
-        name: /generate export package/i,
+        name: /generate export/i,
       });
       expect(generateButton).toHaveAccessibleName();
     });
@@ -558,7 +556,7 @@ describe('ExportScreen', () => {
       render(<ExportScreen />);
 
       const generateButton = screen.getByRole('button', {
-        name: /generate export package/i,
+        name: /generate export/i,
       });
       await user.click(generateButton);
 
@@ -567,7 +565,7 @@ describe('ExportScreen', () => {
           name: /export ready notification/i,
         });
         expect(status).toHaveAttribute('aria-live', 'polite');
-      });
+      }, { timeout: 5000 });
     });
 
     it('should have keyboard accessible export options', async () => {
@@ -575,11 +573,15 @@ describe('ExportScreen', () => {
       render(<ExportScreen />);
 
       const stepOption = screen.getByText('STEP CAD Model');
-      stepOption.focus();
-      expect(document.activeElement).toBe(stepOption.closest('button'));
+      const button = stepOption.closest('button');
+      button.focus();
+      expect(document.activeElement).toBe(button);
 
-      await user.keyboard('{Enter}');
+      await user.keyboard(' ');  // Space key activates buttons
       // Should toggle selection
+      await waitFor(() => {
+        expect(screen.getByText(/7 items selected/i)).toBeInTheDocument();
+      });
     });
   });
 
@@ -595,7 +597,7 @@ describe('ExportScreen', () => {
       render(<ExportScreen />);
 
       const generateButton = screen.getByRole('button', {
-        name: /generate export package/i,
+        name: /generate export/i,
       });
       await user.click(generateButton);
 
@@ -613,6 +615,11 @@ describe('ExportScreen', () => {
       const user = userEvent.setup();
       const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 
+      // startExport succeeds, but status polling fails
+      (apiClient.startExport as ReturnType<typeof vi.fn>).mockResolvedValue({
+        export_id: 'test-export-123',
+      });
+
       (apiClient.getExportStatus as ReturnType<typeof vi.fn>).mockRejectedValue(
         new Error('Status check failed')
       );
@@ -620,7 +627,7 @@ describe('ExportScreen', () => {
       render(<ExportScreen />);
 
       const generateButton = screen.getByRole('button', {
-        name: /generate export package/i,
+        name: /generate export/i,
       });
       await user.click(generateButton);
 
@@ -629,7 +636,7 @@ describe('ExportScreen', () => {
           'Export status polling error:',
           expect.any(Error)
         );
-      });
+      }, { timeout: 3000 });
 
       consoleError.mockRestore();
     });

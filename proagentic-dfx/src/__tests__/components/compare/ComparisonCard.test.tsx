@@ -2,10 +2,15 @@
  * ComparisonCard Component Tests
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ComparisonCard } from '@/components/compare/ComparisonCard';
+
+// Mock the app store
+vi.mock('@/lib/stores/app-store', () => ({
+  useAppStore: vi.fn(() => 'GBP'),
+}));
 
 describe('ComparisonCard', () => {
   const mockOnViewDesign = vi.fn();
@@ -17,7 +22,7 @@ describe('ComparisonCard', () => {
     index: 0,
     metrics: [
       { label: 'Weight', value: 100, unit: 'kg', metricKey: 'weight_kg' },
-      { label: 'Cost', value: 5000, unit: '€', metricKey: 'cost_eur' },
+      { label: 'Cost', value: 5000, unit: '£', metricKey: 'cost_eur' },
       { label: 'Burst Pressure', value: 875, unit: 'bar', metricKey: 'burst_pressure_bar' },
     ],
     allDesignsMetrics: {
@@ -54,7 +59,7 @@ describe('ComparisonCard', () => {
     it('should render metric values with units', () => {
       render(<ComparisonCard {...defaultProps} />);
       expect(screen.getByText(/100 kg/)).toBeInTheDocument();
-      expect(screen.getByText(/€5,000/)).toBeInTheDocument();
+      expect(screen.getByText(/£5,000/)).toBeInTheDocument();
       expect(screen.getByText(/875 bar/)).toBeInTheDocument();
     });
 
@@ -129,7 +134,8 @@ describe('ComparisonCard', () => {
     it('should use semantic HTML for metrics (dl/dt/dd)', () => {
       const { container } = render(<ComparisonCard {...defaultProps} />);
       const dl = container.querySelector('dl');
-      expect(dl.tagName).toBe('DL');
+      expect(dl).not.toBeNull();
+      expect(dl?.tagName).toBe('DL');
     });
   });
 
@@ -204,9 +210,9 @@ describe('ComparisonCard', () => {
       expect(screen.getByText(/1,000,000/)).toBeInTheDocument();
     });
 
-    it('should handle currency formatting for euro', () => {
+    it('should handle currency formatting', () => {
       render(<ComparisonCard {...defaultProps} />);
-      expect(screen.getByText(/€5,000/)).toBeInTheDocument();
+      expect(screen.getByText(/£5,000/)).toBeInTheDocument();
     });
   });
 });

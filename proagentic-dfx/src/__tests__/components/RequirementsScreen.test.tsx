@@ -29,6 +29,16 @@ vi.mock('@/components/RequirementsChat', () => ({
   ),
 }));
 
+vi.mock('@/components/requirements/GuidedRequirementsWizard', () => ({
+  GuidedRequirementsWizard: ({ onComplete }: { onComplete?: (req: Record<string, unknown>) => void }) => (
+    <div data-testid="guided-wizard">
+      <button onClick={() => onComplete?.({ internal_volume_liters: 150 })}>
+        Complete Wizard
+      </button>
+    </div>
+  ),
+}));
+
 vi.mock('@/components/requirements/RequirementsTable', () => ({
   RequirementsTable: () => <div data-testid="requirements-table">Requirements Table</div>,
 }));
@@ -89,9 +99,9 @@ describe('RequirementsScreen', () => {
   it('renders the component with initial state', () => {
     render(<RequirementsScreen />);
 
-    expect(screen.getByText('Requirements Input')).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /chat mode/i })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /text mode/i })).toBeInTheDocument();
+    expect(screen.getByText('Requirements')).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Chat' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Wizard' })).toBeInTheDocument();
   });
 
   it('displays chat mode by default', () => {
@@ -100,89 +110,53 @@ describe('RequirementsScreen', () => {
     expect(screen.getByTestId('requirements-chat')).toBeInTheDocument();
   });
 
-  it('switches between chat and text mode', () => {
+  it('switches between chat and wizard mode', () => {
     render(<RequirementsScreen />);
 
-    const textModeButton = screen.getByRole('tab', { name: /text mode/i });
-    fireEvent.click(textModeButton);
+    const wizardModeButton = screen.getByRole('tab', { name: 'Wizard' });
+    fireEvent.click(wizardModeButton);
 
     expect(screen.queryByTestId('requirements-chat')).not.toBeInTheDocument();
-    expect(screen.getByLabelText('Requirements text input')).toBeInTheDocument();
+    expect(screen.getByTestId('guided-wizard')).toBeInTheDocument();
   });
 
-  it('handles text mode input and parsing', async () => {
-    const mockParsedResult = {
-      success: true,
-      parsed_requirements: {
-        internal_volume_liters: 150,
-        working_pressure_bar: 700,
-        target_weight_kg: 80,
-        target_cost_eur: 15000,
-        min_burst_ratio: 2.25,
-        max_permeation_rate: 46,
-        operating_temp_min_c: -40,
-        operating_temp_max_c: 85,
-        fatigue_cycles: 11000,
-        certification_region: 'EU',
-      },
-      derived_requirements: {
-        burst_pressure_bar: 1575,
-        test_pressure_bar: 1050,
-        min_wall_thickness_mm: 2.5,
-        applicable_standards: ['ISO 11119-3', 'UN R134'],
-      },
-      applicable_standards: [],
+  it('handles wizard completion and sets requirements', async () => {
+    vi.mocked(apiClient.recommendTankType).mockResolvedValue({
+      recommended_type: 'TYPE_IV',
       confidence: 0.95,
-      warnings: [],
-      clarification_needed: [],
-    };
-
-    vi.mocked(apiClient.parseRequirements).mockResolvedValue(mockParsedResult);
+      reasoning: 'Best for high pressure',
+      alternatives: [],
+      comparison: {},
+    });
 
     render(<RequirementsScreen />);
 
-    // Switch to text mode
-    fireEvent.click(screen.getByRole('tab', { name: /text mode/i }));
+    // Switch to wizard mode
+    fireEvent.click(screen.getByRole('tab', { name: 'Wizard' }));
 
-    // Enter requirements text
-    const textarea = screen.getByLabelText('Requirements text input');
-    fireEvent.change(textarea, { target: { value: 'I need a 150L tank at 700 bar' } });
+    // Complete wizard
+    const completeButton = screen.getByText('Complete Wizard');
+    fireEvent.click(completeButton);
 
-    // Click parse button
-    const parseButton = screen.getByRole('button', { name: /parse requirements/i });
-    fireEvent.click(parseButton);
-
+    // Should call setRequirements with the wizard data
     await waitFor(() => {
-      expect(apiClient.parseRequirements).toHaveBeenCalledWith('I need a 150L tank at 700 bar');
-      expect(mockSetRequirements).toHaveBeenCalledWith(mockParsedResult.parsed_requirements);
-    });
-
-    // Should show parsed results
-    await waitFor(() => {
-      expect(screen.getByText('Requirements Parsed Successfully')).toBeInTheDocument();
-    });
-  });
-
-  it('displays error message when parsing fails', async () => {
-    vi.mocked(apiClient.parseRequirements).mockRejectedValue(new Error('Parse error'));
-
-    render(<RequirementsScreen />);
-
-    fireEvent.click(screen.getByRole('tab', { name: /text mode/i }));
-
-    const textarea = screen.getByLabelText('Requirements text input');
-    fireEvent.change(textarea, { target: { value: 'Invalid text' } });
-
-    const parseButton = screen.getByRole('button', { name: /parse requirements/i });
-    fireEvent.click(parseButton);
-
-    await waitFor(() => {
-      expect(screen.getByRole('alert')).toBeInTheDocument();
-      expect(screen.getByText('Parse error')).toBeInTheDocument();
-    });
+      expect(mockSetRequirements).toHaveBeenCalledWith(
+        expect.objectContaining({
+          internal_volume_liters: 150,
+        })
+      );
+    }, { timeout: 3000 });
   });
 
   it('handles chat completion and sets requirements', async () => {
+    vi.mocked(apiClient.recommendTankType).mockResolvedValue({
+      recommended_type: 'TYPE_IV',
+      confidence: 0.95,
+      reasoning: 'Best for high pressure',
+      alternatives: [],
+      comparison: {},
+    });
+
     render(<RequirementsScreen />);
 
     // Complete chat
@@ -199,51 +173,6 @@ describe('RequirementsScreen', () => {
     }, { timeout: 3000 });
   });
 
-  it('displays warnings when present in parsed results', async () => {
-    const mockParsedResult = {
-      success: true,
-      parsed_requirements: {
-        internal_volume_liters: 150,
-        working_pressure_bar: 700,
-        target_weight_kg: 80,
-        target_cost_eur: 15000,
-        min_burst_ratio: 2.25,
-        max_permeation_rate: 46,
-        operating_temp_min_c: -40,
-        operating_temp_max_c: 85,
-        fatigue_cycles: 11000,
-        certification_region: 'EU',
-      },
-      derived_requirements: {
-        burst_pressure_bar: 1575,
-        test_pressure_bar: 1050,
-        min_wall_thickness_mm: 2.5,
-        applicable_standards: ['ISO 11119-3'],
-      },
-      applicable_standards: [],
-      confidence: 0.95,
-      warnings: ['High pressure may require special certification'],
-      clarification_needed: [],
-    };
-
-    vi.mocked(apiClient.parseRequirements).mockResolvedValue(mockParsedResult);
-
-    render(<RequirementsScreen />);
-
-    fireEvent.click(screen.getByRole('tab', { name: /text mode/i }));
-
-    const textarea = screen.getByLabelText('Requirements text input');
-    fireEvent.change(textarea, { target: { value: 'Test requirements' } });
-
-    const parseButton = screen.getByRole('button', { name: /parse requirements/i });
-    fireEvent.click(parseButton);
-
-    await waitFor(() => {
-      expect(screen.getByText('Warnings')).toBeInTheDocument();
-      expect(screen.getByText('High pressure may require special certification')).toBeInTheDocument();
-    });
-  });
-
   it('shows completion state with view results button', async () => {
     // This test is skipped because it requires a full optimization flow
     // which involves SSE streams and is better tested in E2E tests
@@ -254,45 +183,61 @@ describe('RequirementsScreen', () => {
     render(<RequirementsScreen />);
 
     // Check tab list has proper role
-    const tablist = screen.getByRole('tablist', { name: /input mode selection/i });
+    const tablist = screen.getByRole('tablist', { name: /input mode/i });
     expect(tablist).toBeInTheDocument();
 
     // Check tabs have proper aria-selected
-    const chatTab = screen.getByRole('tab', { name: /chat mode/i });
+    const chatTab = screen.getByRole('tab', { name: 'Chat' });
     expect(chatTab).toHaveAttribute('aria-selected', 'true');
 
-    const textTab = screen.getByRole('tab', { name: /text mode/i });
-    expect(textTab).toHaveAttribute('aria-selected', 'false');
+    const wizardTab = screen.getByRole('tab', { name: 'Wizard' });
+    expect(wizardTab).toHaveAttribute('aria-selected', 'false');
   });
 
-  it('displays character count in text mode', () => {
+  it('shows recommendation button after chat completion', async () => {
     render(<RequirementsScreen />);
 
-    fireEvent.click(screen.getByRole('tab', { name: /text mode/i }));
+    // Complete chat
+    const completeButton = screen.getByText('Complete Chat');
+    fireEvent.click(completeButton);
 
-    expect(screen.getByText('Start typing your requirements')).toBeInTheDocument();
-
-    const textarea = screen.getByLabelText('Requirements text input');
-    fireEvent.change(textarea, { target: { value: 'Hello' } });
-
-    expect(screen.getByText('5 characters')).toBeInTheDocument();
+    // Should show parsed results and recommendation button
+    await waitFor(() => {
+      expect(screen.getByText('Requirements Parsed Successfully')).toBeInTheDocument();
+      expect(screen.getByText('Get Tank Type Recommendation')).toBeInTheDocument();
+    }, { timeout: 3000 });
   });
 
-  it('disables parse button during parsing', async () => {
-    vi.mocked(apiClient.parseRequirements).mockImplementation(
-      () => new Promise((resolve) => setTimeout(resolve, 100))
-    );
+  it('calls recommendTankType when button is clicked', async () => {
+    const mockRecommendation = {
+      recommended_type: 'TYPE_IV',
+      confidence: 0.95,
+      reasoning: 'Best for high pressure',
+      alternatives: [],
+      comparison: {},
+    };
+
+    vi.mocked(apiClient.recommendTankType).mockResolvedValue(mockRecommendation);
 
     render(<RequirementsScreen />);
 
-    fireEvent.click(screen.getByRole('tab', { name: /text mode/i }));
+    // Complete chat first
+    const completeButton = screen.getByText('Complete Chat');
+    fireEvent.click(completeButton);
 
-    const textarea = screen.getByLabelText('Requirements text input');
-    fireEvent.change(textarea, { target: { value: 'Test' } });
+    // Wait for recommendation button to appear
+    await waitFor(() => {
+      expect(screen.getByText('Get Tank Type Recommendation')).toBeInTheDocument();
+    });
 
-    const parseButton = screen.getByRole('button', { name: /parse requirements/i });
-    fireEvent.click(parseButton);
+    // Click the recommendation button
+    const recommendButton = screen.getByText('Get Tank Type Recommendation');
+    fireEvent.click(recommendButton);
 
-    expect(parseButton).toBeDisabled();
+    // Should call recommendTankType
+    await waitFor(() => {
+      expect(apiClient.recommendTankType).toHaveBeenCalled();
+      expect(mockSetTankType).toHaveBeenCalledWith('TYPE_IV');
+    });
   });
 });

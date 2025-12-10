@@ -5,20 +5,21 @@
 
 SUMMARY
 -------
-Total Violations:  4
-Files Scanned:     120
-Files Affected:    2
+Total Violations:  7
+Files Scanned:     124
+Files Affected:    3
 
 SEVERITY BREAKDOWN
 ------------------
   CRITICAL:    0 ✓
   HIGH:        0 ✓
-  MEDIUM:      4
+  MEDIUM:      7
   LOW:         0
 
 CATEGORY BREAKDOWN
 ------------------
   🟡 Filler Text:    4
+  🟡 Repeated Structure:    3
 
 ==========================================================================================
 DETAILED VIOLATIONS BY FILE
@@ -40,6 +41,23 @@ VIOLATIONS: 3 (Critical: 0, High: 0)
   🟡 Line 315: [MEDIUM] Filler Text
      Pattern: : 'N/A'
      Reason:  Filler/placeholder text
+
+----------------------------------------------------------------------
+FILE: components\screens\ValidationScreen.tsx
+VIOLATIONS: 3 (Critical: 0, High: 0)
+----------------------------------------------------------------------
+
+  🟡 Line 73: [MEDIUM] Repeated Structure
+     Pattern: {     id: 'permeation',     name: 'Permeation Test',     standard: 'ISO 19881 Annex B',     arti
+     Reason:  Repeated object structure
+
+  🟡 Line 93: [MEDIUM] Repeated Structure
+     Pattern: {     id: 'fire',     name: 'Bonfire Test',     standard: 'UN R134 §6.2.8',     articles: 1,   
+     Reason:  Repeated object structure
+
+  🟡 Line 111: [MEDIUM] Repeated Structure
+     Pattern: {     id: 'fatigue',     name: 'Accelerated Stress Rupture',     standard: 'ISO 11119-3',     ar
+     Reason:  Repeated object structure
 
 ----------------------------------------------------------------------
 FILE: components\analysis\ReliabilityPanel.tsx

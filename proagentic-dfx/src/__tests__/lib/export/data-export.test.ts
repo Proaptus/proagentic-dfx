@@ -15,7 +15,7 @@ import {
   type ExportOptions,
   type PerLayerStress
 } from '@/lib/export/data-export';
-import type { DesignStress, MeshNode, StressNode } from '@/lib/types';
+import type { DesignStress, MeshNode } from '@/lib/types';
 
 describe('Data Export - CSV Functions', () => {
   const mockStressData: DesignStress = {

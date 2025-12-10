@@ -131,7 +131,7 @@ describe('COMPARISON_METRICS', () => {
     expect(metric).toBeDefined();
     expect(metric?.lowerIsBetter).toBe(true);
     expect(metric?.label).toBe('Cost');
-    expect(metric?.unit).toBe('€');
+    expect(metric?.unit).toBe('£');
   });
 
   it('should define burst_pressure_bar as higher-is-better', () => {
