@@ -1,4 +1,5 @@
 ﻿---
+id: HOWTO-INSTALL-001
 doc_type: howto
 title: "OpenCascade.js CAD Integration - Installation Guide"
 version: 1.0.0
@@ -6,6 +7,9 @@ date: 2025-12-09
 owner: "@h2-tank-team"
 status: accepted
 last_verified_at: 2025-12-09
+code_refs:
+  - path: "proagentic-dfx/package.json"
+  - path: "h2-tank-mock-server/package.json"
 ---
 # OpenCascade.js CAD Integration - Installation Guide
 

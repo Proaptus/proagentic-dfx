@@ -1,0 +1,475 @@
+
+> proagentic-dfx@0.1.0 test
+> vitest run charts-comprehensive.test.ts --run
+
+
+[1m[46m RUN [49m[22m [36mv4.0.15 [39m[90mC:/Users/chine/Projects/proagentic-dfx/proagentic-dfx[39m
+
+ [31m❯[39m src/__tests__/lib/charts-comprehensive.test.ts [2m([22m[2m196 tests[22m[2m | [22m[31m17 failed[39m[2m)[22m[32m 39[2mms[22m[39m
+[31m       [31m×[31m should interpolate between two colors at t=0.5[39m[32m 8[2mms[22m[39m
+       [32m✓[39m should return first color at t=0[32m 0[2mms[22m[39m
+       [32m✓[39m should return last color at t=1[32m 0[2mms[22m[39m
+       [32m✓[39m should clamp t < 0 to first color[32m 0[2mms[22m[39m
+       [32m✓[39m should clamp t > 1 to last color[32m 0[2mms[22m[39m
+       [32m✓[39m should handle multi-color scales with 3+ colors[32m 0[2mms[22m[39m
+       [32m✓[39m should handle edge case of single color[32m 0[2mms[22m[39m
+       [32m✓[39m should handle very small t values[32m 0[2mms[22m[39m
+       [32m✓[39m should handle t values very close to 1[32m 0[2mms[22m[39m
+       [32m✓[39m should return first primary color when min === max[32m 0[2mms[22m[39m
+[31m       [31m×[31m should apply reliability gradient (red -> green)[39m[32m 1[2mms[22m[39m
+       [32m✓[39m should apply cost gradient (inverted red -> green)[32m 0[2mms[22m[39m
+       [32m✓[39m should apply performance gradient (purple scale)[32m 0[2mms[22m[39m
+       [32m✓[39m should apply gradient color mode (blue scale)[32m 0[2mms[22m[39m
+       [32m✓[39m should return primary color for unknown color mode[32m 0[2mms[22m[39m
+       [32m✓[39m should invert gradient when invert=true[32m 0[2mms[22m[39m
+       [32m✓[39m should handle value at minimum[32m 0[2mms[22m[39m
+       [32m✓[39m should handle value at maximum[32m 0[2mms[22m[39m
+       [32m✓[39m should handle negative range values[32m 0[2mms[22m[39m
+       [32m✓[39m should format null as dash[32m 0[2mms[22m[39m
+       [32m✓[39m should format undefined as dash[32m 0[2mms[22m[39m
+       [32m✓[39m should format NaN as dash[32m 0[2mms[22m[39m
+       [32m✓[39m should use scientific notation for very small values[32m 0[2mms[22m[39m
+       [32m✓[39m should use scientific notation when isScientific=true[32m 0[2mms[22m[39m
+       [32m✓[39m should format large numbers with M suffix[32m 0[2mms[22m[39m
+       [32m✓[39m should format thousands with k suffix[32m 0[2mms[22m[39m
+       [32m✓[39m should handle negative large numbers[32m 0[2mms[22m[39m
+       [32m✓[39m should not compact when compact=false[32m 0[2mms[22m[39m
+       [32m✓[39m should format small decimals with precision[32m 0[2mms[22m[39m
+       [32m✓[39m should format numbers >= 100 without decimals[32m 0[2mms[22m[39m
+       [32m✓[39m should add unit suffix if provided[32m 0[2mms[22m[39m
+       [32m✓[39m should respect precision parameter[32m 0[2mms[22m[39m
+       [32m✓[39m should handle zero values[32m 0[2mms[22m[39m
+       [32m✓[39m should handle negative zero[32m 0[2mms[22m[39m
+[31m       [31m×[31m should handle Infinity[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m should handle negative Infinity[39m[32m 0[2mms[22m[39m
+       [32m✓[39m should format typical axis values[32m 0[2mms[22m[39m
+       [32m✓[39m should use compact notation by default[32m 0[2mms[22m[39m
+       [32m✓[39m should support scientific notation[32m 0[2mms[22m[39m
+       [32m✓[39m should format small values[32m 0[2mms[22m[39m
+       [32m✓[39m should format 0.5 as 50%[32m 0[2mms[22m[39m
+       [32m✓[39m should format 1 as 100%[32m 0[2mms[22m[39m
+       [32m✓[39m should format 0 as 0%[32m 0[2mms[22m[39m
+       [32m✓[39m should respect custom precision[32m 0[2mms[22m[39m
+       [32m✓[39m should handle values > 1[32m 0[2mms[22m[39m
+       [32m✓[39m should handle negative values[32m 0[2mms[22m[39m
+       [32m✓[39m should normalize values to 0-1 range[32m 0[2mms[22m[39m
+       [32m✓[39m should handle negative values[32m 0[2mms[22m[39m
+       [32m✓[39m should handle single value[32m 0[2mms[22m[39m
+       [32m✓[39m should handle identical values[32m 0[2mms[22m[39m
+       [32m✓[39m should handle large value ranges[32m 0[2mms[22m[39m
+       [32m✓[39m should handle decimal values[32m 0[2mms[22m[39m
+       [32m✓[39m should preserve order[32m 0[2mms[22m[39m
+       [32m✓[39m should normalize log scale with positive values[32m 0[2mms[22m[39m
+       [32m✓[39m should handle single positive value[32m 0[2mms[22m[39m
+       [32m✓[39m should handle mix of positive and non-positive values[32m 0[2mms[22m[39m
+       [32m✓[39m should handle negative values by mapping to 0[32m 0[2mms[22m[39m
+       [32m✓[39m should return all zeros for no positive values[32m 0[2mms[22m[39m
+       [32m✓[39m should handle very small positive values[32m 0[2mms[22m[39m
+       [32m✓[39m should calculate correct min and max[32m 0[2mms[22m[39m
+[31m       [31m×[31m should calculate domain with default padding[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m should add padding proportional to range[39m[32m 1[2mms[22m[39m
+       [32m✓[39m should handle zero padding[32m 0[2mms[22m[39m
+[31m       [31m×[31m should not go below 0 for lower bound[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m should handle negative values[39m[32m 0[2mms[22m[39m
+       [32m✓[39m should handle single value[32m 0[2mms[22m[39m
+       [32m✓[39m should handle identical values[32m 0[2mms[22m[39m
+[31m       [31m×[31m should handle large ranges[39m[32m 0[2mms[22m[39m
+       [32m✓[39m should generate ticks for simple range[32m 0[2mms[22m[39m
+       [32m✓[39m should generate specified number of ticks approximately[32m 0[2mms[22m[39m
+       [32m✓[39m should generate ticks in ascending order[32m 0[2mms[22m[39m
+       [32m✓[39m should use nice round numbers[32m 0[2mms[22m[39m
+       [32m✓[39m should handle negative ranges[32m 0[2mms[22m[39m
+       [32m✓[39m should handle decimal ranges[32m 0[2mms[22m[39m
+       [32m✓[39m should handle very small ranges[32m 0[2mms[22m[39m
+       [32m✓[39m should handle very large ranges[32m 0[2mms[22m[39m
+[31m       [31m×[31m should handle identical min and max[39m[32m 0[2mms[22m[39m
+       [32m✓[39m should format simple data[32m 0[2mms[22m[39m
+       [32m✓[39m should capitalize label words[32m 0[2mms[22m[39m
+       [32m✓[39m should replace underscores with spaces[32m 0[2mms[22m[39m
+       [32m✓[39m should format numeric values[32m 0[2mms[22m[39m
+       [32m✓[39m should preserve string values[32m 0[2mms[22m[39m
+       [32m✓[39m should apply custom format options[32m 0[2mms[22m[39m
+       [32m✓[39m should handle empty data[32m 0[2mms[22m[39m
+       [32m✓[39m should handle mixed numeric and string data[32m 0[2mms[22m[39m
+       [32m✓[39m should interpolate jet colormap at value[32m 0[2mms[22m[39m
+       [32m✓[39m should interpolate thermal colormap[32m 0[2mms[22m[39m
+       [32m✓[39m should interpolate viridis colormap[32m 0[2mms[22m[39m
+       [32m✓[39m should interpolate plasma colormap[32m 0[2mms[22m[39m
+       [32m✓[39m should interpolate coolwarm colormap[32m 0[2mms[22m[39m
+       [32m✓[39m should return color at min value[32m 0[2mms[22m[39m
+       [32m✓[39m should return color at max value[32m 0[2mms[22m[39m
+       [32m✓[39m should clamp values outside range[32m 0[2mms[22m[39m
+[31m       [31m×[31m should handle equal min and max[39m[32m 1[2mms[22m[39m
+       [32m✓[39m should handle decimal values[32m 0[2mms[22m[39m
+       [32m✓[39m should return hex color string[32m 0[2mms[22m[39m
+       [32m✓[39m should work with all colormaps[32m 0[2mms[22m[39m
+       [32m✓[39m should handle edge values[32m 0[2mms[22m[39m
+       [32m✓[39m should return RGB string[32m 0[2mms[22m[39m
+       [32m✓[39m should return valid RGB values[32m 0[2mms[22m[39m
+       [32m✓[39m should return color stops array[32m 0[2mms[22m[39m
+       [32m✓[39m should have offsets from 0 to 1[32m 0[2mms[22m[39m
+       [32m✓[39m should have hex color strings[32m 0[2mms[22m[39m
+       [32m✓[39m should use custom number of stops[32m 0[2mms[22m[39m
+       [32m✓[39m should work with all colormaps[32m 0[2mms[22m[39m
+       [32m✓[39m should have ascending offsets[32m 0[2mms[22m[39m
+       [32m✓[39m should return array of hex colors[32m 0[2mms[22m[39m
+       [32m✓[39m should all be valid hex colors[32m 0[2mms[22m[39m
+       [32m✓[39m should use custom number of colors[32m 0[2mms[22m[39m
+       [32m✓[39m should span from start to end of colormap[32m 0[2mms[22m[39m
+       [32m✓[39m should return array of colormap names[32m 0[2mms[22m[39m
+       [32m✓[39m should include all standard colormaps[32m 0[2mms[22m[39m
+[31m       [31m×[31m should return description for jet[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m should return description for thermal[39m[32m 0[2mms[22m[39m
+[31m       [31m×[31m should return description for viridis[39m[32m 0[2mms[22m[39m
+       [32m✓[39m should return description for all colormaps[32m 0[2mms[22m[39m
+       [32m✓[39m should return CSS gradient string[32m 0[2mms[22m[39m
+       [32m✓[39m should include all color stops[32m 0[2mms[22m[39m
+       [32m✓[39m should support custom direction[32m 0[2mms[22m[39m
+       [32m✓[39m should support custom number of stops[32m 0[2mms[22m[39m
+       [32m✓[39m should include percentage offsets[32m 0[2mms[22m[39m
+       [32m✓[39m should return array of 3 numbers[32m 0[2mms[22m[39m
+       [32m✓[39m should return values in 0-1 range[32m 0[2mms[22m[39m
+       [32m✓[39m should handle all colormaps[32m 0[2mms[22m[39m
+       [32m✓[39m should handle edge values[32m 0[2mms[22m[39m
+       [32m✓[39m should return flat array of RGB values[32m 0[2mms[22m[39m
+       [32m✓[39m should process multiple values[32m 0[2mms[22m[39m
+       [32m✓[39m should return valid color components[32m 0[2mms[22m[39m
+       [32m✓[39m should handle empty array[32m 0[2mms[22m[39m
+       [32m✓[39m should handle single value[32m 0[2mms[22m[39m
+       [32m✓[39m should handle all colormaps[32m 0[2mms[22m[39m
+       [32m✓[39m should return colors for lightest[32m 0[2mms[22m[39m
+       [32m✓[39m should return default colors for undefined[32m 0[2mms[22m[39m
+       [32m✓[39m should return default colors for invalid category[32m 0[2mms[22m[39m
+       [32m✓[39m should return valid colors for all categories[32m 0[2mms[22m[39m
+       [32m✓[39m should format lightest[32m 0[2mms[22m[39m
+       [32m✓[39m should replace underscores with spaces[32m 0[2mms[22m[39m
+       [32m✓[39m should return Unknown for undefined[32m 0[2mms[22m[39m
+       [32m✓[39m should return Unknown for empty string[32m 0[2mms[22m[39m
+       [32m✓[39m should handle multiple underscores[32m 0[2mms[22m[39m
+       [32m✓[39m should validate complete design[32m 0[2mms[22m[39m
+       [32m✓[39m should reject missing id[32m 0[2mms[22m[39m
+       [32m✓[39m should reject missing weight_kg[32m 0[2mms[22m[39m
+       [32m✓[39m should reject missing cost_eur[32m 0[2mms[22m[39m
+       [32m✓[39m should reject missing burst_pressure_bar[32m 0[2mms[22m[39m
+       [32m✓[39m should reject non-string id[32m 0[2mms[22m[39m
+       [32m✓[39m should reject non-number weight_kg[32m 0[2mms[22m[39m
+       [32m✓[39m should filter designs with trade_off_category[32m 0[2mms[22m[39m
+       [32m✓[39m should return empty array for no highlighted designs[32m 0[2mms[22m[39m
+       [32m✓[39m should preserve design order[32m 0[2mms[22m[39m
+       [32m✓[39m should find recommended design[32m 0[2mms[22m[39m
+       [32m✓[39m should return undefined if no recommended[32m 0[2mms[22m[39m
+       [32m✓[39m should return first recommended if multiple[32m 0[2mms[22m[39m
+       [32m✓[39m should have metric options[32m 0[2mms[22m[39m
+       [32m✓[39m should have value and label properties[32m 0[2mms[22m[39m
+       [32m✓[39m should include weight_kg[32m 0[2mms[22m[39m
+       [32m✓[39m should include cost_eur[32m 0[2mms[22m[39m
+       [32m✓[39m should have metric options[32m 0[2mms[22m[39m
+       [32m✓[39m should include burst_pressure_bar[32m 0[2mms[22m[39m
+       [32m✓[39m should have legend items[32m 0[2mms[22m[39m
+       [32m✓[39m should have category, label, and color[32m 0[2mms[22m[39m
+       [32m✓[39m should have valid hex colors[32m 0[2mms[22m[39m
+       [32m✓[39m should have color definitions[32m 0[2mms[22m[39m
+       [32m✓[39m should have all standard categories[32m 0[2mms[22m[39m
+       [32m✓[39m should have bg, text, and dot colors[32m 0[2mms[22m[39m
+       [32m✓[39m should have color array[32m 0[2mms[22m[39m
+       [32m✓[39m should have valid hex colors[32m 0[2mms[22m[39m
+       [32m✓[39m should have color scale definitions[32m 0[2mms[22m[39m
+       [32m✓[39m should have valid hex colors in each scale[32m 0[2mms[22m[39m
+       [32m✓[39m should have diverging scale definitions[32m 0[2mms[22m[39m
+       [32m✓[39m should have valid colors in each scale[32m 0[2mms[22m[39m
+       [32m✓[39m should have category color definitions[32m 0[2mms[22m[39m
+       [32m✓[39m should have valid hex colors[32m 0[2mms[22m[39m
+       [32m✓[39m should have status color definitions[32m 0[2mms[22m[39m
+       [32m✓[39m should have valid hex colors[32m 0[2mms[22m[39m
+       [32m✓[39m should have default configuration[32m 0[2mms[22m[39m
+       [32m✓[39m should have sensible defaults[32m 0[2mms[22m[39m
+       [32m✓[39m should have animation presets[32m 0[2mms[22m[39m
+       [32m✓[39m should have duration and easing[32m 0[2mms[22m[39m
+       [32m✓[39m should have increasing durations[32m 0[2mms[22m[39m
+     [32m✓[39m should export utility functions[32m 0[2mms[22m[39m
+     [32m✓[39m should export color palettes[32m 0[2mms[22m[39m
+     [32m✓[39m should export animation config[32m 0[2mms[22m[39m
+       [32m✓[39m should handle zero range normalization[32m 0[2mms[22m[39m
+       [32m✓[39m should handle very large numbers[32m 0[2mms[22m[39m
+       [32m✓[39m should handle very small positive numbers[32m 0[2mms[22m[39m
+[31m       [31m×[31m should handle all NaN in array[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m should handle Infinity in normalization[39m[32m 0[2mms[22m[39m
+       [32m✓[39m should handle mixed positive and zero in log scale[32m 0[2mms[22m[39m
+[31m       [31m×[31m should calculate ticks for zero range[39m[32m 0[2mms[22m[39m
+       [32m✓[39m should handle negative values in colormap[32m 0[2mms[22m[39m
+       [32m✓[39m should handle percentage formatting of 0[32m 0[2mms[22m[39m
+       [32m✓[39m should handle precision=0 in formatting[32m 0[2mms[22m[39m
+       [32m✓[39m should gracefully handle empty tooltip data[32m 0[2mms[22m[39m
+       [32m✓[39m should handle special characters in category names[32m 0[2mms[22m[39m
+       [32m✓[39m should validate design with extra properties[32m 0[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 17 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/lib/charts-comprehensive.test.ts[2m > [22mChart Utils - Color Interpolation[2m > [22minterpolateColor()[2m > [22mshould interpolate between two colors at t=0.5
+[31m[1mAssertionError[22m: expected 'rgb(128, 0, 128)' to contain '127'[39m
+
+Expected: [32m"127"[39m
+Received: [31m"rgb(128, 0, 128)"[39m
+
+[36m [2m❯[22m src/__tests__/lib/charts-comprehensive.test.ts:[2m88:22[22m[39m
+    [90m 86| [39m      [34mexpect[39m(result)[33m.[39m[34mtoMatch[39m([36m/^rgb\(\d+,\s*\d+,\s*\d+\)$/[39m)[33m;[39m
+    [90m 87| [39m      [90m// Red at 0.5 should be ~127[39m
+    [90m 88| [39m      [34mexpect[39m(result)[33m.[39m[34mtoContain[39m([32m'127'[39m)[33m;[39m
+    [90m   | [39m                     [31m^[39m
+    [90m 89| [39m    })[33m;[39m
+    [90m 90| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/17]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/lib/charts-comprehensive.test.ts[2m > [22mChart Utils - Color Interpolation[2m > [22mgetValueColor()[2m > [22mshould apply reliability gradient (red -> green)
+[31m[1mAssertionError[22m: expected 'rgb(251, 191, 36)' to contain '255'[39m
+
+Expected: [32m"255"[39m
+Received: [31m"rgb(251, 191, 36)"[39m
+
+[36m [2m❯[22m src/__tests__/lib/charts-comprehensive.test.ts:[2m152:22[22m[39m
+    [90m150| [39m      [34mexpect[39m(result)[33m.[39m[34mtoMatch[39m([36m/^rgb\(\d+,\s*\d+,\s*\d+\)$/[39m)[33m;[39m
+    [90m151| [39m      [90m// At 50%, should be yellowish (mix of red and green)[39m
+    [90m152| [39m      [34mexpect[39m(result)[33m.[39m[34mtoContain[39m([32m'255'[39m)[33m;[39m
+    [90m   | [39m                     [31m^[39m
+    [90m153| [39m    })[33m;[39m
+    [90m154| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/17]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/lib/charts-comprehensive.test.ts[2m > [22mChart Utils - Value Formatting[2m > [22mformatValue()[2m > [22mshould handle Infinity
+[31m[1mAssertionError[22m: expected 'InfinityM' to be 'Infinity' // Object.is equality[39m
+
+Expected: [32m"Infinity"[39m
+Received: [31m"Infinity[7mM[27m"[39m
+
+[36m [2m❯[22m src/__tests__/lib/charts-comprehensive.test.ts:[2m280:22[22m[39m
+    [90m278| [39m    [34mit[39m([32m'should handle Infinity'[39m[33m,[39m () [33m=>[39m {
+    [90m279| [39m      [35mconst[39m result [33m=[39m [34mformatValue[39m([33mInfinity[39m)[33m;[39m
+    [90m280| [39m      [34mexpect[39m(result)[33m.[39m[34mtoBe[39m([32m'Infinity'[39m)[33m;[39m
+    [90m   | [39m                     [31m^[39m
+    [90m281| [39m    })[33m;[39m
+    [90m282| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/17]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/lib/charts-comprehensive.test.ts[2m > [22mChart Utils - Value Formatting[2m > [22mformatValue()[2m > [22mshould handle negative Infinity
+[31m[1mAssertionError[22m: expected '-InfinityM' to be '-Infinity' // Object.is equality[39m
+
+Expected: [32m"-Infinity"[39m
+Received: [31m"-Infinity[7mM[27m"[39m
+
+[36m [2m❯[22m src/__tests__/lib/charts-comprehensive.test.ts:[2m285:22[22m[39m
+    [90m283| [39m    [34mit[39m([32m'should handle negative Infinity'[39m[33m,[39m () [33m=>[39m {
+    [90m284| [39m      [35mconst[39m result [33m=[39m [34mformatValue[39m([33m-[39m[33mInfinity[39m)[33m;[39m
+    [90m285| [39m      [34mexpect[39m(result)[33m.[39m[34mtoBe[39m([32m'-Infinity'[39m)[33m;[39m
+    [90m   | [39m                     [31m^[39m
+    [90m286| [39m    })[33m;[39m
+    [90m287| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/17]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/lib/charts-comprehensive.test.ts[2m > [22mChart Utils - Domain Calculations[2m > [22mcalculateDomain()[2m > [22mshould calculate domain with default padding
+[31m[1mAssertionError[22m: expected 0 to be less than 0[39m
+[36m [2m❯[22m src/__tests__/lib/charts-comprehensive.test.ts:[2m474:19[22m[39m
+    [90m472| [39m      [35mconst[39m [min[33m,[39m max] [33m=[39m [34mcalculateDomain[39m(values)[33m;[39m
+    [90m473| [39m
+    [90m474| [39m      [34mexpect[39m(min)[33m.[39m[34mtoBeLessThan[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                  [31m^[39m
+    [90m475| [39m      [34mexpect[39m(max)[33m.[39m[34mtoBeGreaterThan[39m([34m100[39m)[33m;[39m
+    [90m476| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/17]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/lib/charts-comprehensive.test.ts[2m > [22mChart Utils - Domain Calculations[2m > [22mcalculateDomain()[2m > [22mshould add padding proportional to range
+[31m[1mAssertionError[22m: expected +0 to be -10 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- -10[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m src/__tests__/lib/charts-comprehensive.test.ts:[2m483:19[22m[39m
+    [90m481| [39m
+    [90m482| [39m      [90m// Range is 100, padding is 10[39m
+    [90m483| [39m      [34mexpect[39m(min)[33m.[39m[34mtoBe[39m([33m-[39m[34m10[39m)[33m;[39m
+    [90m   | [39m                  [31m^[39m
+    [90m484| [39m      [34mexpect[39m(max)[33m.[39m[34mtoBe[39m([34m110[39m)[33m;[39m
+    [90m485| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/17]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/lib/charts-comprehensive.test.ts[2m > [22mChart Utils - Domain Calculations[2m > [22mcalculateDomain()[2m > [22mshould not go below 0 for lower bound
+[31m[1mAssertionError[22m: expected 2.5 to be +0 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 0[39m
+[31m+ 2.5[39m
+
+[36m [2m❯[22m src/__tests__/lib/charts-comprehensive.test.ts:[2m499:19[22m[39m
+    [90m497| [39m      [35mconst[39m [min[33m,[39m max] [33m=[39m [34mcalculateDomain[39m(values[33m,[39m [34m0.5[39m)[33m;[39m
+    [90m498| [39m
+    [90m499| [39m      [34mexpect[39m(min)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m [90m// Clamped to 0[39m
+    [90m   | [39m                  [31m^[39m
+    [90m500| [39m      [34mexpect[39m(max)[33m.[39m[34mtoBeGreaterThan[39m([34m10[39m)[33m;[39m
+    [90m501| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/17]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/lib/charts-comprehensive.test.ts[2m > [22mChart Utils - Domain Calculations[2m > [22mcalculateDomain()[2m > [22mshould handle negative values
+[31m[1mAssertionError[22m: expected 0 to be less than -100[39m
+[36m [2m❯[22m src/__tests__/lib/charts-comprehensive.test.ts:[2m507:19[22m[39m
+    [90m505| [39m      [35mconst[39m [min[33m,[39m max] [33m=[39m [34mcalculateDomain[39m(values[33m,[39m [34m0.1[39m)[33m;[39m
+    [90m506| [39m
+    [90m507| [39m      [34mexpect[39m(min)[33m.[39m[34mtoBeLessThan[39m([33m-[39m[34m100[39m)[33m;[39m
+    [90m   | [39m                  [31m^[39m
+    [90m508| [39m      [34mexpect[39m(max)[33m.[39m[34mtoBeGreaterThan[39m([33m-[39m[34m50[39m)[33m;[39m
+    [90m509| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/17]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/lib/charts-comprehensive.test.ts[2m > [22mChart Utils - Domain Calculations[2m > [22mcalculateDomain()[2m > [22mshould handle large ranges
+[31m[1mAssertionError[22m: expected +0 to be -100000 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- -100000[39m
+[31m+ 0[39m
+
+[36m [2m❯[22m src/__tests__/lib/charts-comprehensive.test.ts:[2m532:19[22m[39m
+    [90m530| [39m      [35mconst[39m [min[33m,[39m max] [33m=[39m [34mcalculateDomain[39m(values[33m,[39m [34m0.1[39m)[33m;[39m
+    [90m531| [39m
+    [90m532| [39m      [34mexpect[39m(min)[33m.[39m[34mtoBe[39m([33m-[39m[34m100000[39m)[33m;[39m
+    [90m   | [39m                  [31m^[39m
+    [90m533| [39m      [34mexpect[39m(max)[33m.[39m[34mtoBe[39m([34m1100000[39m)[33m;[39m
+    [90m534| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/17]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/lib/charts-comprehensive.test.ts[2m > [22mChart Utils - Domain Calculations[2m > [22mcalculateNiceTicks()[2m > [22mshould handle identical min and max
+[31m[1mAssertionError[22m: expected 0 to be greater than 0[39m
+[36m [2m❯[22m src/__tests__/lib/charts-comprehensive.test.ts:[2m600:28[22m[39m
+    [90m598| [39m
+    [90m599| [39m      [90m// Should still return some ticks[39m
+    [90m600| [39m      [34mexpect[39m(ticks[33m.[39mlength)[33m.[39m[34mtoBeGreaterThan[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m601| [39m    })[33m;[39m
+    [90m602| [39m  })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/17]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/lib/charts-comprehensive.test.ts[2m > [22mColormap - Basic Interpolation[2m > [22minterpolateColor() - Colormap Version[2m > [22mshould handle equal min and max
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 'r')[39m
+[36m [2m❯[22m lerpColor src/lib/charts/colormap.ts:[2m149:31[22m[39m
+    [90m147| [39m[35mfunction[39m [34mlerpColor[39m(color1[33m:[39m [33mRGB[39m[33m,[39m color2[33m:[39m [33mRGB[39m[33m,[39m t[33m:[39m number)[33m:[39m [33mRGB[39m {
+    [90m148| [39m  [35mreturn[39m {
+    [90m149| [39m    r[33m:[39m [33mMath[39m[33m.[39m[34mround[39m([34mlerp[39m(color1[33m.[39mr[33m,[39m color2[33m.[39mr[33m,[39m t))[33m,[39m
+    [90m   | [39m                              [31m^[39m
+    [90m150| [39m    g[33m:[39m [33mMath[39m[33m.[39m[34mround[39m([34mlerp[39m(color1[33m.[39mg[33m,[39m color2[33m.[39mg[33m,[39m t))[33m,[39m
+    [90m151| [39m    b[33m:[39m [33mMath[39m[33m.[39m[34mround[39m([34mlerp[39m(color1[33m.[39mb[33m,[39m color2[33m.[39mb[33m,[39m t))
+[90m [2m❯[22m interpolateColor src/lib/charts/colormap.ts:[2m215:10[22m[39m
+[90m [2m❯[22m src/__tests__/lib/charts-comprehensive.test.ts:[2m731:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/17]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/lib/charts-comprehensive.test.ts[2m > [22mColormap - Color Stops and Generation[2m > [22mgetColormapDescription()[2m > [22mshould return description for jet
+[31m[1mAssertionError[22m: expected 'Classic FEA colormap (blue → cyan → g…' to contain 'jet'[39m
+
+Expected: [32m"jet"[39m
+Received: [31m"Classic FEA colormap (blue → cyan → green → yellow → red)"[39m
+
+[36m [2m❯[22m src/__tests__/lib/charts-comprehensive.test.ts:[2m884:20[22m[39m
+    [90m882| [39m    [34mit[39m([32m'should return description for jet'[39m[33m,[39m () [33m=>[39m {
+    [90m883| [39m      [35mconst[39m desc [33m=[39m [34mgetColormapDescription[39m([32m'jet'[39m)[33m;[39m
+    [90m884| [39m      [34mexpect[39m(desc)[33m.[39m[34mtoContain[39m([32m'jet'[39m)[33m;[39m
+    [90m   | [39m                   [31m^[39m
+    [90m885| [39m      [34mexpect[39m(desc)[33m.[39m[34mtoContain[39m([32m'FEA'[39m)[33m;[39m
+    [90m886| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/17]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/lib/charts-comprehensive.test.ts[2m > [22mColormap - Color Stops and Generation[2m > [22mgetColormapDescription()[2m > [22mshould return description for thermal
+[31m[1mAssertionError[22m: expected 'Temperature visualization (dark blue …' to contain 'thermal'[39m
+
+Expected: [32m"thermal"[39m
+Received: [31m"Temperature visualization (dark blue → blue → green → yellow → red)"[39m
+
+[36m [2m❯[22m src/__tests__/lib/charts-comprehensive.test.ts:[2m890:20[22m[39m
+    [90m888| [39m    [34mit[39m([32m'should return description for thermal'[39m[33m,[39m () [33m=>[39m {
+    [90m889| [39m      [35mconst[39m desc [33m=[39m [34mgetColormapDescription[39m([32m'thermal'[39m)[33m;[39m
+    [90m890| [39m      [34mexpect[39m(desc)[33m.[39m[34mtoContain[39m([32m'thermal'[39m)[33m;[39m
+    [90m   | [39m                   [31m^[39m
+    [90m891| [39m    })[33m;[39m
+    [90m892| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/17]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/lib/charts-comprehensive.test.ts[2m > [22mColormap - Color Stops and Generation[2m > [22mgetColormapDescription()[2m > [22mshould return description for viridis
+[31m[1mAssertionError[22m: expected 'Perceptually uniform, colorblind-safe…' to contain 'viridis'[39m
+
+Expected: [32m"viridis"[39m
+Received: [31m"Perceptually uniform, colorblind-safe (purple → blue → teal → green → yellow)"[39m
+
+[36m [2m❯[22m src/__tests__/lib/charts-comprehensive.test.ts:[2m895:20[22m[39m
+    [90m893| [39m    [34mit[39m([32m'should return description for viridis'[39m[33m,[39m () [33m=>[39m {
+    [90m894| [39m      [35mconst[39m desc [33m=[39m [34mgetColormapDescription[39m([32m'viridis'[39m)[33m;[39m
+    [90m895| [39m      [34mexpect[39m(desc)[33m.[39m[34mtoContain[39m([32m'viridis'[39m)[33m;[39m
+    [90m   | [39m                   [31m^[39m
+    [90m896| [39m    })[33m;[39m
+    [90m897| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/17]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/lib/charts-comprehensive.test.ts[2m > [22mEdge Cases and Stress Tests[2m > [22mExtreme values and boundary conditions[2m > [22mshould handle all NaN in array
+[31m[1mAssertionError[22m: expected [Function] to throw an error[39m
+[36m [2m❯[22m src/__tests__/lib/charts-comprehensive.test.ts:[2m1478:45[22m[39m
+    [90m1476| [39m      [35mconst[39m values [33m=[39m [[33mNaN[39m[33m,[39m [33mNaN[39m[33m,[39m [33mNaN[39m][33m;[39m
+    [90m1477| [39m      [90m// This should not crash[39m
+    [90m1478| [39m      [34mexpect[39m(() [33m=>[39m [34mnormalizeValues[39m(values))[33m.[39m[34mtoThrow[39m()[33m;[39m
+    [90m   | [39m                                            [31m^[39m
+    [90m1479| [39m    })[33m;[39m
+    [90m1480| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/17]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/lib/charts-comprehensive.test.ts[2m > [22mEdge Cases and Stress Tests[2m > [22mExtreme values and boundary conditions[2m > [22mshould handle Infinity in normalization
+[31m[1mAssertionError[22m: expected [Function] to throw an error[39m
+[36m [2m❯[22m src/__tests__/lib/charts-comprehensive.test.ts:[2m1484:45[22m[39m
+    [90m1482| [39m      [35mconst[39m values [33m=[39m [[34m0[39m[33m,[39m [34m100[39m[33m,[39m [33mInfinity[39m][33m;[39m
+    [90m1483| [39m      [90m// This should not crash[39m
+    [90m1484| [39m      [34mexpect[39m(() [33m=>[39m [34mnormalizeValues[39m(values))[33m.[39m[34mtoThrow[39m()[33m;[39m
+    [90m   | [39m                                            [31m^[39m
+    [90m1485| [39m    })[33m;[39m
+    [90m1486| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/17]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/lib/charts-comprehensive.test.ts[2m > [22mEdge Cases and Stress Tests[2m > [22mExtreme values and boundary conditions[2m > [22mshould calculate ticks for zero range
+[31m[1mAssertionError[22m: expected 0 to be greater than 0[39m
+[36m [2m❯[22m src/__tests__/lib/charts-comprehensive.test.ts:[2m1494:28[22m[39m
+    [90m1492| [39m    [34mit[39m([32m'should calculate ticks for zero range'[39m[33m,[39m () [33m=>[39m {
+    [90m1493| [39m      [35mconst[39m ticks [33m=[39m [34mcalculateNiceTicks[39m([34m50[39m[33m,[39m [34m50[39m[33m,[39m [34m5[39m)[33m;[39m
+    [90m1494| [39m      [34mexpect[39m(ticks[33m.[39mlength)[33m.[39m[34mtoBeGreaterThan[39m([34m0[39m)[33m;[39m
+    [90m   | [39m                           [31m^[39m
+    [90m1495| [39m    })[33m;[39m
+    [90m1496| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/17]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m17 failed[39m[22m[2m | [22m[1m[32m179 passed[39m[22m[90m (196)[39m
+[2m   Start at [22m 17:35:36
+[2m   Duration [22m 1.31s[2m (transform 118ms, setup 248ms, import 191ms, tests 39ms, environment 661ms)[22m
+
+npm error Lifecycle script `test` failed with error:
+npm error code 1
+npm error path C:\Users\chine\Projects\proagentic-dfx\proagentic-dfx
+npm error workspace proagentic-dfx@0.1.0
+npm error location C:\Users\chine\Projects\proagentic-dfx\proagentic-dfx
+npm error command failed
+npm error command C:\Windows\System32\cmd.exe /d /s /c vitest run charts-comprehensive.test.ts --run

@@ -1,0 +1,190 @@
+# Dependabot Configuration
+# Automated dependency updates for security and maintenance
+# See: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # Main repository dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "ProAgentic/core-team"
+    assignees:
+      - "ProAgentic/devops-team"
+    labels:
+      - "dependencies"
+      - "automated"
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+    # Automatically merge patch updates for known safe dependencies
+    # This requires additional GitHub Actions workflow
+    pull-request-branch-name:
+      separator: "-"
+    # Group updates for better management
+    groups:
+      development-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+      production-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "patch"
+
+  # ProAgentic DfX frontend dependencies
+  - package-ecosystem: "npm"
+    directory: "/proagentic-dfx"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "ProAgentic/frontend-team"
+    assignees:
+      - "ProAgentic/core-team"
+    labels:
+      - "dependencies"
+      - "frontend"
+      - "automated"
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+    pull-request-branch-name:
+      separator: "-"
+    # Version updates
+    ignore:
+      # Ignore major version updates for now - handle manually
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      react-ecosystem:
+        patterns:
+          - "react*"
+          - "@types/react*"
+        update-types:
+          - "minor"
+          - "patch"
+      nextjs-ecosystem:
+        patterns:
+          - "next"
+          - "next-*"
+        update-types:
+          - "patch"
+      three-ecosystem:
+        patterns:
+          - "three"
+          - "@react-three/*"
+          - "@types/three"
+        update-types:
+          - "minor"
+          - "patch"
+      testing-tools:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+          - "@testing-library/*"
+          - "playwright"
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # H2 Tank Mock Server dependencies
+  - package-ecosystem: "npm"
+    directory: "/h2-tank-mock-server"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "ProAgentic/backend-team"
+    assignees:
+      - "ProAgentic/core-team"
+    labels:
+      - "dependencies"
+      - "backend"
+      - "mock-server"
+      - "automated"
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+    pull-request-branch-name:
+      separator: "-"
+    groups:
+      express-ecosystem:
+        patterns:
+          - "express"
+          - "express-*"
+          - "@types/express*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Docker dependencies
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "ProAgentic/devops-team"
+    assignees:
+      - "ProAgentic/devops-team"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "infrastructure"
+      - "automated"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # GitHub Actions dependencies
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "ProAgentic/devops-team"
+    assignees:
+      - "ProAgentic/devops-team"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "ci-cd"
+      - "automated"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+
+# Security updates are automatically enabled for all ecosystems
+# Dependabot will create PRs for security updates with high priority
+# Security updates ignore the schedule and are created immediately
+
+# Additional notes:
+# - Security updates are always created regardless of schedule
+# - PRs are automatically rebased when base branch is updated
+# - Dependabot will not create PRs for dependencies with open PRs
+# - Review and merge PRs promptly to keep dependencies up to date

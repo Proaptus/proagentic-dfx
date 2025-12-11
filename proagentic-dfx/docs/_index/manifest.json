@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "generated_at": "2025-12-11T00:00:00Z",
+  "generator": "doc-manager-skill",
+  "project": "proagentic-dfx",
+  "stats": {
+    "total_documents": 7,
+    "by_type": {
+      "reference": 5,
+      "howto": 1,
+      "quarantine": 1
+    },
+    "by_status": {
+      "accepted": 7
+    }
+  },
+  "documents": [
+    {
+      "id": "REF-export-module",
+      "path": "src/lib/export/README.md",
+      "doc_type": "reference",
+      "title": "Data Export Module",
+      "status": "accepted",
+      "last_verified_at": "2025-12-11",
+      "owner": "@ProAgentic/frontend-team",
+      "code_refs": [
+        "src/lib/export/data-export.ts",
+        "src/lib/export/screenshot-utils.ts"
+      ],
+      "test_refs": [
+        "src/__tests__/lib/export/data-export.test.ts",
+        "src/__tests__/lib/export/screenshot-utils.test.ts"
+      ],
+      "keywords": ["export", "csv", "json", "stress", "data"]
+    },
+    {
+      "id": "REF-security-utilities",
+      "path": "src/lib/security/README.md",
+      "doc_type": "reference",
+      "title": "Security Utilities",
+      "status": "accepted",
+      "last_verified_at": "2025-12-11",
+      "owner": "@ProAgentic/security-team",
+      "code_refs": [
+        "src/lib/security/rate-limit.ts"
+      ],
+      "test_refs": [],
+      "keywords": ["security", "rate-limit", "api", "protection"]
+    },
+    {
+      "id": "REF-tank-models-3d",
+      "path": "src/lib/tank-models/README.md",
+      "doc_type": "reference",
+      "title": "Tank Models 3D Library",
+      "status": "accepted",
+      "last_verified_at": "2025-12-11",
+      "owner": "@ProAgentic/frontend-team",
+      "code_refs": [
+        "src/lib/tank-models/index.ts",
+        "src/lib/tank-models/tank-types.ts",
+        "src/lib/tank-models/dome-profiles.ts",
+        "src/lib/tank-models/boss-components.ts",
+        "src/lib/tank-models/liner-materials.ts"
+      ],
+      "test_refs": [
+        "src/__tests__/lib/tank-geometry.test.ts"
+      ],
+      "keywords": ["3d", "tank", "visualization", "threejs", "geometry", "type-iv"]
+    },
+    {
+      "id": "HOWTO-tank-models-quickstart",
+      "path": "src/lib/tank-models/QUICKSTART.md",
+      "doc_type": "howto",
+      "title": "Tank Models 3D Library - Quick Start Guide",
+      "status": "accepted",
+      "last_verified_at": "2025-12-11",
+      "owner": "@ProAgentic/frontend-team",
+      "code_refs": [
+        "src/lib/tank-models/index.ts",
+        "src/lib/tank-models/TankModel3D.tsx"
+      ],
+      "test_refs": [],
+      "keywords": ["quickstart", "3d", "tank", "guide", "tutorial"]
+    },
+    {
+      "id": "REF-notification-system",
+      "path": "src/lib/notifications/README.md",
+      "doc_type": "reference",
+      "title": "Notification System",
+      "status": "accepted",
+      "last_verified_at": "2025-12-11",
+      "owner": "@ProAgentic/frontend-team",
+      "code_refs": [
+        "src/lib/notifications/index.ts",
+        "src/components/ui/Notifications.tsx"
+      ],
+      "test_refs": [],
+      "keywords": ["notifications", "toast", "sonner", "alerts", "ui"]
+    },
+    {
+      "id": "REF-screenshot-export",
+      "path": "docs/reference/SCREENSHOT_EXPORT.md",
+      "doc_type": "reference",
+      "title": "Screenshot Export",
+      "status": "accepted",
+      "last_verified_at": "2025-12-11",
+      "owner": "@ProAgentic/frontend-team",
+      "code_refs": [],
+      "test_refs": [],
+      "keywords": ["screenshot", "export", "png", "image"]
+    },
+    {
+      "id": "QUARANTINE-2025-12-11-test-artifacts",
+      "path": "docs/quarantine/2025-12-11-test-artifacts/",
+      "doc_type": "quarantine",
+      "title": "Quarantined Test Generation Artifacts",
+      "status": "accepted",
+      "last_verified_at": "2025-12-11",
+      "owner": "@ProAgentic/qa-team",
+      "reason": "Test generation work artifacts - ephemeral, not permanent documentation",
+      "files_count": 10
+    }
+  ],
+  "quarantine": {
+    "2025-12-11-test-artifacts": {
+      "reason": "Test generation work artifacts - ephemeral, not permanent documentation",
+      "files": [
+        "TEST_COVERAGE_SUMMARY.md",
+        "TEST_FILES_INDEX.md",
+        "PHASE2_TEST_GENERATION_SUMMARY.md",
+        "PHASE2_TEST_VALIDATION_REPORT.md",
+        "REQUIREMENTS_SCREEN_TEST_ADDITIONS.md",
+        "TEST_COVERAGE_IMPROVEMENTS.md",
+        "TEST_GENERATION_REPORT.md",
+        "TEST_SUMMARY.md",
+        "THEME_COMPREHENSIVE_TEST_REPORT.md",
+        "UI_COMPONENT_TEST_SUITE_SUMMARY.md"
+      ],
+      "action": "Delete after 30 days if not referenced"
+    }
+  }
+}

@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+---
+id: REF-h2-mock-server
+doc_type: reference
+title: "H2 Tank Mock Server"
+status: accepted
+last_verified_at: 2025-12-11
+owner: "@ProAgentic/backend-team"
+code_refs:
+  - path: "h2-tank-mock-server/src/app/api"
+test_refs:
+  - path: "h2-tank-mock-server/tests/api.test.ts"
+keywords: ["mock", "api", "backend", "physics", "h2", "tank"]
+---
 
-## Getting Started
+# H2 Tank Mock Server
 
-First, run the development server:
+Mock API server for the H2 Tank Designer frontend, providing realistic engineering data based on first-principles physics calculations.
+
+## Overview
+
+This server provides mock API endpoints that simulate a real backend for the H2 Tank Designer application. It uses first-principles physics equations for pressure vessel analysis, composite mechanics, and reliability calculations.
+
+## Running the Server
 
 ```bash
+# Development mode (port 3001)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Production build
+npm run build
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The server runs on **http://localhost:3001** by default.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## API Endpoints
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/designs` | GET | List all tank designs |
+| `/api/designs` | POST | Create a new design |
+| `/api/designs/:id` | GET | Get design details |
+| `/api/designs/:id/stress` | GET | Get stress analysis |
+| `/api/pareto` | GET | Get Pareto front data |
+| `/api/optimization` | POST | Run optimization |
+| `/api/materials` | GET | Get materials database |
+| `/api/compliance` | GET | Get compliance standards |
+| `/api/validation` | POST | Run validation tests |
 
-## Learn More
+## Physics Implementation
 
-To learn more about Next.js, take a look at the following resources:
+The server implements real engineering calculations:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Pressure Vessel Theory**: Hoop stress, axial stress, burst pressure
+- **Composite Analysis**: Tsai-Wu criterion, Hashin failure modes
+- **Dome Geometry**: Geodesic paths, isotensoid profiles
+- **Reliability**: Weibull statistics, fatigue life prediction
+- **Thermal Analysis**: Heat transfer, operating temperature limits
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+See [PHYSICS_IMPLEMENTATION.md](../docs/explanation/PHYSICS_IMPLEMENTATION.md) for details.
 
-## Deploy on Vercel
+## Data Files
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Static data is stored in `/data/`:
+- `materials.json` - Material properties database
+- `standards.json` - Compliance standards (ISO, ASME, etc.)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Technology Stack
+
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Testing**: Vitest
+
+## Related Documentation
+
+- [Main App](../proagentic-dfx/README.md)
+- [Physics Implementation](../docs/explanation/PHYSICS_IMPLEMENTATION.md)
+- [API Reference](../docs/reference/API_ENDPOINT_MAPPING.md)

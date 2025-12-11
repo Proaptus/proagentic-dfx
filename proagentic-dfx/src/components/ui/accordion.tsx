@@ -74,6 +74,7 @@ export function AccordionTrigger({ children, className = '' }: AccordionTriggerP
 
   return (
     <button
+      type="button"
       onClick={toggle}
       className={`flex w-full items-center justify-between py-4 font-medium transition-all hover:underline ${className}`}
     >

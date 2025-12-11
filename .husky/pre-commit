@@ -1,5 +1,110 @@
-# Check file sizes first (fast, blocks oversized files)
-node scripts/check-file-sizes.mjs staged
+#!/usr/bin/env sh
+# =============================================================================
+# COMPREHENSIVE QUALITY GATE - Pre-Commit Hook
+# =============================================================================
+# This hook enforces code quality standards BEFORE any commit can proceed.
+# All gates must pass or the commit is rejected.
+#
+# Quality Gates (in order):
+#   1. File Size Check - Blocks oversized files (AI context optimization)
+#   2. Lint-Staged - ESLint fix + Prettier formatting
+#   3. TypeScript Check - Type safety verification
+#   4. Unit Tests - All tests must pass
+#   5. Coverage Check - Must meet 80% threshold
+# =============================================================================
 
-# Run lint-staged (eslint fix + prettier)
+echo ""
+echo "========================================"
+echo "  QUALITY GATE: Pre-Commit Validation"
+echo "========================================"
+echo ""
+
+# Track start time
+START_TIME=$(date +%s)
+
+# -----------------------------------------------------------------------------
+# GATE 1: File Size Check (Fast - runs first)
+# -----------------------------------------------------------------------------
+echo "[1/5] Checking file sizes..."
+node scripts/check-file-sizes.mjs staged
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "GATE 1 FAILED: File size limits exceeded"
+  echo "Split large files before committing. See CLAUDE.md for guidelines."
+  exit 1
+fi
+echo "  File sizes OK"
+
+# -----------------------------------------------------------------------------
+# GATE 2: Lint-Staged (ESLint + Prettier)
+# -----------------------------------------------------------------------------
+echo "[2/5] Running lint-staged (ESLint + Prettier)..."
 npx lint-staged
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "GATE 2 FAILED: Linting/formatting errors"
+  echo "Fix ESLint errors before committing."
+  exit 1
+fi
+echo "  Lint OK"
+
+# -----------------------------------------------------------------------------
+# GATE 3: TypeScript Type Check
+# -----------------------------------------------------------------------------
+echo "[3/5] Running TypeScript type check..."
+cd proagentic-dfx && npx tsc --noEmit 2>&1
+TSC_EXIT=$?
+cd ..
+if [ $TSC_EXIT -ne 0 ]; then
+  echo ""
+  echo "GATE 3 FAILED: TypeScript type errors"
+  echo "Fix type errors before committing."
+  exit 1
+fi
+echo "  TypeScript OK"
+
+# -----------------------------------------------------------------------------
+# GATE 4: Unit Tests (Must Pass)
+# -----------------------------------------------------------------------------
+echo "[4/5] Running unit tests..."
+cd proagentic-dfx && npm run test -- --run --reporter=dot 2>&1
+TEST_EXIT=$?
+cd ..
+if [ $TEST_EXIT -ne 0 ]; then
+  echo ""
+  echo "GATE 4 FAILED: Unit tests failing"
+  echo "All tests must pass before committing."
+  exit 1
+fi
+echo "  Tests OK"
+
+# -----------------------------------------------------------------------------
+# GATE 5: Coverage Threshold Check (80% minimum)
+# -----------------------------------------------------------------------------
+echo "[5/5] Verifying coverage thresholds (80% minimum)..."
+cd proagentic-dfx && npm run test:coverage -- --run --reporter=dot 2>&1
+COVERAGE_EXIT=$?
+cd ..
+if [ $COVERAGE_EXIT -ne 0 ]; then
+  echo ""
+  echo "GATE 5 FAILED: Coverage below 80% threshold"
+  echo "Add tests to increase coverage before committing."
+  echo ""
+  echo "Run 'npm run test:coverage' to see detailed coverage report."
+  exit 1
+fi
+echo "  Coverage OK"
+
+# -----------------------------------------------------------------------------
+# SUCCESS: All Gates Passed
+# -----------------------------------------------------------------------------
+END_TIME=$(date +%s)
+DURATION=$((END_TIME - START_TIME))
+
+echo ""
+echo "========================================"
+echo "  ALL QUALITY GATES PASSED"
+echo "  Duration: ${DURATION}s"
+echo "========================================"
+echo ""
+echo "Proceeding with commit..."

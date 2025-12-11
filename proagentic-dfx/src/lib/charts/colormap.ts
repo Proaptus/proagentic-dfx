@@ -195,6 +195,12 @@ export function interpolateColor(
   max: number,
   colormap: ColormapType = 'jet'
 ): RGB {
+  // Handle edge case: min equals max
+  if (min === max) {
+    const controlPoints = COLORMAP_CONTROL_POINTS[colormap];
+    return controlPoints[0]; // Return first color when no range
+  }
+
   // Normalize value to [0, 1]
   const normalizedValue = clamp((value - min) / (max - min), 0, 1);
 

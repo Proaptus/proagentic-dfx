@@ -574,7 +574,8 @@ describe('ExportScreen', () => {
 
       const stepOption = screen.getByText('STEP CAD Model');
       const button = stepOption.closest('button');
-      button.focus();
+      expect(button).not.toBeNull();
+      button!.focus();
       expect(document.activeElement).toBe(button);
 
       await user.keyboard(' ');  // Space key activates buttons

@@ -1,0 +1,40 @@
+# Test Failure Root Cause Analysis Report
+
+Date: 2025-12-10
+Total Failures: 94 tests (16% of 600-test suite)
+
+## FAILURE CLUSTERS:
+
+1. DATA NORMALIZATION EDGE CASES - 23 tests
+   File: src/lib/charts/chart-utils.ts
+   Issue: calculateDomain() missing validation for negative, NaN, Infinity, empty arrays
+   Example: calculateDomain([-50, 100]) returns [0, 100] instead of [-60, 110]
+   Fix: Add filter for Number.isFinite(), handle min===max with padding
+
+2. REACT act() WARNINGS - 19 tests
+   Files: CostAnalysisPanel, FailureAnalysisPanel, ThemeToggle tests
+   Issue: Async state updates not wrapped in act()
+   Tests PASS but generate warnings
+   Fix: Use waitFor() for async operations, mock API calls
+
+3. COMPONENT DATA LOADING - 15 tests
+   File: src/__tests__/components/analysis/CostAnalysisPanel.test.tsx
+   Issue: Mock API responses missing/incomplete for /api/designs/* endpoints
+   Tests timeout after 1000ms waiting for data
+   Fix: Add comprehensive fetch mocks in beforeEach()
+
+4. ACCESSIBILITY STANDARDS - 23 tests
+   File: src/__tests__/accessibility-ci.test.tsx
+   Issue: Missing WCAG 2.1 AA compliance (landmarks, labels, alt text, skip links)
+   Components affected: All screens (AnalysisScreen, CompareScreen, etc.)
+   Fix: Add <main>, <label>, role=img, fix heading hierarchy
+
+5. NUMBER FORMATTING - 14 tests
+   File: src/lib/charts/chart-utils.ts formatValue()
+   Issue: Lost precision (123.456->123), wrong units (1.2M instead of 1.2MPa), Infinity handling
+   Fix: Use toFixed(), add unit after number, return '-' for invalid
+
+CRITICAL ARCHITECTURE ISSUES:
+- API routes in frontend (DELETE): src/app/api/auth/route.ts, designs/*, stress/*
+- Hardcoded mock data: AnalysisScreen, ValidationScreen, ReliabilityPanel
+

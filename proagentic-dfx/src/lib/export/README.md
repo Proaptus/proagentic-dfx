@@ -1,3 +1,19 @@
+---
+id: REF-export-module
+doc_type: reference
+title: "Data Export Module"
+status: accepted
+last_verified_at: 2025-12-11
+owner: "@ProAgentic/frontend-team"
+code_refs:
+  - path: "src/lib/export/data-export.ts"
+  - path: "src/lib/export/screenshot-utils.ts"
+test_refs:
+  - path: "src/__tests__/lib/export/data-export.test.ts"
+  - path: "src/__tests__/lib/export/screenshot-utils.test.ts"
+keywords: ["export", "csv", "json", "stress", "data"]
+---
+
 # Data Export Module
 
 Provides CSV and JSON export functionality for stress analysis data from the H2 Tank Designer.

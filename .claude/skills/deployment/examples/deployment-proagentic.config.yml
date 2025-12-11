@@ -1,68 +1,149 @@
-# ProAgentic Deployment Configuration
-# 
-# Production deployment configuration for ProAgentic project
-# Copy to project root as: deployment.config.yml
+# ProAgentic DfX - Production Deployment Configuration
 #
-# Environment Variables Required:
-#   export OPENROUTER_API_KEY="sk-or-v1-..."
-#   export SUPABASE_URL="https://qyomydbmtndkprjmsdin.supabase.co"
-#   export SUPABASE_SERVICE_KEY="eyJ..."
-#   export NETLIFY_AUTH_TOKEN="netlify_xxx"
+# Active configuration for the H2 Tank Designer project
+# Based on .github/workflows/ci.yml
 
-project: proagentic
+project: proagentic-dfx
+version: "1.0"
+last_updated: "2025-12-09"
 
-backend:
-  gcloud_project: novae-compare
-  service_name: proagentic-server
-  region: europe-west2
-  docker_registry: gcr.io
-  dockerfile: Dockerfile.backend
-  port: 8080
+deployment:
+  provider: vercel
+  type: frontend-only
 
-staging:
-  # Important: Staging must use the correct Netlify alias
-  # Incorrect domain will cause CORS/CSP failures
-  netlify_site: proagentic1
-  netlify_alias: staging--proagentic1
-  cors_domain: https://staging--proagentic1.netlify.app
-  build_command: npm run build:staging
-  publish_dir: dist
+  # No backend in this project
+  # The mock server (h2-tank-mock-server) is for development only
+  backend: null
 
-production:
-  # Production uses custom domain
-  domain: https://proagentic.ai
-  cors_domain: https://proagentic.ai
-  build_command: npm run build
-  publish_dir: dist
+environments:
+  production:
+    branch: main
+    url: https://dfx.proagentic.ai
+    vercel_args: "--prod"
+    auto_deploy: true
+    requires:
+      - unit_tests
+      - build
+      - mock_server_tests
 
-uat:
-  enabled: true
-  smoke_scope:
-    - auth
-    - dashboard
-  full_scope:
-    - auth
-    - dashboard
-    - workflow
-    - export
-  timeout: 600
-  fail_on_error: true
+  staging:
+    branch: staging
+    url: https://proagentic-dfx-staging.vercel.app
+    auto_deploy: true
+    requires:
+      - unit_tests
+      - build
+      - mock_server_tests
 
-validation:
-  check_cors: true
-  check_csp: true
-  health_endpoint: /api/health
-  health_timeout: 30
-  allow_self_signed: false
+  preview:
+    trigger: pull_request
+    url: "auto-generated"
+    comment_on_pr: true
+    requires:
+      - unit_tests
+      - build
 
-logging:
-  log_dir: .deployment/logs
-  log_level: info
-  retention_days: 90
+# GitHub Actions Integration
+github_actions:
+  workflow_file: ".github/workflows/ci.yml"
 
-advanced:
-  skip_pre_checks: false
-  parallel_execution: true
-  auto_rollback: true
-  max_retries: 3
-  retry_delay: 5
+  jobs:
+    file-sizes:
+      runs_on: ubuntu-latest
+      command: "node scripts/check-file-sizes.mjs all"
+
+    lint:
+      runs_on: ubuntu-latest
+      needs: file-sizes
+      commands:
+        - "npm run lint"
+        - "npx tsc --noEmit"
+      working_directory: proagentic-dfx
+
+    unit-tests:
+      runs_on: ubuntu-latest
+      needs: lint
+      command: "npm run test:coverage"
+      working_directory: proagentic-dfx
+      artifacts:
+        - name: coverage-report
+          path: proagentic-dfx/coverage/
+          retention_days: 7
+
+    build:
+      runs_on: ubuntu-latest
+      needs: lint
+      command: "npm run build"
+      working_directory: proagentic-dfx
+      env:
+        NEXT_TELEMETRY_DISABLED: 1
+      artifacts:
+        - name: build-output
+          path: proagentic-dfx/.next/
+          retention_days: 1
+
+    mock-server-tests:
+      runs_on: ubuntu-latest
+      needs: lint
+      command: "npm run test"
+      working_directory: h2-tank-mock-server
+
+    e2e-tests:
+      runs_on: ubuntu-latest
+      needs: [build, mock-server-tests]
+      condition: "github.event_name == 'pull_request' && github.base_ref == 'main'"
+      commands:
+        - "npx playwright install --with-deps chromium"
+        - "npm run test:e2e"
+      working_directory: proagentic-dfx
+      artifacts:
+        - name: playwright-report
+          path: proagentic-dfx/playwright-report/
+          retention_days: 7
+
+    security-audit:
+      runs_on: ubuntu-latest
+      commands:
+        - "npm audit --audit-level=high"
+      continue_on_error: true
+
+    deploy-preview:
+      runs_on: ubuntu-latest
+      needs: [unit-tests, build]
+      condition: "github.event_name == 'pull_request'"
+      uses: amondnet/vercel-action@v25
+
+    deploy-staging:
+      runs_on: ubuntu-latest
+      needs: [unit-tests, build, mock-server-tests]
+      condition: "github.ref == 'refs/heads/staging' && github.event_name == 'push'"
+      uses: amondnet/vercel-action@v25
+
+    deploy-production:
+      runs_on: ubuntu-latest
+      needs: [unit-tests, build, mock-server-tests]
+      condition: "github.ref == 'refs/heads/main' && github.event_name == 'push'"
+      uses: amondnet/vercel-action@v25
+      with:
+        vercel_args: "--prod"
+
+# Local Development
+local:
+  dev_command: "npm run dev"
+  dev_port: 3000
+  mock_server_port: 8080
+
+# Required Secrets
+secrets:
+  github:
+    - VERCEL_TOKEN
+    - VERCEL_ORG_ID
+    - VERCEL_PROJECT_ID
+
+# Notes
+notes:
+  - "This project is frontend-only, deployed to Vercel"
+  - "Mock server (h2-tank-mock-server) is for local development only"
+  - "E2E tests run only on PRs to main branch"
+  - "Production deploys automatically on push to main"
+  - "Old Netlify/Cloud Run configs archived in ./archive/"

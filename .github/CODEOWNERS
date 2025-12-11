@@ -1,0 +1,65 @@
+# CODEOWNERS - Code Review Assignment
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repository
+# These will be requested for review when someone opens a pull request
+* @ProAgentic/core-team
+
+# Security-sensitive files require additional review from security team
+/proagentic-dfx/src/middleware.ts @ProAgentic/security-team @ProAgentic/core-team
+/proagentic-dfx/src/app/api/auth/* @ProAgentic/security-team @ProAgentic/core-team
+/proagentic-dfx/src/lib/security/* @ProAgentic/security-team @ProAgentic/core-team
+/.github/workflows/* @ProAgentic/devops-team @ProAgentic/core-team
+/.github/dependabot.yml @ProAgentic/devops-team @ProAgentic/core-team
+/.github/SECURITY.md @ProAgentic/security-team @ProAgentic/core-team
+
+# Infrastructure and deployment files
+/docker-compose*.yml @ProAgentic/devops-team
+/Dockerfile* @ProAgentic/devops-team
+/.dockerignore @ProAgentic/devops-team
+/proagentic-dfx/next.config.js @ProAgentic/core-team @ProAgentic/devops-team
+
+# Configuration files
+/.eslintrc* @ProAgentic/core-team
+/.prettierrc* @ProAgentic/core-team
+/tsconfig*.json @ProAgentic/core-team
+/vitest.config.ts @ProAgentic/core-team
+
+# Documentation
+/docs/* @ProAgentic/docs-team
+/README.md @ProAgentic/docs-team
+/CLAUDE.md @ProAgentic/core-team
+/agentic-pioneers-prize/* @ProAgentic/competition-team
+
+# API routes - require backend team review
+/proagentic-dfx/src/app/api/* @ProAgentic/backend-team @ProAgentic/core-team
+
+# Frontend components
+/proagentic-dfx/src/components/* @ProAgentic/frontend-team
+/proagentic-dfx/src/app/* @ProAgentic/frontend-team
+
+# Analysis and calculation libraries
+/proagentic-dfx/src/lib/domains/* @ProAgentic/physics-team @ProAgentic/core-team
+/proagentic-dfx/src/lib/charts/* @ProAgentic/frontend-team
+
+# H2 Tank Mock Server
+/h2-tank-mock-server/* @ProAgentic/backend-team
+
+# Test files - require review from test team
+/proagentic-dfx/src/__tests__/* @ProAgentic/qa-team
+*.test.ts @ProAgentic/qa-team
+*.test.tsx @ProAgentic/qa-team
+*.spec.ts @ProAgentic/qa-team
+
+# Package management
+/package.json @ProAgentic/core-team
+/package-lock.json @ProAgentic/core-team
+/proagentic-dfx/package.json @ProAgentic/core-team
+/h2-tank-mock-server/package.json @ProAgentic/backend-team
+
+# Skills and automation
+/.claude/skills/* @ProAgentic/devops-team
+/scripts/* @ProAgentic/devops-team
+
+# Competition-specific files
+/agentic-pioneers-prize/application/* @ProAgentic/competition-team @ProAgentic/core-team

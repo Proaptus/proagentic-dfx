@@ -1,3 +1,16 @@
+---
+id: REF-notification-system
+doc_type: reference
+title: "Notification System"
+status: accepted
+last_verified_at: 2025-12-11
+owner: "@ProAgentic/frontend-team"
+code_refs:
+  - path: "src/lib/notifications/index.ts"
+  - path: "src/components/ui/Notifications.tsx"
+keywords: ["notifications", "toast", "sonner", "alerts", "ui"]
+---
+
 # Notification System
 
 A comprehensive notification/toast system built on [Sonner](https://sonner.emilkowal.ski/) for the ProAgentic DFX application.

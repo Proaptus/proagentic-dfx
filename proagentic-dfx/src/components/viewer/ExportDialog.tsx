@@ -90,7 +90,7 @@ export function ExportDialog({
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="bg-white/20 p-2 rounded-lg">
-              <Image className="text-white" size={24} />
+              <Image className="text-white" size={24} aria-label="Export icon" />
             </div>
             <div>
               <h2 id="export-dialog-title" className="text-xl font-bold text-white">

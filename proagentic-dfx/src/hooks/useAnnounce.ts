@@ -8,7 +8,9 @@
 
 import { useCallback } from 'react';
 
-export function useAnnounce() {
+export type AnnounceFunction = (message: string, priority?: 'polite' | 'assertive') => void;
+
+export function useAnnounce(): AnnounceFunction {
   const announce = useCallback((message: string, priority: 'polite' | 'assertive' = 'polite') => {
     const announcer = document.createElement('div');
     announcer.setAttribute('role', 'status');

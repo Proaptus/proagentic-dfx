@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { CheckCircle2, Circle, AlertCircle, User, CheckSquare } from 'lucide-react';
 
-interface ChecklistItem {
+export interface ChecklistItem {
   id: string;
   category: 'automated' | 'manual';
   item: string;
@@ -14,7 +14,7 @@ interface ChecklistItem {
   date_completed?: string;
 }
 
-interface ApprovalSignoff {
+export interface ApprovalSignoff {
   role: string;
   name: string;
   status: 'pending' | 'approved' | 'rejected';

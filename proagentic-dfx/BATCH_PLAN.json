@@ -1,0 +1,234 @@
+{
+  "total_failures": 40,
+  "test_files_affected": 12,
+  "tests_passing": 2133,
+  "analysis_date": "2025-12-11",
+  "root_causes_summary": {
+    "async_state_update_timeout": 16,
+    "chart_render_missing_data": 8,
+    "formatting_assertion_failure": 4,
+    "mock_state_interaction": 6,
+    "tab_panel_interaction": 6
+  },
+  "batch_1": {
+    "title": "ValidationScreen Tab Interaction & Async State (16 failures)",
+    "priority": "CRITICAL/HIGH",
+    "impact": "Tab navigation broken, prevents access to testing/sentry/verification panels",
+    "bugs": [
+      {
+        "id": 1,
+        "test": "should return to normal state after tests complete",
+        "file": "ValidationScreen.test.tsx",
+        "fix": "Wrap loading state reset in act()"
+      },
+      {
+        "id": 2,
+        "test": "should switch to testing tab when clicked",
+        "file": "ValidationScreen.test.tsx",
+        "fix": "Wrap tab click in act()"
+      },
+      {
+        "id": 3,
+        "test": "should switch to sentry tab when clicked",
+        "file": "ValidationScreen.test.tsx",
+        "fix": "Wrap sentry tab click in act()"
+      },
+      {
+        "id": 4,
+        "test": "should switch to verification tab when clicked",
+        "file": "ValidationScreen.test.tsx",
+        "fix": "Wrap verification tab click in act()"
+      },
+      {
+        "id": 5,
+        "test": "should hide inactive tab panels",
+        "file": "ValidationScreen.test.tsx",
+        "fix": "Wrap visibility state in act()"
+      },
+      {
+        "id": 6,
+        "test": "should show active tab panel",
+        "file": "ValidationScreen.test.tsx",
+        "fix": "Ensure active panel renders after state update"
+      },
+      {
+        "id": 7,
+        "test": "should render sensor table with locations",
+        "file": "ValidationScreen.test.tsx",
+        "fix": "Use waitFor() for sensor data"
+      },
+      {
+        "id": 8,
+        "test": "should display sensor coordinates",
+        "file": "ValidationScreen.test.tsx",
+        "fix": "Wrap in waitFor()"
+      },
+      {
+        "id": 9,
+        "test": "should show critical sensor indicators",
+        "file": "ValidationScreen.test.tsx",
+        "fix": "Use waitFor() for indicators"
+      },
+      {
+        "id": 10,
+        "test": "should display inspection intervals",
+        "file": "ValidationScreen.test.tsx",
+        "fix": "Wait for data to load"
+      },
+      {
+        "id": 11,
+        "test": "should render inspection schedule table",
+        "file": "ValidationScreen.test.tsx",
+        "fix": "Wrap in waitFor()"
+      },
+      {
+        "id": 12,
+        "test": "should display inspection durations",
+        "file": "ValidationScreen.test.tsx",
+        "fix": "Wait for data load"
+      },
+      {
+        "id": 13,
+        "test": "should have no accessibility violations",
+        "file": "ValidationScreen.test.tsx",
+        "fix": "Run axe after async content loads"
+      },
+      {
+        "id": 14,
+        "test": "should be keyboard navigable through tabs",
+        "file": "ValidationScreen.test.tsx",
+        "fix": "Ensure tabs fully render"
+      },
+      {
+        "id": 15,
+        "test": "should support Enter key to activate tabs",
+        "file": "ValidationScreen.test.tsx",
+        "fix": "Wrap key event in waitFor()"
+      }
+    ]
+  },
+  "batch_2": {
+    "title": "CostAnalysisPanel Chart Rendering & RequirementsChat State (15 failures)",
+    "priority": "HIGH/MEDIUM",
+    "impact": "Cost analysis charts not rendering, requirements chat interaction broken",
+    "bugs": [
+      {
+        "id": 16,
+        "test": "should render manufacturing process breakdown chart",
+        "file": "CostAnalysisPanel.test.tsx",
+        "fix": "Load manufacturing process data before render"
+      },
+      {
+        "id": 17,
+        "test": "should render learning curve chart",
+        "file": "CostAnalysisPanel.test.tsx",
+        "fix": "Wrap learning curve in waitFor()"
+      },
+      {
+        "id": 18,
+        "test": "should show loading state during volume change",
+        "file": "CostAnalysisPanel.test.tsx",
+        "fix": "Display loading state during async fetch"
+      },
+      {
+        "id": 19,
+        "test": "should display fiber cost percentage",
+        "file": "CostAnalysisPanel.test.tsx",
+        "fix": "Wait for fiber cost data"
+      },
+      {
+        "id": 20,
+        "test": "should calculate manufacturing processes from labor cost",
+        "file": "CostAnalysisPanel.test.tsx",
+        "fix": "Wrap calculation in waitFor()"
+      },
+      {
+        "id": 21,
+        "test": "should distribute labor cost across processes",
+        "file": "CostAnalysisPanel.test.tsx",
+        "fix": "Wait for calculation to complete"
+      },
+      {
+        "id": 22,
+        "test": "should show cost reduction with volume increase",
+        "file": "CostAnalysisPanel.test.tsx",
+        "fix": "Wait for learning curve update"
+      },
+      {
+        "id": 23,
+        "test": "should format zero for axis",
+        "file": "chart-visualization.test.ts",
+        "fix": "Fix zero formatting in axis formatter"
+      },
+      {
+        "id": 24,
+        "test": "should handle zero",
+        "file": "charts.test.ts",
+        "fix": "Fix zero percentage formatting"
+      },
+      {
+        "id": 25,
+        "test": "should handle Infinity in values",
+        "file": "charts.test.ts",
+        "fix": "Add Infinity check in normalization"
+      },
+      {
+        "id": 26,
+        "test": "should handle invalid format gracefully",
+        "file": "charts.test.ts",
+        "fix": "Add error handling for invalid formats"
+      },
+      {
+        "id": 27,
+        "test": "should use color coding for performance",
+        "file": "CompareScreen.test.tsx",
+        "fix": "Wait for performance data"
+      },
+      {
+        "id": 28,
+        "test": "should render all X-axis options",
+        "file": "ParetoScreen.test.tsx",
+        "fix": "Wait for X-axis metrics to load"
+      },
+      {
+        "id": 29,
+        "test": "should render all Y-axis options",
+        "file": "ParetoScreen.test.tsx",
+        "fix": "Wait for Y-axis metrics to load"
+      },
+      {
+        "id": 30,
+        "test": "handles suggestion click",
+        "file": "RequirementsChat.test.tsx",
+        "fix": "Wrap click in act() and wait for state"
+      }
+    ]
+  },
+  "batch_3": {
+    "title": "RequirementsChat Edit Cancellation & Edge Cases (5 failures)",
+    "priority": "MEDIUM/LOW",
+    "impact": "Requirements chat edit feature partially broken",
+    "bugs": [
+      {
+        "id": 31,
+        "test": "cancels editing when cancel button clicked",
+        "file": "RequirementsChat.test.tsx",
+        "fix": "Wrap cancel state in act()"
+      },
+      {
+        "id": 32,
+        "test": "should handle empty sensor locations gracefully",
+        "file": "ValidationScreen.test.tsx",
+        "fix": "Test with empty sensor array"
+      }
+    ]
+  },
+  "summary": {
+    "total_failures_to_fix": 40,
+    "total_batch_bugs": 32,
+    "batches": 3,
+    "estimated_time": "5-8 hours total",
+    "fix_strategy": "Most failures require wrapping async state updates in act() and using waitFor() for DOM updates",
+    "critical_path": "Fix Batch 1 (ValidationScreen) first - affects 16 tests and core navigation"
+  }
+}

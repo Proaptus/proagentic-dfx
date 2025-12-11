@@ -134,8 +134,9 @@ export function Badge({
 /**
  * StatusBadge - Specialized badge for pass/fail/warning status
  */
-interface StatusBadgeProps extends Omit<BadgeProps, 'variant'> {
+interface StatusBadgeProps extends Omit<BadgeProps, 'variant' | 'children'> {
   status: 'pass' | 'fail' | 'warning' | 'pending';
+  children?: ReactNode;
 }
 
 export function StatusBadge({ status, children, ...props }: StatusBadgeProps) {
@@ -156,8 +157,9 @@ export function StatusBadge({ status, children, ...props }: StatusBadgeProps) {
 /**
  * PriorityBadge - Specialized badge for priority indicators
  */
-interface PriorityBadgeProps extends Omit<BadgeProps, 'variant'> {
+interface PriorityBadgeProps extends Omit<BadgeProps, 'variant' | 'children'> {
   priority: 'low' | 'medium' | 'high' | 'critical';
+  children?: ReactNode;
 }
 
 export function PriorityBadge({
@@ -189,8 +191,9 @@ export function PriorityBadge({
 /**
  * ComplianceBadge - Specialized badge for compliance status
  */
-interface ComplianceBadgeProps extends Omit<BadgeProps, 'variant'> {
+interface ComplianceBadgeProps extends Omit<BadgeProps, 'variant' | 'children'> {
   compliant: boolean;
+  children?: ReactNode;
 }
 
 export function ComplianceBadge({

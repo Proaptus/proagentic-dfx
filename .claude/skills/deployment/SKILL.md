@@ -1,218 +1,353 @@
 ---
 name: Deployment
-description: Deploys ProAgentic using the tested deployment workflow - backend via ./deploy-server.sh, then staging frontend, smoke UAT, and production. Use when deploying ProAgentic to production.
-allowed-tools: Bash, Read, Skill
+description: Deploys ProAgentic DfX (H2 Tank Designer) using the full CI/CD pipeline. Runs all quality gates (lint, typecheck, tests, coverage, E2E) then deploys to Vercel. Use when deploying to staging or production, or when running the full CI pipeline locally.
+allowed-tools: Bash, Read, Glob, Grep
 ---
 
-# Deployment Skill
+# Deployment Skill - ProAgentic DfX
 
 ## What This Does
 
-Deploys ProAgentic to production using the standard workflow:
+Deploys the H2 Tank Designer frontend to Vercel using the full CI/CD pipeline:
 
-1. **Deploy Backend** → Runs `./deploy-server.sh` (handles Docker, Cloud Run, traffic routing)
-2. **Health Check** → Verifies backend is responding
-3. **Deploy Staging** → Deploys frontend to staging--proagentic1.netlify.app
-4. **Smoke UAT** → Runs smoke tests on staging
-5. **Deploy Production** → Deploys frontend to proagentic.ai
-6. **Final Smoke UAT** → Verifies production deployment
+1. **File Size Check** - Verify all files are within AI-optimized limits
+2. **Lint & Type Check** - ESLint + TypeScript validation
+3. **Unit Tests** - Run Vitest with coverage reporting
+4. **Build Verification** - Next.js production build
+5. **Mock Server Tests** - Verify mock API responses
+6. **E2E Tests** - Playwright end-to-end tests
+7. **Deploy** - Push to Vercel (staging or production)
 
 ## When to Use
 
-- User says "deploy to production"
-- User says "deploy ProAgentic"
-- After merging a release PR
-- For production releases
+- User says "deploy to production" or "deploy to staging"
+- User says "run CI" or "run the pipeline"
+- After completing a feature and wanting to deploy
+- Before merging a PR (to validate all gates pass)
 
 ## When NOT to Use
 
-- For local testing (use `npm run dev`)
-- For backend-only changes without frontend updates (just run `./deploy-server.sh` directly)
-- For experimental features (deploy to staging only)
+- For local development (use `npm run dev`)
+- For quick lint checks (use `npm run lint`)
+- For running single tests (use `npm test`)
 
 ## Execution Steps
 
-### Step 1: Deploy Backend
-
-Run the tested backend deployment script:
-
-```bash
-./deploy-server.sh
-```
-
-This script handles:
-- Loading environment variables from server/.env
-- Building Docker image
-- Pushing to Google Container Registry
-- Deploying to Cloud Run with all environment variables
-- **Routing 100% traffic to new revision** (critical!)
-- Health check verification
-
-**Expected output**: "✅ Deployment complete!"
-
-**If it fails**: Check the error message from the script and stop deployment.
-
-### Step 2: Health Check
-
-Verify backend is responding:
-
-```bash
-curl -s https://proagentic-server-705044459306.europe-west2.run.app/api/health | python3 -m json.tool
-```
-
-**Expected output**: `{"status": "ok", "timestamp": "...", "version": "..."}`
-
-**If it fails**: Backend deployment didn't work. Do NOT proceed.
-
-### Step 3: Deploy to Staging
-
-Deploy frontend to Netlify staging:
-
-```bash
-npm run build
-netlify deploy --alias=staging --dir=dist
-```
-
-**Expected output**: Netlify deploy URL shown
-
-**If it fails**: Check Netlify authentication and build errors.
-
-### Step 4: Run Smoke UAT on Staging
-
-Activate UAT skill with smoke test scope:
-
-```bash
-Skill({ skill: "uat-automation" })
-# When UAT skill asks, specify: "Run smoke tests on staging--proagentic1.netlify.app"
-```
-
-**Expected outcome**: Smoke tests complete (UAT skill generates report)
-
-**If tests fail**:
-- Review UAT report for critical bugs (auth failures, data loss, crashes)
-- **Stop deployment** if critical bugs found
-- **Continue deployment** if only non-critical issues (minor UI bugs, warnings)
-- Non-critical issues should be tracked but don't block release
-
-### Step 5: Deploy to Production
-
-Deploy frontend to production:
-
-```bash
-npm run build
-netlify deploy --prod --dir=dist
-```
-
-**Expected output**: Production URL (https://proagentic.ai) deployed
-
-**If it fails**: Check Netlify authentication and build errors.
-
-### Step 6: Final Smoke UAT on Production
-
-Activate UAT skill for production verification:
-
-```bash
-Skill({ skill: "uat-automation" })
-# When UAT skill asks, specify: "Run smoke tests on https://proagentic.ai"
-```
-
-**Expected outcome**: Smoke tests complete (UAT skill generates report)
-
-**If critical bugs found**:
-- Production has critical issues - immediate attention required
-- Review UAT report and determine if rollback needed
-- Critical bugs: auth failures, data loss, crashes, core features broken
-
-**If non-critical issues found**:
-- Track issues for next release
-- Deployment is successful but improvements needed
-
-## Critical Requirements
-
-### Environment Variables Required
-
-These must be set before deployment:
-
-- `OPENROUTER_API_KEY` (in server/.env)
-- `SUPABASE_URL` (in server/.env)
-- `SUPABASE_SERVICE_KEY` (in server/.env)
-- `NETLIFY_AUTH_TOKEN` (for Netlify CLI)
-
-### Pre-Deployment Checks
+### Pre-Flight Checks
 
 Before starting, verify:
 
-1. **Git status**: Working directory should be clean or committed
-2. **Branch**: Should be on `main` branch
-3. **Tests passing**: Run `npm test` to verify
-4. **Environment files**: Ensure server/.env exists with required variables
+```bash
+# 1. Check git status - should be clean
+cd proagentic-dfx && git status
 
-### Never Do This
+# 2. Verify on correct branch
+git branch --show-current
+# main → production deploy
+# staging → staging deploy
+# feature/* → preview deploy (via PR)
 
-- ❌ NEVER manually run docker/gcloud commands (use ./deploy-server.sh)
-- ❌ NEVER skip UAT testing before production
-- ❌ NEVER deploy without health check verification
-- ❌ NEVER commit with dirty working directory
+# 3. Check working directory
+pwd
+# Should be in proagentic-dfx/
+```
+
+### Step 1: File Size Check
+
+```bash
+cd proagentic-dfx
+node ../scripts/check-file-sizes.mjs all
+```
+
+**Expected**: No files over limits (500 lines for components, 800 for types/tests)
+
+**If fails**: Split large files before proceeding
+
+### Step 2: Lint & Type Check
+
+```bash
+npm run lint
+npx tsc --noEmit
+```
+
+**Expected**: No errors
+
+**If fails**: Fix lint/type errors before proceeding
+
+### Step 3: Unit Tests with Coverage
+
+```bash
+npm run test:coverage
+```
+
+**Expected**:
+- All tests pass
+- Coverage meets threshold (≥80% for critical paths)
+
+**If fails**: Fix failing tests or increase coverage
+
+### Step 4: Build Verification
+
+```bash
+npm run build
+```
+
+**Expected**: Build completes without errors
+
+**If fails**: Check for build-time errors (missing dependencies, TypeScript issues)
+
+### Step 5: Mock Server Tests
+
+```bash
+cd ../h2-tank-mock-server
+npm test
+```
+
+**Expected**: All mock server tests pass
+
+**If fails**: Mock server API contracts may be broken
+
+### Step 6: E2E Tests (Optional for local, required for PR)
+
+```bash
+cd ../proagentic-dfx
+npx playwright install --with-deps chromium
+npm run test:e2e
+```
+
+**Expected**: All Playwright tests pass
+
+**If fails**: Review playwright-report for failures
+
+### Step 7: Deploy to Vercel
+
+**For Staging** (branch: `staging`):
+```bash
+git push origin staging
+```
+GitHub Actions will auto-deploy to: `https://proagentic-dfx-staging.vercel.app`
+
+**For Production** (branch: `main`):
+```bash
+git push origin main
+```
+GitHub Actions will auto-deploy to: `https://dfx.proagentic.ai`
+
+**For Preview** (any PR):
+- Open PR against `main` or `staging`
+- GitHub Actions deploys preview automatically
+- Preview URL posted in PR comments
+
+### Manual Vercel Deploy (if needed)
+
+```bash
+# Install Vercel CLI if needed
+npm i -g vercel
+
+# Deploy preview
+cd proagentic-dfx
+vercel
+
+# Deploy production (requires confirmation)
+vercel --prod
+```
+
+## Environment Configuration
+
+### Required Secrets (GitHub Actions)
+
+These must be configured in GitHub repository secrets:
+
+| Secret | Description |
+|--------|-------------|
+| `VERCEL_TOKEN` | Vercel API token |
+| `VERCEL_ORG_ID` | Vercel organization ID |
+| `VERCEL_PROJECT_ID` | Vercel project ID |
+
+### Local Environment
+
+For local development and testing:
+
+```bash
+# No secrets required - uses mock server
+cd proagentic-dfx
+npm run dev
+```
+
+## Quality Gates Summary
+
+| Gate | Command | Required |
+|------|---------|----------|
+| File Sizes | `node scripts/check-file-sizes.mjs all` | Always |
+| Lint | `npm run lint` | Always |
+| Types | `npx tsc --noEmit` | Always |
+| Unit Tests | `npm test` | Always |
+| Coverage | `npm run test:coverage` | PR to main |
+| Build | `npm run build` | Always |
+| Mock Server | `cd h2-tank-mock-server && npm test` | Always |
+| E2E | `npm run test:e2e` | PR to main |
+
+## Deployment Targets
+
+| Branch | Target | URL |
+|--------|--------|-----|
+| `main` | Production | https://dfx.proagentic.ai |
+| `staging` | Staging | https://proagentic-dfx-staging.vercel.app |
+| PR | Preview | Auto-generated Vercel URL |
 
 ## Rollback Procedure
 
-If production deployment fails or UAT tests fail:
+### Via Vercel Dashboard
 
-**Backend Rollback**:
+1. Go to https://vercel.com/dashboard
+2. Select the proagentic-dfx project
+3. Go to Deployments
+4. Find the last working deployment
+5. Click "..." → "Promote to Production"
+
+### Via CLI
+
 ```bash
-gcloud run revisions list --service=proagentic-server --region=europe-west2
-gcloud run services update-traffic proagentic-server \
-  --to-revisions=PREVIOUS_REVISION=100 \
-  --region=europe-west2
-```
+# List recent deployments
+vercel ls
 
-**Frontend Rollback**:
-- Go to Netlify dashboard → proagentic1 site → Deployments
-- Click "Publish deploy" on previous working version
+# Rollback to specific deployment
+vercel rollback <deployment-url>
+```
 
 ## Success Criteria
 
 Deployment is successful when:
 
-✅ Backend health check returns `{"status": "ok"}`
-✅ Staging UAT smoke tests pass
-✅ Production is deployed without errors
-✅ Production UAT smoke tests pass
-✅ User can access https://proagentic.ai
+- All quality gates pass (lint, types, tests, build)
+- Vercel deployment completes without errors
+- Target URL is accessible and functional
+- No critical console errors in browser
 
 ## Troubleshooting
 
-**"./deploy-server.sh failed"**
-- Check server/.env has all required variables
-- Check Docker is running
-- Check gcloud authentication: `gcloud auth list`
-- Check recent changes didn't break server code
+### "File size check failed"
 
-**"Netlify deploy failed"**
-- Check authentication: `netlify status`
-- Check build succeeds locally: `npm run build`
-- Check Netlify site configuration
+```bash
+# Find large files
+node scripts/check-file-sizes.mjs all
 
-**"UAT tests failed"**
-- Review UAT report for specific failures
-- Fix identified issues
-- Restart deployment from appropriate step
-- Do NOT proceed to production with failing tests
+# Split components following patterns in CLAUDE.md
+# Target: <350 lines per file
+```
 
-**"Health check failed"**
-- Backend didn't deploy correctly
-- Check Cloud Run logs: `gcloud run services logs read proagentic-server --region europe-west2 --limit 50`
-- Verify environment variables are set in Cloud Run
-- Check OpenRouter API key is valid
+### "Lint/Type errors"
 
-## Time Estimate
+```bash
+# Auto-fix what's possible
+npm run lint:fix
 
-Full deployment typically takes:
+# Check remaining issues
+npm run lint
+npx tsc --noEmit
+```
 
-- Backend deployment: 5-7 minutes
-- Staging deployment: 2-3 minutes
-- Smoke UAT: 3-5 minutes
-- Production deployment: 2-3 minutes
-- Final UAT: 3-5 minutes
+### "Tests failing"
 
-**Total: ~15-23 minutes**
+```bash
+# Run tests in watch mode for debugging
+npm run test:watch
+
+# Run specific test file
+npm test -- path/to/test.test.ts
+```
+
+### "Build failed"
+
+```bash
+# Check for Next.js specific issues
+npm run build 2>&1 | head -100
+
+# Common issues:
+# - Missing imports
+# - Server/client component mismatches
+# - Environment variable issues
+```
+
+### "E2E tests failing"
+
+```bash
+# Run with UI for debugging
+npm run test:e2e:ui
+
+# Check Playwright report
+open playwright-report/index.html
+```
+
+### "Vercel deployment failed"
+
+```bash
+# Check Vercel CLI status
+vercel whoami
+
+# Re-link project if needed
+vercel link
+
+# Check deployment logs
+vercel logs <deployment-url>
+```
+
+## Pipeline Diagram
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Push to Branch                           │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Gate 0: File Size Check                                    │
+│  node scripts/check-file-sizes.mjs all                     │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Gate 1: Lint & Type Check                                  │
+│  npm run lint && npx tsc --noEmit                          │
+└─────────────────────────────────────────────────────────────┘
+                            │
+              ┌─────────────┴─────────────┐
+              ▼                           ▼
+┌─────────────────────────┐   ┌─────────────────────────┐
+│  Gate 2: Unit Tests     │   │  Gate 3: Build          │
+│  npm run test:coverage  │   │  npm run build          │
+└─────────────────────────┘   └─────────────────────────┘
+              │                           │
+              └─────────────┬─────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Gate 4: Mock Server Tests                                  │
+│  cd h2-tank-mock-server && npm test                        │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Gate 5: E2E Tests (PR to main only)                       │
+│  npm run test:e2e                                          │
+└─────────────────────────────────────────────────────────────┘
+                            │
+              ┌─────────────┼─────────────┐
+              ▼             ▼             ▼
+┌───────────────┐ ┌───────────────┐ ┌───────────────┐
+│  Preview      │ │  Staging      │ │  Production   │
+│  (PR)         │ │  (staging)    │ │  (main)       │
+└───────────────┘ └───────────────┘ └───────────────┘
+```
+
+## Time Estimates
+
+| Phase | Duration |
+|-------|----------|
+| File sizes + Lint + Types | ~1 min |
+| Unit tests + Coverage | ~2-3 min |
+| Build | ~1-2 min |
+| Mock server tests | ~30 sec |
+| E2E tests | ~3-5 min |
+| Vercel deployment | ~1-2 min |
+| **Total** | **~8-14 min** |

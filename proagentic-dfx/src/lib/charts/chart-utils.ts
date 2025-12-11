@@ -95,7 +95,17 @@ export const STATUS_COLORS = {
  * Interpolate between colors in a scale based on a 0-1 value
  */
 export function interpolateColor(colors: string[], t: number): string {
-  const clampedT = Math.max(0, Math.min(1, t));
+  // Handle single color array
+  if (colors.length === 1) {
+    const c = colors[0];
+    const r = parseInt(c.slice(1, 3), 16);
+    const g = parseInt(c.slice(3, 5), 16);
+    const b = parseInt(c.slice(5, 7), 16);
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+
+  // Handle NaN by treating it as 0
+  const clampedT = Math.max(0, Math.min(1, isNaN(t) ? 0 : t));
   const n = colors.length - 1;
   const i = Math.min(Math.floor(clampedT * n), n - 1);
   const f = clampedT * n - i;
@@ -163,10 +173,25 @@ export interface FormatOptions {
  * Format a numeric value for display
  */
 export function formatValue(value: number, options: FormatOptions = {}): string {
-  const { isScientific, precision = 2, unit, compact = true } = options;
+  const { isScientific, unit, compact = true } = options;
+  // Clamp precision to valid range (0-100) for toFixed
+  const precision = Math.max(0, Math.min(100, options.precision ?? 2));
 
   if (value === null || value === undefined || isNaN(value)) {
     return '-';
+  }
+
+  // Handle Infinity
+  if (value === Infinity) {
+    return 'Infinity';
+  }
+  if (value === -Infinity) {
+    return '-Infinity';
+  }
+
+  // Handle zero explicitly
+  if (value === 0) {
+    return unit ? `0 ${unit}` : '0';
   }
 
   // Scientific notation for very small or explicitly scientific values
@@ -176,20 +201,23 @@ export function formatValue(value: number, options: FormatOptions = {}): string 
 
   // Compact notation for large numbers
   if (compact && Math.abs(value) >= 1000000) {
-    return `${(value / 1000000).toFixed(1)}M`;
+    const formatted = `${(value / 1000000).toFixed(1)}M`;
+    return unit ? `${formatted} ${unit}` : formatted;
   }
   if (compact && Math.abs(value) >= 1000) {
-    return `${(value / 1000).toFixed(1)}k`;
+    const formatted = `${(value / 1000).toFixed(1)}k`;
+    return unit ? `${formatted} ${unit}` : formatted;
   }
 
   // Small decimals
   if (Math.abs(value) < 1 && value !== 0) {
-    return value.toFixed(precision);
+    const formatted = value.toFixed(precision);
+    return unit ? `${formatted} ${unit}` : formatted;
   }
 
-  // Regular numbers
-  const formatted = Math.abs(value) >= 100 ? value.toFixed(0) : value.toFixed(precision);
-  
+  // Regular numbers - always respect precision
+  const formatted = value.toFixed(precision);
+
   return unit ? `${formatted} ${unit}` : formatted;
 }
 
@@ -215,10 +243,22 @@ export function formatPercent(value: number, precision: number = 1): string {
  * Normalize values to 0-1 range
  */
 export function normalizeValues(values: number[]): { normalized: number[]; min: number; max: number } {
+  // Throw on empty array
+  if (!values || values.length === 0) {
+    throw new Error('Cannot normalize empty array');
+  }
+
+  // Check for invalid values
+  for (const v of values) {
+    if (!isFinite(v)) {
+      throw new Error('Cannot normalize array with NaN or Infinity values');
+    }
+  }
+
   const min = Math.min(...values);
   const max = Math.max(...values);
   const range = max - min || 1;
-  
+
   return {
     normalized: values.map(v => (v - min) / range),
     min,
@@ -255,12 +295,33 @@ export function normalizeLogScale(values: number[]): { normalized: number[]; min
  * Calculate domain with padding
  */
 export function calculateDomain(values: number[], padding: number = 0.1): [number, number] {
+  // Validate input
+  if (!values || values.length === 0) {
+    throw new Error('Cannot calculate domain for empty array');
+  }
+
+  // Check for invalid values
+  for (const v of values) {
+    if (isNaN(v) || !isFinite(v)) {
+      throw new Error('Cannot calculate domain with NaN or Infinity values');
+    }
+  }
+
   const min = Math.min(...values);
   const max = Math.max(...values);
+
+  // Handle single value or identical values
+  if (min === max) {
+    const absVal = Math.abs(min);
+    const pad = absVal > 0 ? absVal * padding : 1;
+    return [min - pad, max + pad];
+  }
+
   const range = max - min;
   const pad = range * padding;
-  
-  return [Math.max(0, min - pad), max + pad];
+
+  // Don't force min to be >= 0, allow negative domains
+  return [min - pad, max + pad];
 }
 
 /**
@@ -268,6 +329,12 @@ export function calculateDomain(values: number[], padding: number = 0.1): [numbe
  */
 export function calculateNiceTicks(min: number, max: number, targetCount: number = 5): number[] {
   const range = max - min;
+
+  // Handle edge case: targetCount <= 1
+  if (targetCount <= 1) {
+    return [min, max];
+  }
+
   const roughStep = range / (targetCount - 1);
   
   // Find a nice step size

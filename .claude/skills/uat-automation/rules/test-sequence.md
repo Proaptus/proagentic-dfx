@@ -1,6 +1,6 @@
-# Mandatory Test Execution Sequence
+# Mandatory Test Execution Sequence - H2 Tank Designer
 
-**For EVERY test (SMOKE-001 through SPOT-010), follow this exact 6-step sequence.**
+**For EVERY test (SMOKE-001 through SMOKE-030), follow this exact 6-step sequence.**
 
 This sequence is **MANDATORY** and **NON-NEGOTIABLE**. You cannot skip steps or change the order.
 
@@ -15,7 +15,7 @@ This sequence is **MANDATORY** and **NON-NEGOTIABLE**. You cannot skip steps or 
 │ STEP 3: Capture Screenshot                                  │
 │ STEP 4: Analyze Screenshot (Read Tool)                      │
 │ STEP 5: Update Report (Edit Tool)                           │
-│ STEP 6: Update Todo & Validate                              │
+│ STEP 6: Update Todo & Proceed                               │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -27,27 +27,30 @@ This sequence is **MANDATORY** and **NON-NEGOTIABLE**. You cannot skip steps or 
 
 **Purpose**: Perform the test interaction
 
-**Actions**:
-- Navigate to test URL
-- Click button
-- Type text
-- Submit form
-- Trigger functionality
-- Wait for action to START
+**Common Actions for H2 Tank Designer**:
+- Navigate to screens using keyboard shortcuts (1-9)
+- Click buttons using snapshot UIDs
+- Fill form fields in Requirements wizard
+- Interact with 3D viewer (rotate, zoom)
+- Click tabs in Analysis panels
 
-**Example**:
+**Example - Navigate to 3D Viewer**:
 ```typescript
-// For SPOT-002: Load large dataset
-mcp__playwright__browser_evaluate({
-  function: `
-    () => {
-      const generateBtn = Array.from(document.querySelectorAll('button'))
-        .find(btn => btn.textContent.includes('Generate Requirements'));
-      if (generateBtn) generateBtn.click();
-      return true;
-    }
-  `
-})
+// Use keyboard shortcut
+mcp__chrome-devtools__press_key({ key: "3" })
+
+// OR click nav item
+mcp__chrome-devtools__take_snapshot()
+// Find "3D Viewer" button UID from snapshot
+mcp__chrome-devtools__click({ uid: "nav-3d-viewer-uid" })
+```
+
+**Example - Fill Requirements Form**:
+```typescript
+mcp__chrome-devtools__take_snapshot()
+// Find form field UIDs
+mcp__chrome-devtools__fill({ uid: "length-input", value: "1000" })
+mcp__chrome-devtools__fill({ uid: "diameter-input", value: "500" })
 ```
 
 **Success criteria**: Action triggered, process started
@@ -60,60 +63,51 @@ mcp__playwright__browser_evaluate({
 
 **Purpose**: Ensure process fully completes before capturing screenshot
 
-**This is the MOST VIOLATED step** - agents frequently capture screenshots too early.
+**This is the MOST VIOLATED step** - screenshots taken too early are INVALID.
 
-**Wait indicators by test type**:
+### Wait Times by Test Type
 
-### Navigation Tests
-- Wait: 3 seconds minimum after URL changes
-- Verify: Page stops loading, elements visible
+| Test Type | Minimum Wait | What to Check |
+|-----------|--------------|---------------|
+| Page Navigation | 3 seconds | Page loaded, no spinners |
+| Form Input | 1 second | Input accepted, validation shown |
+| 3D Model Load | 5 seconds | Model rendered, no loading |
+| Analysis Tab Switch | 2 seconds | Charts rendered |
+| Export Generation | 10 seconds | Progress complete |
+| Compliance Checks | 15 seconds | All checks complete |
 
+### H2 Tank Designer Specific Waits
+
+**Requirements Wizard Navigation**:
 ```typescript
-mcp__playwright__browser_navigate({ url: "..." })
-mcp__playwright__browser_wait_for({ time: 3 })
+// After clicking Next step
+await mcp__chrome-devtools__wait_for({ text: "Step 2", timeout: 5000 })
 ```
 
-### Agent Processing Tests
-- Wait: Until ALL agents show "Complete" or checkmarks
-- Verify: No "In Progress" states visible
-- Duration: May be 30-60 seconds
-
+**3D Model Loading**:
 ```typescript
-// Start agent processing
-triggerAgentGeneration()
-
-// Wait for completion (not just start!)
-mcp__playwright__browser_wait_for({ time: 5 }) // Initial wait
-mcp__playwright__browser_snapshot() // Check state
-
-// If agents still "In Progress", wait longer
-mcp__playwright__browser_wait_for({ time: 10 })
-mcp__playwright__browser_snapshot() // Check again
-
-// Repeat until ALL agents "Complete"
+// After navigating to 3D Viewer
+// Wait for canvas to render
+mcp__chrome-devtools__evaluate_script({
+  function: `() => {
+    const canvas = document.querySelector('canvas');
+    return canvas && canvas.width > 0;
+  }`
+})
+// Then wait additional 3 seconds for full render
 ```
 
-### Form Submission Tests
-- Wait: Until success message appears
-- Verify: Toast notification or success indicator visible
-
+**Chart Rendering**:
 ```typescript
-submitForm()
-mcp__playwright__browser_wait_for({ time: 2 })
-// Verify success message appears
+// After switching analysis tabs
+// Wait for SVG charts to render
+mcp__chrome-devtools__evaluate_script({
+  function: `() => {
+    const charts = document.querySelectorAll('svg');
+    return charts.length > 0;
+  }`
+})
 ```
-
-### Data Generation Tests
-- Wait: Until loading spinner disappears
-- Verify: Data fully rendered on screen
-
-```typescript
-generateData()
-mcp__playwright__browser_wait_for({ time: 5 })
-// Verify loading indicators gone
-```
-
-**CRITICAL**: If you capture screenshot during a transition, loading state, or partial completion, the screenshot is INVALID and test FAILS.
 
 **Success criteria**: Process 100% complete, final state achieved
 
@@ -125,26 +119,39 @@ mcp__playwright__browser_wait_for({ time: 5 })
 
 **Purpose**: Create visual evidence of test result
 
-**Tool**: `mcp__playwright__browser_take_screenshot`
+**Tool**: `mcp__chrome-devtools__take_screenshot`
 
-**Filename convention**:
-- Smoke tests: `smoke-[num]-[name].png`
-- Spot tests: `spot-[num]-[name].png`
-- Multi-screenshot tests: `smoke-003-a-swarm-processing.png`, `smoke-003-b-swarm-complete.png`
+**Filename Convention for H2 Tank Designer**:
+```
+smoke-[num]-[short-name].png
+
+Examples:
+- smoke-001-app-loads.png
+- smoke-005-wizard-mode.png
+- smoke-014-3d-tank-render.png
+- smoke-019-analysis-tabs.png
+- smoke-026-export-config.png
+```
 
 **Example**:
 ```typescript
-mcp__playwright__browser_take_screenshot({
-  filename: "spot-002-performance-18-requirements.png"
+mcp__chrome-devtools__take_screenshot({
+  filename: "smoke-014-3d-tank-render.png"
 })
 ```
 
-**File location**: `./.playwright-mcp/[filename].png`
+**Full Page Screenshot** (if needed):
+```typescript
+mcp__chrome-devtools__take_screenshot({
+  filename: "smoke-022-compliance-full.png",
+  fullPage: true
+})
+```
 
 **Success criteria**:
 - File saved successfully
-- File size > 0 bytes (not empty)
-- Filename follows convention
+- Image shows complete UI state
+- No loading indicators visible
 
 **Next step**: Read and analyze screenshot
 
@@ -154,34 +161,78 @@ mcp__playwright__browser_take_screenshot({
 
 **Purpose**: View screenshot, describe content, determine pass/fail
 
-**Tool**: `Read({ file_path: "./.playwright-mcp/[filename].png" })`
+**Tool**: `Read({ file_path: "smoke-xxx-name.png" })`
 
 **MANDATORY steps**:
 1. Call Read tool on screenshot file
 2. Write 3-5 sentence description of what's visible
 3. Determine pass/fail based on screenshot evidence
 
-**Description should include**:
-- Specific UI elements visible (buttons, text, icons, counts)
-- State indicators (checkmarks, "In Progress", error messages)
-- Test-specific elements (e.g., "18 requirement cards", "Gantt chart")
-- Any errors, warnings, or anomalies
-- Conclusion about expected state
+**H2 Tank Designer Specific Analysis Points**:
 
-**Example**:
-```typescript
-Read({ file_path: "./.playwright-mcp/spot-002-performance-18-requirements.png" })
+### Navigation Tests (SMOKE-001 to 004)
+- Is sidebar visible with all sections?
+- Is "ProAgentic DfX" header present?
+- Is H2 Tank module indicator shown?
+- Is correct screen active (blue indicator)?
 
-// Write description:
-// "In this screenshot, I can see the Requirements dashboard displaying 18 requirement cards in a grid layout. The header shows 'Requirements (18)' confirming the count. All cards are fully rendered with titles and descriptions visible. The page is responsive with no loading indicators. Pagination controls are present at the bottom. No error messages or warnings visible."
+### Requirements Tests (SMOKE-005 to 009)
+- Is wizard/chat interface visible?
+- Are form fields rendered?
+- Is progress indicator correct?
+- Are values displayed properly?
 
-// Determine: ✅ PASS - Large dataset (18 requirements) loads correctly, UI remains responsive
+### Pareto Tests (SMOKE-010 to 013)
+- Is scatter plot/chart rendered?
+- Are design points visible?
+- Is selection feedback working?
+- Are axis labels present?
+
+### 3D Viewer Tests (SMOKE-014 to 017)
+- Is 3D model rendered (not blank canvas)?
+- Is tank geometry visible?
+- Are controls responsive?
+- Is cross-section working (if applicable)?
+
+### Analysis Tests (SMOKE-018 to 021)
+- Are comparison cards displayed?
+- Do tabs switch content properly?
+- Are charts rendered with data?
+- Is stress visualization showing colors?
+
+### Validation Tests (SMOKE-022 to 025)
+- Are standards/tests listed?
+- Are status indicators visible?
+- Do results show pass/fail?
+- Is summary accurate?
+
+### Export Tests (SMOKE-026 to 030)
+- Are export options displayed?
+- Is format selection working?
+- Is progress/completion shown?
+- Is Sentry dashboard populated?
+
+**Example Analysis**:
+```
+Read({ file_path: "smoke-014-3d-tank-render.png" })
+
+**Description**:
+In this screenshot, I can see the 3D Viewer screen with a Type IV hydrogen tank
+model rendered in the center canvas. The tank shows a cylindrical body with
+hemispherical end caps, rendered with realistic metallic materials and ambient
+lighting. The sidebar navigation is visible on the left with "3D Viewer"
+highlighted with a blue indicator. Camera control buttons are visible in the
+top-right corner of the canvas. No error messages or loading indicators are
+present.
+
+**Determination**: ✅ PASS - 3D model renders correctly with proper geometry and
+materials.
 ```
 
 **Success criteria**:
 - Read tool invoked on screenshot
 - Description written (3-5 sentences minimum)
-- Pass/fail determination made with reasoning
+- Pass/fail determination made with clear reasoning
 
 **Next step**: Update report with results
 
@@ -191,45 +242,51 @@ Read({ file_path: "./.playwright-mcp/spot-002-performance-18-requirements.png" }
 
 **Purpose**: Document test results immediately
 
-**Tool**: `Edit({ file_path: "./UAT_COMPREHENSIVE_TEST_REPORT.md", ... })`
+**Tool**: `Edit({ file_path: "./H2_UAT_REPORT.md", ... })`
 
-**Entry format**:
+**Report File**: `H2_UAT_REPORT.md` (in project root or specified directory)
+
+**Entry Format**:
 ```markdown
-### SPOT-002: Performance Test - Large Dataset
+### SMOKE-014: 3D Tank Model Renders
 
-**Screenshot**: spot-002-performance-18-requirements.png
+**Screenshot**: smoke-014-3d-tank-render.png
 
-![spot-002-performance-18-requirements.png](./.playwright-mcp/spot-002-performance-18-requirements.png)
+![smoke-014-3d-tank-render.png](smoke-014-3d-tank-render.png)
 
-**What's Visible**: [Your 3-5 sentence description from Step 4]
+**What's Visible**: In this screenshot, I can see the 3D Viewer screen with a
+Type IV hydrogen tank model rendered in the center canvas. The tank shows a
+cylindrical body with hemispherical end caps. The sidebar shows "3D Viewer"
+active. Camera controls visible in top-right. No errors present.
 
-**Pass/Fail**: ✅ PASS or ❌ FAIL
+**Pass/Fail**: ✅ PASS
 
-**Reasoning**: [Why it passed or failed based on screenshot evidence]
+**Reasoning**: 3D model renders correctly with proper geometry, materials, and
+lighting. All expected UI elements present.
 
 ---
 ```
 
 **CRITICAL**: Update report IMMEDIATELY after analyzing screenshot. DO NOT batch updates.
 
-**Example**:
+**Example Edit Command**:
 ```typescript
 Edit({
-  file_path: "./UAT_COMPREHENSIVE_TEST_REPORT.md",
+  file_path: "./H2_UAT_REPORT.md",
   old_string: "## Test Results\n\n",
   new_string: `## Test Results
 
-### SPOT-002: Performance Test - Large Dataset
+### SMOKE-014: 3D Tank Model Renders
 
-**Screenshot**: spot-002-performance-18-requirements.png
+**Screenshot**: smoke-014-3d-tank-render.png
 
-![spot-002-performance-18-requirements.png](./.playwright-mcp/spot-002-performance-18-requirements.png)
+![smoke-014-3d-tank-render.png](smoke-014-3d-tank-render.png)
 
-**What's Visible**: In this screenshot, I can see the Requirements dashboard displaying 18 requirement cards in a grid layout. The header shows "Requirements (18)" confirming the count. All cards are fully rendered with titles and descriptions visible. The page is responsive with no loading indicators. No error messages or warnings visible.
+**What's Visible**: [Your description from Step 4]
 
 **Pass/Fail**: ✅ PASS
 
-**Reasoning**: Large dataset (18 requirements) loads correctly, UI remains responsive, no performance issues detected.
+**Reasoning**: [Your reasoning from Step 4]
 
 ---
 
@@ -242,149 +299,132 @@ Edit({
 - Test entry added to report
 - Entry includes screenshot link, description, pass/fail, reasoning
 
-**Next step**: Update todo and validate
+**Next step**: Update todo and proceed
 
 ---
 
-## STEP 6: Update Todo & Validate
+## STEP 6: Update Todo & Proceed
 
-**Purpose**: Mark test complete, trigger validation, proceed only if validation passes
+**Purpose**: Mark test complete, update progress, move to next test
 
 **Actions**:
 1. Call TodoWrite to mark current test "completed"
-2. Mark next test "in_progress" (if not last test)
-3. **Automatic**: `uat-test-validator` subagent runs
-4. Check validation result
-5. If PASS → Proceed to next test
-6. If FAIL → Complete missing steps, re-validate
+2. Mark next test "in_progress"
+3. Proceed to next test (return to Step 1)
 
 **Example**:
 ```typescript
 TodoWrite({
   todos: [
-    // ... previous tests
+    // Previous tests...
     {
-      content: "SPOT-002: Performance - Large Dataset",
+      content: "SMOKE-013: Select Optimal Design",
       status: "completed",
       activeForm: "✅ PASS"
     },
     {
-      content: "SPOT-003: Accessibility - Keyboard Navigation",
-      status: "in_progress",
-      activeForm: "Testing accessibility"
+      content: "SMOKE-014: 3D Tank Model Renders",
+      status: "completed",
+      activeForm: "✅ PASS"
     },
-    // ... remaining tests
+    {
+      content: "SMOKE-015: Camera Controls Work",
+      status: "in_progress",
+      activeForm: "Testing camera controls"
+    },
+    // Remaining tests...
   ]
 })
-
-// Validator runs automatically and checks:
-// ✅ Screenshot captured
-// ✅ Screenshot analyzed with Read tool
-// ✅ Report updated with Edit tool
-// ✅ Status is PASS or FAIL (no other options)
-// ✅ Todo updated
-
-// If validation passes:
-// → Proceed to STEP 1 for next test
-
-// If validation fails:
-// → Display missing steps
-// → Complete missing steps
-// → Re-validate
-// → Only then proceed to next test
 ```
 
 **Success criteria**:
-- Todo list updated
-- Validation checkpoint passed
-- Ready for next test
+- Todo list updated with test result
+- Next test marked in_progress
+- Ready to proceed
 
 **Next step**: Return to STEP 1 for next test
 
 ---
 
-## Complete Example: SPOT-002
-
-Here's the complete 6-step sequence for SPOT-002:
+## Complete Example: SMOKE-014 (3D Tank Render)
 
 ```typescript
 // ═══════════════════════════════════════════════════════════
 // STEP 1: Execute Test Action
 // ═══════════════════════════════════════════════════════════
 
-mcp__playwright__browser_evaluate({
-  function: `
-    () => {
-      const generateBtn = Array.from(document.querySelectorAll('button'))
-        .find(btn => btn.textContent.includes('Generate Requirements'));
-      if (generateBtn) {
-        generateBtn.click();
-        return true;
-      }
-      return false;
-    }
-  `
-})
+// Navigate to 3D Viewer using keyboard shortcut
+mcp__chrome-devtools__press_key({ key: "3" })
 
 // ═══════════════════════════════════════════════════════════
 // STEP 2: Wait for Process Completion
 // ═══════════════════════════════════════════════════════════
 
-// Initial wait for agents to start
-mcp__playwright__browser_wait_for({ time: 5 })
+// Wait for navigation
+// (3 seconds for page load)
 
-// Check if agents still processing
-mcp__playwright__browser_snapshot() // See if "In Progress" visible
+// Wait for 3D model to render
+// (additional 5 seconds for Three.js canvas)
 
-// Wait for all agents to complete
-mcp__playwright__browser_wait_for({ time: 30 })
-
-// Verify completion
-mcp__playwright__browser_snapshot() // All agents should show "Complete"
+// Verify canvas is rendered
+mcp__chrome-devtools__evaluate_script({
+  function: `() => {
+    const canvas = document.querySelector('canvas');
+    return canvas && canvas.width > 0 && canvas.height > 0;
+  }`
+})
+// Returns: true
 
 // ═══════════════════════════════════════════════════════════
 // STEP 3: Capture Screenshot
 // ═══════════════════════════════════════════════════════════
 
-mcp__playwright__browser_take_screenshot({
-  filename: "spot-002-performance-18-requirements.png"
+mcp__chrome-devtools__take_screenshot({
+  filename: "smoke-014-3d-tank-render.png"
 })
 
 // ═══════════════════════════════════════════════════════════
 // STEP 4: Analyze Screenshot (Read Tool)
 // ═══════════════════════════════════════════════════════════
 
-Read({ file_path: "./.playwright-mcp/spot-002-performance-18-requirements.png" })
+Read({ file_path: "smoke-014-3d-tank-render.png" })
 
-// Description:
-// "In this screenshot, I can see the Requirements dashboard displaying 18 requirement
-// cards in a grid layout. The header shows 'Requirements (18)' confirming the count.
-// All cards are fully rendered with titles and descriptions visible. The page is
-// responsive with no loading indicators. Pagination controls are present at the bottom.
-// No error messages or warnings visible."
+// Write description:
+// "In this screenshot, I can see the 3D Viewer screen with a Type IV
+// hydrogen tank model rendered in the center canvas. The tank displays
+// a cylindrical body with hemispherical end caps, rendered with realistic
+// metallic materials and proper lighting. The sidebar navigation shows
+// '3D Viewer' as active with a blue indicator. Camera control buttons
+// are visible. No error messages or loading spinners present."
 
-// Determination: ✅ PASS - Large dataset loads correctly, UI remains responsive
+// Determination: ✅ PASS - 3D model renders correctly
 
 // ═══════════════════════════════════════════════════════════
 // STEP 5: Update Report (Edit Tool)
 // ═══════════════════════════════════════════════════════════
 
 Edit({
-  file_path: "./UAT_COMPREHENSIVE_TEST_REPORT.md",
+  file_path: "./H2_UAT_REPORT.md",
   old_string: "## Test Results\n\n",
   new_string: `## Test Results
 
-### SPOT-002: Performance Test - Large Dataset
+### SMOKE-014: 3D Tank Model Renders
 
-**Screenshot**: spot-002-performance-18-requirements.png
+**Screenshot**: smoke-014-3d-tank-render.png
 
-![spot-002-performance-18-requirements.png](./.playwright-mcp/spot-002-performance-18-requirements.png)
+![smoke-014-3d-tank-render.png](smoke-014-3d-tank-render.png)
 
-**What's Visible**: In this screenshot, I can see the Requirements dashboard displaying 18 requirement cards in a grid layout. The header shows "Requirements (18)" confirming the count. All cards are fully rendered with titles and descriptions visible. The page is responsive with no loading indicators. No error messages or warnings visible.
+**What's Visible**: In this screenshot, I can see the 3D Viewer screen with
+a Type IV hydrogen tank model rendered in the center canvas. The tank
+displays a cylindrical body with hemispherical end caps, rendered with
+realistic metallic materials and proper lighting. The sidebar navigation
+shows '3D Viewer' as active with a blue indicator. Camera control buttons
+are visible. No error messages or loading spinners present.
 
 **Pass/Fail**: ✅ PASS
 
-**Reasoning**: Large dataset (18 requirements) loads correctly, UI remains responsive, no performance issues detected.
+**Reasoning**: 3D model renders correctly with proper geometry, materials,
+and lighting. All expected UI elements present and functional.
 
 ---
 
@@ -392,35 +432,25 @@ Edit({
 })
 
 // ═══════════════════════════════════════════════════════════
-// STEP 6: Update Todo & Validate
+// STEP 6: Update Todo & Proceed
 // ═══════════════════════════════════════════════════════════
 
 TodoWrite({
   todos: [
     {
-      content: "SPOT-002: Performance - Large Dataset",
+      content: "SMOKE-014: 3D Tank Model Renders",
       status: "completed",
       activeForm: "✅ PASS"
     },
     {
-      content: "SPOT-003: Accessibility - Keyboard Navigation",
+      content: "SMOKE-015: Camera Controls Work",
       status: "in_progress",
-      activeForm: "Testing accessibility"
+      activeForm: "Testing camera controls"
     }
   ]
 })
 
-// Validator runs automatically:
-// ✅ Test SPOT-002 Validation: PASSED
-//   ✓ Screenshot captured: spot-002-performance-18-requirements.png (152 KB)
-//   ✓ Screenshot analyzed: Read tool called at 14:32:15
-//   ✓ Report updated: Edit tool called, entry added at line 679
-//   ✓ Valid status: ✅ PASS
-//   ✓ Todo updated: Test marked completed
-//
-// Ready to proceed to next test: SPOT-003
-
-// NOW proceed to SPOT-003 (return to STEP 1)
+// NOW proceed to SMOKE-015 (return to STEP 1)
 ```
 
 ---
@@ -428,96 +458,55 @@ TodoWrite({
 ## Common Violations
 
 ### Violation 1: Skipping Read Tool (Step 4)
-
 ```typescript
 // ❌ WRONG
-captureScreenshot("spot-002.png")
-updateReport("SPOT-002") // Skipped Read tool!
+takeScreenshot("smoke-014.png")
+updateReport("SMOKE-014") // Skipped Read tool - no analysis!
 ```
-
-**Consequence**: Validator blocks progression - "Screenshot not analyzed with Read tool"
+**Fix**: Always call `Read({ file_path: "..." })` on screenshot and write description.
 
 ### Violation 2: Batching Report Updates (Step 5)
-
 ```typescript
 // ❌ WRONG
-executeTest("SPOT-002")
-captureScreenshot("spot-002.png")
-executeTest("SPOT-003")
-captureScreenshot("spot-003.png")
-// Now batch update report ← TOO LATE!
-updateReport("SPOT-002")
-updateReport("SPOT-003")
+executeTest("SMOKE-014")
+executeTest("SMOKE-015")
+executeTest("SMOKE-016")
+updateReport("SMOKE-014, 015, 016") // Batched - TOO LATE!
 ```
-
-**Consequence**: Validator blocks progression after SPOT-002 - "Report not updated with test entry"
+**Fix**: Update report immediately after EACH test.
 
 ### Violation 3: Capturing Screenshot Too Early (Step 2)
-
 ```typescript
 // ❌ WRONG
-triggerAgentGeneration()
-mcp__playwright__browser_wait_for({ time: 2 }) // TOO SHORT!
-captureScreenshot() // Agents still "In Progress"
+navigateTo3DViewer()
+// wait(1) // TOO SHORT for 3D to render!
+takeScreenshot() // Blank canvas!
 ```
+**Fix**: Wait for 3D canvas to fully render (5+ seconds, verify with script).
 
-**Consequence**: Screenshot shows incomplete state, test result invalid
-
-### Violation 4: Using Status Other Than PASS/FAIL (Step 5)
-
-```markdown
-<!-- ❌ WRONG -->
-### SPOT-002: Performance Test
-**Pass/Fail**: ⏭️ SKIPPED - test environment constraints
+### Violation 4: Wrong Screenshot Path
+```typescript
+// ❌ WRONG
+Read({ file_path: "./screenshots/smoke-014.png" }) // Wrong path!
 ```
-
-**Consequence**: Validator blocks progression - "Invalid test status - only PASS or FAIL allowed"
+**Fix**: Use correct path where screenshot was saved.
 
 ---
 
 ## Checklist for Each Test
 
-Use this checklist to verify you've completed all steps:
-
 ```
-Test: SPOT-002
+Test: SMOKE-___
 
-[ ] Step 1: Test action executed (generate 18 requirements)
-[ ] Step 2: Process completed (all agents show "Complete")
-[ ] Step 3: Screenshot captured (spot-002-performance-18-requirements.png)
-[ ] Step 4: Screenshot analyzed with Read tool (3-5 sentences written)
-[ ] Step 5: Report updated with Edit tool (entry added to report)
-[ ] Step 6: Todo updated (test marked completed)
-[ ] Validation passed (all 5 gates passed)
+[ ] Step 1: Test action executed
+[ ] Step 2: Waited for completion (verified no loading)
+[ ] Step 3: Screenshot captured with correct filename
+[ ] Step 4: Screenshot analyzed with Read tool (3-5 sentences)
+[ ] Step 5: Report updated immediately with Edit tool
+[ ] Step 6: Todo updated, ready for next test
 
-Progress: 0/7 complete - CANNOT proceed to next test until all checked
+Progress: 0/6 complete
 ```
-
----
-
-## When Things Go Wrong
-
-### Test Fails to Execute
-
-**Action**: Mark as ❌ FAIL, document reason, proceed to next test
-
-```markdown
-### SPOT-002: Performance Test
-**Pass/Fail**: ❌ FAIL
-**Reasoning**: Unable to execute - test data missing (need 18 requirements, only 5 available)
-```
-
-### Screenshot Capture Fails
-
-**Action**: Retry screenshot capture, if fails again mark as ❌ FAIL
-
-### Report Update Fails
-
-**Action**: Check report file path, retry Edit tool, verify file permissions
-
-### Validation Fails
-
-**Action**: Review validation output, complete missing steps, re-validate
 
 ---
 
@@ -525,20 +514,11 @@ Progress: 0/7 complete - CANNOT proceed to next test until all checked
 
 **The 6-step sequence is MANDATORY for EVERY test:**
 
-1. **Execute** test action
-2. **Wait** for process completion (CRITICAL - no shortcuts)
-3. **Capture** screenshot
-4. **Analyze** screenshot with Read tool (3-5 sentences)
+1. **Execute** test action (navigate, click, fill)
+2. **Wait** for process completion (CRITICAL - use appropriate delays)
+3. **Capture** screenshot with descriptive filename
+4. **Analyze** screenshot with Read tool (3-5 sentence description)
 5. **Update** report with Edit tool (immediately, no batching)
-6. **Validate** before proceeding to next test
+6. **Proceed** after updating todo
 
-**NEVER skip steps. NEVER batch tests. NEVER proceed without validation.**
-
-This sequence is enforced by the `uat-test-validator` subagent which automatically blocks progression if steps are skipped.
-
----
-
-**References**:
-- ABSOLUTE_RULES.md - 5 critical rules
-- validation-gates.md - Validator gate details
-- uat-test-validator subagent - Enforcement mechanism
+**NEVER skip steps. NEVER batch tests. Complete all 30 tests.**

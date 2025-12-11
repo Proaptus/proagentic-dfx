@@ -1,3 +1,16 @@
+---
+id: HOWTO-tank-models-quickstart
+doc_type: howto
+title: "Tank Models 3D Library - Quick Start Guide"
+status: accepted
+last_verified_at: 2025-12-11
+owner: "@ProAgentic/frontend-team"
+code_refs:
+  - path: "src/lib/tank-models/index.ts"
+  - path: "src/lib/tank-models/TankModel3D.tsx"
+keywords: ["quickstart", "3d", "tank", "guide", "tutorial"]
+---
+
 # Tank Models 3D Library - Quick Start Guide
 
 ## 30-Second Quick Start

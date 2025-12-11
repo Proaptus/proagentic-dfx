@@ -1,0 +1,30 @@
+    it('should switch to standards library view and load data', async () => {
+      const user = userEvent.setup();
+      
+      // Make the standards library API slow to test loading state
+      vi.mocked(apiClient.getStandardsLibrary).mockImplementation(
+        () => new Promise((resolve) => setTimeout(() => resolve(mockStandardsLibraryData), 100))
+      );
+      
+      render(<ComplianceScreenEnhanced />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Compliance Dashboard')).toBeInTheDocument();
+      });
+
+      const libraryTab = screen.getByRole('tab', { name: /Standards Library/i });
+      await user.click(libraryTab);
+
+      // Should show loading state first
+      await waitFor(() => {
+        expect(screen.getByText('Loading standards library...')).toBeInTheDocument();
+      });
+
+      // Then show the panel after loading
+      await waitFor(() => {
+        expect(screen.getByTestId('standards-library-panel')).toBeInTheDocument();
+      });
+
+      // Should have called the API
+      expect(apiClient.getStandardsLibrary).toHaveBeenCalledTimes(1);
+    });

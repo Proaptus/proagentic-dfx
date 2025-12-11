@@ -2,12 +2,14 @@
 id: ANALYSIS-GAP-DETAILED-001
 doc_type: test_report
 title: "Detailed Enterprise Gap Analysis"
-status: accepted
+status: superseded
+superseded_by: ["docs/test-report/REQUIREMENTS_ALIGNMENT_GAP_ANALYSIS.md"]
 last_verified_at: 2024-12-09
 owner: "@h2-tank-team"
 related_docs:
   - "docs/ENTERPRISE_GAP_ANALYSIS.md"
 keywords: ["gap analysis", "detailed", "rtm", "line-by-line"]
+reason: "Line-by-line RTM superseded by comprehensive analysis"
 ---
 
 # Detailed Enterprise Gap Analysis

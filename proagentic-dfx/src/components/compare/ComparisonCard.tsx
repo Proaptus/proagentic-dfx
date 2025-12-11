@@ -86,9 +86,9 @@ export function ComparisonCard({
                 <dd className="flex items-center gap-2">
                   <DifferenceIndicator {...indicator} />
                   <span className="font-semibold text-gray-900">
-                    {metric.unit === '€' ? '€' : ''}
+                    {['£', '€', '$'].includes(metric.unit) ? metric.unit : ''}
                     {metric.value.toLocaleString()}
-                    {metric.unit !== '€' ? ` ${metric.unit}` : ''}
+                    {!['£', '€', '$'].includes(metric.unit) ? ` ${metric.unit}` : ''}
                   </span>
                 </dd>
               </div>

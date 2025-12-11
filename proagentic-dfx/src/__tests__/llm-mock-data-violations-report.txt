@@ -5,13 +5,13 @@
 
 SUMMARY
 -------
-Total Violations:  7
-Files Scanned:     124
-Files Affected:    3
+Total Violations:  11
+Files Scanned:     150
+Files Affected:    7
 
 SEVERITY BREAKDOWN
 ------------------
-  CRITICAL:    0 ✓
+  CRITICAL:    4 ⚠️  BLOCKING
   HIGH:        0 ✓
   MEDIUM:      7
   LOW:         0
@@ -19,6 +19,7 @@ SEVERITY BREAKDOWN
 CATEGORY BREAKDOWN
 ------------------
   🟡 Filler Text:    4
+  🔴 API Routes:    4
   🟡 Repeated Structure:    3
 
 ==========================================================================================
@@ -47,15 +48,15 @@ FILE: components\screens\ValidationScreen.tsx
 VIOLATIONS: 3 (Critical: 0, High: 0)
 ----------------------------------------------------------------------
 
-  🟡 Line 73: [MEDIUM] Repeated Structure
+  🟡 Line 78: [MEDIUM] Repeated Structure
      Pattern: {     id: 'permeation',     name: 'Permeation Test',     standard: 'ISO 19881 Annex B',     arti
      Reason:  Repeated object structure
 
-  🟡 Line 93: [MEDIUM] Repeated Structure
+  🟡 Line 98: [MEDIUM] Repeated Structure
      Pattern: {     id: 'fire',     name: 'Bonfire Test',     standard: 'UN R134 §6.2.8',     articles: 1,   
      Reason:  Repeated object structure
 
-  🟡 Line 111: [MEDIUM] Repeated Structure
+  🟡 Line 116: [MEDIUM] Repeated Structure
      Pattern: {     id: 'fatigue',     name: 'Accelerated Stress Rupture',     standard: 'ISO 11119-3',     ar
      Reason:  Repeated object structure
 
@@ -64,9 +65,45 @@ FILE: components\analysis\ReliabilityPanel.tsx
 VIOLATIONS: 1 (Critical: 0, High: 0)
 ----------------------------------------------------------------------
 
-  🟡 Line 183: [MEDIUM] Filler Text
+  🟡 Line 149: [MEDIUM] Filler Text
      Pattern: : 'N/A'
      Reason:  Filler/placeholder text
+
+----------------------------------------------------------------------
+FILE: app\api\auth\route.ts
+VIOLATIONS: 1 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+----------------------------------------------------------------------
+FILE: app\api\designs\route.ts
+VIOLATIONS: 1 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+----------------------------------------------------------------------
+FILE: app\api\designs\[designId]\route.ts
+VIOLATIONS: 1 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+----------------------------------------------------------------------
+FILE: app\api\designs\[designId]\stress\route.ts
+VIOLATIONS: 1 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
 
 ==========================================================================================
 HOW TO FIX

@@ -26,6 +26,8 @@
     "test:coverage": "turbo run test:coverage --filter=proagentic-dfx",
     "test:e2e": "turbo run test:e2e --filter=proagentic-dfx",
     "validate": "turbo run lint typecheck test",
+    "validate:full": "npm run check:sizes && npm run lint && npm run typecheck && npm run test:coverage",
+    "quality-gate": "npm run check:sizes && npm run lint && npm run typecheck && npm run test:coverage && npm run build",
     "check:sizes": "node scripts/check-file-sizes.mjs all",
     "check:sizes:staged": "node scripts/check-file-sizes.mjs staged",
     "prepare": "husky",
@@ -33,6 +35,8 @@
     "clean": "turbo run clean && rm -rf node_modules"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.2.0",
+    "@commitlint/config-conventional": "^20.2.0",
     "husky": "^9.1.7",
     "kill-port": "^2.0.1",
     "lint-staged": "^15.2.10",

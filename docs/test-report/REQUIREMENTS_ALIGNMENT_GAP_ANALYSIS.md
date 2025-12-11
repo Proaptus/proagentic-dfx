@@ -1,4 +1,5 @@
 ﻿---
+id: GAP-ANALYSIS-COMPREHENSIVE-001
 doc_type: test-report
 title: "COMPREHENSIVE REQUIREMENTS ALIGNMENT & GAP ANALYSIS"
 version: 1.0.0
@@ -6,6 +7,7 @@ date: 2025-12-09
 owner: "@h2-tank-team"
 status: accepted
 last_verified_at: 2025-12-09
+supersedes: ["docs/test-report/ENTERPRISE_GAP_ANALYSIS.md", "docs/test-report/DETAILED_GAP_ANALYSIS.md"]
 ---
 # COMPREHENSIVE REQUIREMENTS ALIGNMENT & GAP ANALYSIS
 ## ProAgentic-DFX Frontend & Mock Server - December 9, 2025

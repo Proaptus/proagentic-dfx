@@ -1,109 +1,142 @@
 {
-  "deployment_id": "20251019-143022",
-  "project": "proagentic",
-  "mode": "full",
+  "deployment_id": "20251209-103045",
+  "project": "proagentic-dfx",
+  "target": "production",
+  "provider": "vercel",
   "status": "success",
-  "started_at": "2025-10-19T14:30:22Z",
-  "completed_at": "2025-10-19T14:45:55Z",
-  "total_duration_seconds": 933,
-  "phases": [
+  "started_at": "2025-12-09T10:30:45Z",
+  "completed_at": "2025-12-09T10:42:18Z",
+  "total_duration_seconds": 693,
+  "branch": "main",
+  "commit": "abc123def456789",
+  "triggered_by": "push",
+  "quality_gates": [
     {
-      "phase": "pre-deploy-checks",
+      "gate": "file-sizes",
       "status": "success",
-      "duration_seconds": 12,
-      "timestamp": "2025-10-19T14:30:34Z",
-      "checks_passed": 18,
-      "checks_failed": 0
+      "duration_seconds": 5,
+      "timestamp": "2025-12-09T10:30:50Z",
+      "details": {
+        "files_checked": 156,
+        "violations": 0
+      }
     },
     {
-      "phase": "backend-deploy",
+      "gate": "lint",
+      "status": "success",
+      "duration_seconds": 15,
+      "timestamp": "2025-12-09T10:31:05Z",
+      "details": {
+        "errors": 0,
+        "warnings": 0
+      }
+    },
+    {
+      "gate": "typecheck",
+      "status": "success",
+      "duration_seconds": 20,
+      "timestamp": "2025-12-09T10:31:25Z",
+      "details": {
+        "errors": 0
+      }
+    },
+    {
+      "gate": "unit-tests",
       "status": "success",
       "duration_seconds": 180,
-      "timestamp": "2025-10-19T14:33:34Z",
-      "data": {
-        "service": "proagentic-server",
-        "region": "europe-west2",
-        "gcloud_project": "novae-compare",
-        "revision": "proagentic-server-abc123def456",
-        "backend_url": "https://proagentic-server-705044459306.europe-west2.run.app",
-        "traffic_percentage": 100
+      "timestamp": "2025-12-09T10:34:25Z",
+      "details": {
+        "tests_run": 245,
+        "tests_passed": 245,
+        "tests_failed": 0,
+        "tests_skipped": 3,
+        "coverage": {
+          "lines": 82.4,
+          "branches": 78.2,
+          "functions": 85.1,
+          "statements": 82.0
+        }
       }
     },
     {
-      "phase": "staging-deploy",
+      "gate": "build",
       "status": "success",
-      "duration_seconds": 120,
-      "timestamp": "2025-10-19T14:35:34Z",
-      "data": {
-        "alias": "staging--proagentic1",
-        "domain": "https://staging--proagentic1.netlify.app",
-        "build_time_seconds": 45,
-        "deploy_time_seconds": 15
+      "duration_seconds": 90,
+      "timestamp": "2025-12-09T10:35:55Z",
+      "details": {
+        "framework": "next.js",
+        "output_size_mb": 42.3,
+        "pages_generated": 12,
+        "static_files": 89
       }
     },
     {
-      "phase": "staging-validation",
+      "gate": "mock-server-tests",
       "status": "success",
       "duration_seconds": 30,
-      "timestamp": "2025-10-19T14:36:04Z",
-      "data": {
-        "health_check": "ok",
-        "cors_validation": "passed",
-        "csp_validation": "passed",
-        "response_time_ms": 342
+      "timestamp": "2025-12-09T10:36:25Z",
+      "details": {
+        "tests_run": 28,
+        "tests_passed": 28,
+        "tests_failed": 0
       }
     },
     {
-      "phase": "uat-testing",
+      "gate": "e2e-tests",
       "status": "success",
-      "duration_seconds": 420,
-      "timestamp": "2025-10-19T14:43:04Z",
-      "data": {
-        "scope": "full",
-        "test_results": "all_passed",
-        "tests_run": 45,
-        "tests_passed": 45,
+      "duration_seconds": 240,
+      "timestamp": "2025-12-09T10:40:25Z",
+      "details": {
+        "browser": "chromium",
+        "tests_run": 18,
+        "tests_passed": 18,
         "tests_failed": 0,
-        "tests_skipped": 0
-      }
-    },
-    {
-      "phase": "production-deploy",
-      "status": "success",
-      "duration_seconds": 120,
-      "timestamp": "2025-10-19T14:45:04Z",
-      "data": {
-        "domain": "https://proagentic.ai",
-        "build_time_seconds": 48,
-        "deploy_time_seconds": 12
-      }
-    },
-    {
-      "phase": "production-validation",
-      "status": "success",
-      "duration_seconds": 33,
-      "timestamp": "2025-10-19T14:45:37Z",
-      "data": {
-        "health_check": "ok",
-        "cors_validation": "passed",
-        "csp_validation": "passed",
-        "response_time_ms": 289
+        "screenshots_captured": 24
       }
     }
   ],
+  "deployment": {
+    "phase": "deploy-production",
+    "status": "success",
+    "duration_seconds": 90,
+    "timestamp": "2025-12-09T10:41:55Z",
+    "data": {
+      "provider": "vercel",
+      "deployment_url": "https://proagentic-dfx-abc123.vercel.app",
+      "production_url": "https://dfx.proagentic.ai",
+      "deployment_id": "dpl_abc123xyz789",
+      "ready_state": "READY"
+    }
+  },
+  "validation": {
+    "phase": "post-deploy-check",
+    "status": "success",
+    "duration_seconds": 23,
+    "timestamp": "2025-12-09T10:42:18Z",
+    "data": {
+      "url_accessible": true,
+      "response_status": 200,
+      "response_time_ms": 245,
+      "console_errors": 0
+    }
+  },
+  "artifacts": {
+    "coverage_report": "https://github.com/owner/repo/actions/runs/12345/artifacts/coverage-report",
+    "playwright_report": "https://github.com/owner/repo/actions/runs/12345/artifacts/playwright-report",
+    "build_output": "https://github.com/owner/repo/actions/runs/12345/artifacts/build-output"
+  },
   "errors": [],
-  "warnings": [
-    {
-      "phase": "staging-validation",
-      "message": "CSP header not found in response headers",
-      "severity": "info"
-    }
-  ],
+  "warnings": [],
   "summary": {
-    "all_phases_passed": true,
+    "all_gates_passed": true,
     "deployment_successful": true,
     "production_live": true,
     "rollback_available": true,
-    "previous_revision": "proagentic-server-xyz789uvw012"
+    "previous_deployment": "dpl_xyz789abc123"
+  },
+  "urls": {
+    "production": "https://dfx.proagentic.ai",
+    "staging": "https://proagentic-dfx-staging.vercel.app",
+    "github_actions_run": "https://github.com/owner/repo/actions/runs/12345"
   }
 }

@@ -1,6 +1,7 @@
 ---
 doc_type: reference
 title: "Test Reports & Implementation Summaries Index"
+status: accepted
 version: 1.0.0
 date: 2025-12-09
 owner: "@doc-manager"

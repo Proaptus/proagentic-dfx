@@ -3,7 +3,7 @@
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { FlaskConical, DollarSign, Clock, Package } from 'lucide-react';
 
-interface TestType {
+export interface TestType {
   id: string;
   name: string;
   standard: string;

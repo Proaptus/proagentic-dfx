@@ -9,4 +9,4 @@
 
 export { useKeyboardNavigation } from './useKeyboardNavigation';
 export { useFocusTrap } from './useFocusTrap';
-export { useAnnounce } from './useAnnounce';
+export { useAnnounce, type AnnounceFunction } from './useAnnounce';

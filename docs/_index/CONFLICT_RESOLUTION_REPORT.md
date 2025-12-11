@@ -423,7 +423,7 @@ test_evidence:
 
 ## Sign-Off
 
-**Phase 3 Status**: ✅ COMPLETE
+**Phase 3 Status**: COMPLETE
 
 **Prepared by**: doc-manager-conflict-resolver (Phase 3 agent)
 **Reviewed by**: ProSWARM orchestrator
@@ -439,3 +439,59 @@ test_evidence:
 **Breaking Changes**: None - all original files preserved with supersession markers
 
 **Risk Assessment**: Low - all changes are additive (metadata) and organizational (moves in Phase 4)
+
+---
+
+## Phase 5 Update: Consolidation (2025-12-09)
+
+**Agent**: doc-manager-consolidator
+**Task**: Verify bidirectional links and update report
+
+### New Migrations Applied
+
+The following additional migrations were completed:
+
+| Original Location | New Location | Status |
+|-------------------|--------------|--------|
+| `API_MAPPING_SUMMARY.md` | `docs/reference/API_ENDPOINT_MAPPING.md` | Superseded |
+| `QUALITY_RUN_REPORT.md` | `docs/test-report/QUALITY_RUN_2025-12-09.md` | Superseded |
+| `SCREENSHOT_EXPORT_IMPLEMENTATION.md` | `proagentic-dfx/docs/reference/SCREENSHOT_EXPORT.md` | Superseded |
+| `proagentic-dfx/SECTION_CONTROLS_WIRING_SUMMARY.md` | `docs/test-report/SECTION_CONTROLS_IMPLEMENTATION.md` | Superseded |
+| `docs/explanation/README_PROAGENTIC_DFX.md` | `README.md` | Superseded |
+| `docs/test-report/ENTERPRISE_GAP_ANALYSIS.md` | `docs/test-report/REQUIREMENTS_ALIGNMENT_GAP_ANALYSIS.md` | Superseded |
+| `docs/test-report/DETAILED_GAP_ANALYSIS.md` | `docs/test-report/REQUIREMENTS_ALIGNMENT_GAP_ANALYSIS.md` | Superseded |
+
+### Bidirectional Links Verified
+
+| Superseded Document | Has `superseded_by` | Keeper Document | Has `supersedes` |
+|---------------------|---------------------|-----------------|------------------|
+| `API_MAPPING_SUMMARY.md` | YES | `docs/reference/API_ENDPOINT_MAPPING.md` | YES |
+| `QUALITY_RUN_REPORT.md` | YES | `docs/test-report/QUALITY_RUN_2025-12-09.md` | YES |
+| `SCREENSHOT_EXPORT_IMPLEMENTATION.md` | YES | `proagentic-dfx/docs/reference/SCREENSHOT_EXPORT.md` | YES |
+| `proagentic-dfx/SECTION_CONTROLS_WIRING_SUMMARY.md` | YES | `docs/test-report/SECTION_CONTROLS_IMPLEMENTATION.md` | YES |
+| `docs/explanation/README_PROAGENTIC_DFX.md` | YES | `README.md` | N/A (standard root file) |
+| `docs/test-report/ENTERPRISE_GAP_ANALYSIS.md` | YES | `docs/test-report/REQUIREMENTS_ALIGNMENT_GAP_ANALYSIS.md` | YES |
+| `docs/test-report/DETAILED_GAP_ANALYSIS.md` | YES | `docs/test-report/REQUIREMENTS_ALIGNMENT_GAP_ANALYSIS.md` | YES |
+
+### Documents Quarantine Candidates
+
+The following documents have unclear purpose or are potentially stale:
+
+| Document | Issue | Recommendation |
+|----------|-------|----------------|
+| Root `.png` files (UAT-*.png, etc.) | Screenshot artifacts at root level | Move to `docs/assets/` or `docs/screenshots/` |
+| Root `.json` files (test-results.json, etc.) | Test output at root level | Add to `.gitignore` or move to `docs/test-report/data/` |
+| `nul` file at root | Empty/artifact file | Delete |
+| `proagentic-dfx/nul` | Empty/artifact file | Delete |
+
+### Phase 5 Status: COMPLETE
+
+**Consolidation Summary:**
+- 7 additional migrations documented
+- All bidirectional links verified (6/6 superseded docs have `superseded_by`, 6/6 keepers have `supersedes`)
+- 4 quarantine candidates identified for cleanup
+- No documents deleted (per safety rules)
+
+**Next Steps:**
+- Phase 6: Create documentation index/manifest
+- Consider quarantine cleanup in separate task

@@ -6,6 +6,7 @@ import type {
   ParetoDesign,
   OptimizationJob,
 } from '@/lib/types';
+import type { CurrencyCode } from '@/lib/utils/currency';
 
 // Snapshot type for history tracking
 interface StateSnapshot {
@@ -16,6 +17,7 @@ interface StateSnapshot {
   selectedDesigns: string[];
   currentDesign: string | null;
   analysisTab: 'stress' | 'failure' | 'thermal' | 'reliability' | 'cost' | 'physics';
+  currency: CurrencyCode;
 }
 
 interface AppState extends StateSnapshot {
@@ -46,6 +48,9 @@ interface AppState extends StateSnapshot {
   // Analysis Tab
   setAnalysisTab: (tab: 'stress' | 'failure' | 'thermal' | 'reliability' | 'cost' | 'physics') => void;
 
+  // Currency
+  setCurrency: (currency: CurrencyCode) => void;
+
   // History (Undo/Redo)
   _history: StateSnapshot[];
   _historyIndex: number;
@@ -70,6 +75,7 @@ const initialState: StateSnapshot = {
   selectedDesigns: [],
   currentDesign: null,
   analysisTab: 'stress',
+  currency: 'EUR',
 };
 
 // Validate design ID
@@ -87,6 +93,7 @@ const createSnapshot = (state: AppState): StateSnapshot => ({
   selectedDesigns: state.selectedDesigns,
   currentDesign: state.currentDesign,
   analysisTab: state.analysisTab,
+  currency: state.currency,
 });
 
 // Create store with persist (auto-save) and built-in undo/redo
@@ -179,6 +186,8 @@ export const useAppStore = create<AppState>()(
         set({ analysisTab });
       },
 
+      setCurrency: (currency) => set({ currency }),
+
       undo: () => {
         const state = get();
         if (state._historyIndex > 0) {
@@ -220,6 +229,7 @@ export const useAppStore = create<AppState>()(
         selectedDesigns: state.selectedDesigns,
         currentDesign: state.currentDesign,
         analysisTab: state.analysisTab,
+        currency: state.currency,
       }),
       onRehydrateStorage: () => (state) => {
         // Validate persisted state after rehydration

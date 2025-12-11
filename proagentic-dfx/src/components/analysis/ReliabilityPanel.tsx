@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
-import { EquationDisplay } from './EquationDisplay';
-import { TornadoChart, HistogramChart, LineProfileChart, PieChartEnhanced } from '@/components/charts';
+import { PieChartEnhanced } from '@/components/charts';
 import type { DesignReliability } from '@/lib/types';
 import {
   BarChart,
@@ -13,24 +12,20 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
-  Line,
 } from 'recharts';
 import { Target, TrendingUp, AlertCircle, Activity } from 'lucide-react';
-
-interface ReliabilityPanelProps {
-  data: DesignReliability;
-  designId?: string;
-  onReliabilityDataChange?: (data: DesignReliability) => void;
-}
-
-type MonteCarloConfig = '10k' | '100k' | '1M';
-
-const MONTE_CARLO_CONFIGS: Record<MonteCarloConfig, string> = {
-  '10k': '10,000 samples (Fast)',
-  '100k': '100,000 samples (Standard)',
-  '1M': '1,000,000 samples (High Precision)',
-};
+import { ReliabilityChartsSection } from './ReliabilityChartsSection';
+import { ReliabilityEquationsSection } from './ReliabilityEquationsSection';
+import {
+  type ReliabilityPanelProps,
+  type MonteCarloConfig,
+  MONTE_CARLO_CONFIGS,
+  SERVICE_LIFE_YEARS,
+  formatLargeNumber,
+  generateWeibullData,
+  generateBathtubData,
+  calculateReliabilityMetrics,
+} from './reliability-panel.types';
 
 export function ReliabilityPanel({ data: initialData, designId = 'C', onReliabilityDataChange }: ReliabilityPanelProps) {
   const [reliabilityData, setReliabilityData] = useState<DesignReliability>(initialData);
@@ -64,53 +59,24 @@ export function ReliabilityPanel({ data: initialData, designId = 'C', onReliabil
   const totalSafetyFactor = safetyFactorComponents.reduce((acc, c) => acc * c.factor, 1.0);
   const confidenceIntervals = reliabilityData.confidence_intervals || [];
 
-  // Generate Weibull distribution data
-  const weibullData = Array.from({ length: 50 }, (_, i) => {
-    const time = i * 2000; // hours
-    const shape = 2.5; // beta parameter
-    const scale = 50000; // eta parameter (hours)
-    const reliability = Math.exp(-Math.pow(time / scale, shape));
-    return { time, reliability: reliability * 100 };
-  });
+  // Generate chart data using utility functions
+  const weibullData = generateWeibullData();
+  const bathtubData = generateBathtubData();
 
-  // Generate bathtub curve (failure rate over time)
-  const bathtubData = Array.from({ length: 50 }, (_, i) => {
-    const time = i * 2000;
-    const infant = 0.001 * Math.exp(-time / 10000);
-    const random = 0.00005;
-    const wearout = 0.000001 * Math.exp(time / 80000);
-    const failureRate = infant + random + wearout;
-    return { time, failureRate: failureRate * 1e6 }; // Convert to failures per million hours
-  });
-
-  // Calculate MTBF and B10 life properly
-  // MTBF = 1 / failure_rate. For p_failure per service life (15 years @ 1000 cycles/year)
-  // Service life = 15,000 cycles. MTBF (cycles) = 1 / p_failure
+  // Calculate reliability metrics
   const pFailure = reliabilityData.monte_carlo.p_failure;
-  const mtbfCycles = pFailure > 0 ? Math.round(1 / pFailure) : 0;
-  const serviceLifeYears = 15; // Design service life
-  const cyclesPerYear = 1000; // Typical refueling cycles
-  const mtbfYears = pFailure > 0 ? (1 / pFailure) / cyclesPerYear : 0;
-  const b10LifeCycles = Math.round(mtbfCycles * 0.105); // B10 life (10% failure point)
-  const b10LifeYears = mtbfYears * 0.105;
-
-  // Format helper for large numbers
-  const formatLargeNumber = (num: number): string => {
-    if (num >= 1e9) return `${(num / 1e9).toFixed(1)}B`;
-    if (num >= 1e6) return `${(num / 1e6).toFixed(1)}M`;
-    if (num >= 1e3) return `${(num / 1e3).toFixed(1)}K`;
-    return num.toFixed(0);
-  };
+  const { mtbfCycles, mtbfYears, b10LifeCycles, b10LifeYears } = calculateReliabilityMetrics(pFailure);
 
   return (
     <div className="space-y-4">
       {/* Controls Row */}
       <div className="flex gap-4 items-end">
         <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="monte-carlo-config-select" className="block text-sm font-medium text-gray-700 mb-2">
             Monte Carlo Configuration
           </label>
           <select
+            id="monte-carlo-config-select"
             value={monteCarloConfig}
             onChange={(e) => setMonteCarloConfig(e.target.value as MonteCarloConfig)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
@@ -169,7 +135,7 @@ export function ReliabilityPanel({ data: initialData, designId = 'C', onReliabil
             <div className="text-2xl font-semibold text-gray-900">
               {pFailure.toExponential(2)}
             </div>
-            <div className="text-xs text-gray-500 mt-1">per {serviceLifeYears}-year service life</div>
+            <div className="text-xs text-gray-500 mt-1">per {SERVICE_LIFE_YEARS}-year service life</div>
           </div>
         </Card>
 
@@ -290,77 +256,7 @@ export function ReliabilityPanel({ data: initialData, designId = 'C', onReliabil
       </div>
 
       {/* Weibull Distribution and Bathtub Curve */}
-      <div className="grid grid-cols-2 gap-4">
-        <Card className="transition-all hover:shadow-md">
-          <CardHeader>
-            <CardTitle>Weibull Reliability Function</CardTitle>
-          </CardHeader>
-          <div className="space-y-3 p-4">
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={weibullData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis
-                    dataKey="time"
-                    tick={{ fontSize: 10 }}
-                    label={{ value: 'Service Time (hours)', position: 'insideBottom', offset: -5 }}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 10 }}
-                    label={{ value: 'Reliability (%)', angle: -90, position: 'insideLeft' }}
-                  />
-                  <Tooltip formatter={(value: number) => `${value.toFixed(1)}%`} />
-                  <Line
-                    type="monotone"
-                    dataKey="reliability"
-                    stroke="#8B5CF6"
-                    strokeWidth={2}
-                    dot={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded">
-              Weibull distribution models time-to-failure with shape β=2.5 (wear-out phase) and scale η=50,000 hours.
-            </div>
-          </div>
-        </Card>
-
-        <Card className="transition-all hover:shadow-md">
-          <CardHeader>
-            <CardTitle>Failure Rate Bathtub Curve</CardTitle>
-          </CardHeader>
-          <div className="space-y-3 p-4">
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={bathtubData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis
-                    dataKey="time"
-                    tick={{ fontSize: 10 }}
-                    label={{ value: 'Service Time (hours)', position: 'insideBottom', offset: -5 }}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 10 }}
-                    label={{ value: 'Failure Rate (FPM)', angle: -90, position: 'insideLeft' }}
-                  />
-                  <Tooltip formatter={(value: number) => `${value.toFixed(2)} FPM`} />
-                  <Line
-                    type="monotone"
-                    dataKey="failureRate"
-                    stroke="#EF4444"
-                    strokeWidth={2}
-                    dot={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded">
-              Classic bathtub curve: high infant mortality, constant random failures, then wear-out phase. FPM = failures per million hours.
-            </div>
-          </div>
-        </Card>
-      </div>
+      <ReliabilityChartsSection weibullData={weibullData} bathtubData={bathtubData} />
 
       {/* Confidence Intervals */}
       <Card className="transition-all hover:shadow-md">
@@ -509,69 +405,15 @@ export function ReliabilityPanel({ data: initialData, designId = 'C', onReliabil
 
       {/* Collapsible Equations Section */}
       {showEquations && (
-        <div className="space-y-4 pt-4 border-t animate-in fade-in slide-in-from-top-2">
-          <h3 className="text-lg font-semibold text-gray-900">Reliability Engineering Equations</h3>
-
-          <EquationDisplay
-            title="Monte Carlo Failure Probability"
-            equation="P_failure = (Number of failures) / (Total samples)"
-            variables={[
-              { symbol: 'P_failure', description: 'Probability of failure', value: reliabilityData.monte_carlo.p_failure.toExponential(2) },
-              { symbol: 'Failures', description: 'Simulations where burst < test pressure', value: '0' },
-              { symbol: 'Samples', description: 'Total Monte Carlo runs', value: reliabilityData.monte_carlo.samples.toLocaleString() },
-            ]}
-            explanation="Monte Carlo simulation randomly samples input parameters from their statistical distributions, runs FEA for each sample, and counts failures. Converges to true probability with large sample size."
-          />
-
-          <EquationDisplay
-            title="Coefficient of Variation (CoV)"
-            equation="CoV = σ / μ"
-            variables={[
-              { symbol: 'CoV', description: 'Coefficient of variation', value: (reliabilityData.burst_distribution.cov * 100).toFixed(1) + '%' },
-              { symbol: 'σ', description: 'Standard deviation of burst pressure', value: `${reliabilityData.burst_distribution.std_bar} bar` },
-              { symbol: 'μ', description: 'Mean burst pressure', value: `${reliabilityData.burst_distribution.mean_bar} bar` },
-            ]}
-            explanation="CoV normalizes variability relative to the mean. Lower CoV indicates tighter control. Typical CoV for Type IV tanks: 3-5%."
-          />
-
-          <EquationDisplay
-            title="Reliability Index (β)"
-            equation="β = Φ^(-1)(1 - P_failure)"
-            variables={[
-              { symbol: 'β', description: 'Reliability index (sigma level)', value: '5.2' },
-              { symbol: 'Φ^(-1)', description: 'Inverse standard normal CDF' },
-              { symbol: 'P_failure', description: 'Probability of failure', value: reliabilityData.monte_carlo.p_failure.toExponential(2) },
-            ]}
-            explanation="Beta (β) is a measure of reliability in standard deviations. β = 3 corresponds to 99.87% reliability (3-sigma), β = 6 is six-sigma (99.99966%)."
-            defaultExpanded={false}
-          />
-
-          <EquationDisplay
-            title="Weibull Reliability Function"
-            equation="R(t) = exp(-(t/η)^β)"
-            variables={[
-              { symbol: 'R(t)', description: 'Reliability at time t' },
-              { symbol: 't', description: 'Service time (hours)' },
-              { symbol: 'β', description: 'Shape parameter (Weibull modulus)', value: '2.5' },
-              { symbol: 'η', description: 'Scale parameter (characteristic life)', value: '50,000 hours' },
-            ]}
-            explanation="Weibull distribution models time-to-failure. β < 1 indicates infant mortality, β = 1 random failures, β > 1 wear-out. Characteristic life η is time when 63.2% have failed."
-            defaultExpanded={false}
-          />
-
-          <EquationDisplay
-            title="Mean Time Between Failures (MTBF)"
-            equation="MTBF = η × Γ(1 + 1/β)"
-            variables={[
-              { symbol: 'MTBF', description: 'Mean time between failures', value: `${mtbfYears.toFixed(0)} years (${formatLargeNumber(mtbfCycles)} cycles)` },
-              { symbol: 'η', description: 'Scale parameter', value: '50,000 hours' },
-              { symbol: 'β', description: 'Shape parameter', value: '2.5' },
-              { symbol: 'Γ', description: 'Gamma function' },
-            ]}
-            explanation="MTBF is the expected value of the Weibull distribution. For β = 2.5, MTBF ≈ 0.887 × η."
-            defaultExpanded={false}
-          />
-        </div>
+        <ReliabilityEquationsSection
+          pFailure={pFailure}
+          samples={reliabilityData.monte_carlo.samples}
+          covPercent={(reliabilityData.burst_distribution.cov * 100).toFixed(1) + '%'}
+          stdBar={reliabilityData.burst_distribution.std_bar}
+          meanBar={reliabilityData.burst_distribution.mean_bar}
+          mtbfYears={mtbfYears}
+          mtbfCycles={mtbfCycles}
+        />
       )}
     </div>
   );

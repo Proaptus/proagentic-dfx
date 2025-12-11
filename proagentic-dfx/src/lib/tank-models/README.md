@@ -1,3 +1,21 @@
+---
+id: REF-tank-models-3d
+doc_type: reference
+title: "Tank Models 3D Library"
+status: accepted
+last_verified_at: 2025-12-11
+owner: "@ProAgentic/frontend-team"
+code_refs:
+  - path: "src/lib/tank-models/index.ts"
+  - path: "src/lib/tank-models/tank-types.ts"
+  - path: "src/lib/tank-models/dome-profiles.ts"
+  - path: "src/lib/tank-models/boss-components.ts"
+  - path: "src/lib/tank-models/liner-materials.ts"
+test_refs:
+  - path: "src/__tests__/lib/tank-geometry.test.ts"
+keywords: ["3d", "tank", "visualization", "threejs", "geometry", "type-iv"]
+---
+
 # Tank Models 3D Library
 
 Comprehensive 3D modeling library for hydrogen pressure vessel visualization in the H2 Tank Designer.

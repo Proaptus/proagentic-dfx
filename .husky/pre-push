@@ -1,0 +1,54 @@
+#!/usr/bin/env sh
+# =============================================================================
+# PRE-PUSH QUALITY GATE
+# =============================================================================
+# Since pre-commit already runs full quality checks, pre-push performs
+# a lighter verification focused on integration concerns.
+#
+# Gates:
+#   1. Build Verification - Ensures the app builds successfully
+#   2. Mock Server Tests - Backend API tests
+# =============================================================================
+
+echo ""
+echo "========================================"
+echo "  QUALITY GATE: Pre-Push Validation"
+echo "========================================"
+echo ""
+
+# -----------------------------------------------------------------------------
+# GATE 1: Build Verification
+# -----------------------------------------------------------------------------
+echo "[1/2] Verifying build..."
+cd proagentic-dfx && npm run build 2>&1
+BUILD_EXIT=$?
+cd ..
+if [ $BUILD_EXIT -ne 0 ]; then
+  echo ""
+  echo "GATE 1 FAILED: Build failed"
+  echo "Fix build errors before pushing."
+  exit 1
+fi
+echo "  Build OK"
+
+# -----------------------------------------------------------------------------
+# GATE 2: Mock Server Tests
+# -----------------------------------------------------------------------------
+echo "[2/2] Running mock server tests..."
+cd h2-tank-mock-server && npm run test -- --run 2>&1
+MOCK_EXIT=$?
+cd ..
+if [ $MOCK_EXIT -ne 0 ]; then
+  echo ""
+  echo "GATE 2 FAILED: Mock server tests failing"
+  echo "Fix mock server tests before pushing."
+  exit 1
+fi
+echo "  Mock Server Tests OK"
+
+echo ""
+echo "========================================"
+echo "  PRE-PUSH VALIDATION PASSED"
+echo "========================================"
+echo ""
+echo "Proceeding with push..."

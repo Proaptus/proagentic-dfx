@@ -1,0 +1,641 @@
+// ============================================================================
+// ADD THESE TESTS TO RequirementsScreen.test.tsx
+// Copy from line 244 onwards (after the last test, before the final closing brace)
+// ============================================================================
+
+// ============================================================================
+// ERROR HANDLING TESTS
+// ============================================================================
+
+describe('RequirementsScreen - Error Handling', () => {
+  const mockSetRequirements = vi.fn();
+  const mockSetTankType = vi.fn();
+  const mockSetParetoFront = vi.fn();
+  const mockSetCurrentDesign = vi.fn();
+  const mockSetScreen = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    vi.mocked(useAppStore).mockReturnValue({
+      setRequirements: mockSetRequirements,
+      setTankType: mockSetTankType,
+      setParetoFront: mockSetParetoFront,
+      setCurrentDesign: mockSetCurrentDesign,
+      setScreen: mockSetScreen,
+      // Add other required store properties with default values
+      requirements: null,
+      tankType: null,
+      paretoFront: [],
+      currentDesignId: null,
+      screen: 'requirements',
+      currency: 'EUR',
+      setCurrency: vi.fn(),
+    });
+  });
+
+  it('displays error when recommendTankType API fails', async () => {
+    const errorMessage = 'Failed to get recommendation';
+    vi.mocked(apiClient.recommendTankType).mockRejectedValue(new Error(errorMessage));
+
+    render(<RequirementsScreen />);
+
+    // Complete chat to trigger recommendation
+    const completeButton = screen.getByText('Complete Chat');
+    fireEvent.click(completeButton);
+
+    // Wait for error to appear
+    await waitFor(() => {
+      const errorElement = screen.getByRole('alert');
+      expect(errorElement).toBeInTheDocument();
+      expect(errorElement).toHaveTextContent(errorMessage);
+    }, { timeout: 3000 });
+  });
+
+  it('displays error when recommendTankType fails with non-Error object', async () => {
+    vi.mocked(apiClient.recommendTankType).mockRejectedValue('String error');
+
+    render(<RequirementsScreen />);
+
+    fireEvent.click(screen.getByText('Complete Chat'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Failed to get recommendation')).toBeInTheDocument();
+    }, { timeout: 3000 });
+  });
+
+  it('displays error when optimization fails to start', async () => {
+    // Setup successful recommendation first
+    vi.mocked(apiClient.recommendTankType).mockResolvedValue({
+      recommended_type: 'TYPE_IV',
+      confidence: 0.95,
+      reasoning: 'Best for high pressure',
+      alternatives: [],
+      comparison: {},
+    });
+
+    // Make optimization fail
+    vi.mocked(apiClient.startOptimization).mockRejectedValue(new Error('Failed to start optimization'));
+
+    render(<RequirementsScreen />);
+
+    // Complete chat and wait for recommendation
+    fireEvent.click(screen.getByText('Complete Chat'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Get Tank Type Recommendation')).toBeInTheDocument();
+    });
+
+    // Click recommendation button
+    fireEvent.click(screen.getByText('Get Tank Type Recommendation'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('optimization-config')).toBeInTheDocument();
+    });
+
+    // Start optimization (this should fail)
+    fireEvent.click(screen.getByText('Start Optimization'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Failed to start optimization')).toBeInTheDocument();
+    }, { timeout: 3000 });
+  });
+});
+
+// ============================================================================
+// OPTIMIZATION FLOW TESTS
+// ============================================================================
+
+describe('RequirementsScreen - Optimization Flow', () => {
+  const mockSetRequirements = vi.fn();
+  const mockSetTankType = vi.fn();
+  const mockSetParetoFront = vi.fn();
+  const mockSetCurrentDesign = vi.fn();
+  const mockSetScreen = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    vi.mocked(useAppStore).mockReturnValue({
+      setRequirements: mockSetRequirements,
+      setTankType: mockSetTankType,
+      setParetoFront: mockSetParetoFront,
+      setCurrentDesign: mockSetCurrentDesign,
+      setScreen: mockSetScreen,
+      requirements: null,
+      tankType: null,
+      paretoFront: [],
+      currentDesignId: null,
+      screen: 'requirements',
+      currency: 'EUR',
+      setCurrency: vi.fn(),
+    });
+  });
+
+  it('starts optimization and displays progress', async () => {
+    // Mock successful recommendation
+    vi.mocked(apiClient.recommendTankType).mockResolvedValue({
+      recommended_type: 'TYPE_IV',
+      confidence: 0.95,
+      reasoning: 'Best for high pressure',
+      alternatives: [],
+      comparison: {},
+    });
+
+    // Mock optimization start
+    const mockJobId = 'job-123';
+    vi.mocked(apiClient.startOptimization).mockResolvedValue({
+      job_id: mockJobId,
+      stream_url: `http://localhost:8000/api/optimize/${mockJobId}/stream`,
+    });
+
+    // Mock SSE EventSource
+    const mockEventSource = {
+      addEventListener: vi.fn(),
+      close: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+      onerror: null,
+      onmessage: null,
+      onopen: null,
+      readyState: 0,
+      url: '',
+      withCredentials: false,
+      CONNECTING: 0,
+      OPEN: 1,
+      CLOSED: 2,
+    };
+    vi.mocked(apiClient.createOptimizationStream).mockReturnValue(mockEventSource as unknown as EventSource);
+
+    render(<RequirementsScreen />);
+
+    // Complete flow to optimization
+    fireEvent.click(screen.getByText('Complete Chat'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Get Tank Type Recommendation')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Get Tank Type Recommendation'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('optimization-config')).toBeInTheDocument();
+    });
+
+    // Start optimization
+    fireEvent.click(screen.getByText('Start Optimization'));
+
+    await waitFor(() => {
+      expect(apiClient.startOptimization).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tank_type: 'TYPE_IV',
+        })
+      );
+    });
+
+    // Verify EventSource was created
+    expect(apiClient.createOptimizationStream).toHaveBeenCalledWith(mockJobId);
+    expect(mockEventSource.addEventListener).toHaveBeenCalledWith('progress', expect.any(Function));
+    expect(mockEventSource.addEventListener).toHaveBeenCalledWith('complete', expect.any(Function));
+    expect(mockEventSource.addEventListener).toHaveBeenCalledWith('error', expect.any(Function));
+  });
+
+  it('handles optimization progress events', async () => {
+    vi.mocked(apiClient.recommendTankType).mockResolvedValue({
+      recommended_type: 'TYPE_IV',
+      confidence: 0.95,
+      reasoning: 'Best for high pressure',
+      alternatives: [],
+      comparison: {},
+    });
+
+    const mockJobId = 'job-456';
+    vi.mocked(apiClient.startOptimization).mockResolvedValue({
+      job_id: mockJobId,
+      stream_url: `http://localhost:8000/api/optimize/${mockJobId}/stream`,
+    });
+
+    let progressHandler: ((e: MessageEvent) => void) | undefined;
+    const mockEventSource = {
+      addEventListener: vi.fn((event, handler) => {
+        if (event === 'progress') {
+          progressHandler = handler as (e: MessageEvent) => void;
+        }
+      }),
+      close: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+      onerror: null,
+      onmessage: null,
+      onopen: null,
+      readyState: 0,
+      url: '',
+      withCredentials: false,
+      CONNECTING: 0,
+      OPEN: 1,
+      CLOSED: 2,
+    };
+    vi.mocked(apiClient.createOptimizationStream).mockReturnValue(mockEventSource as unknown as EventSource);
+
+    render(<RequirementsScreen />);
+
+    // Complete flow
+    fireEvent.click(screen.getByText('Complete Chat'));
+    await waitFor(() => fireEvent.click(screen.getByText('Get Tank Type Recommendation')));
+    await waitFor(() => fireEvent.click(screen.getByText('Start Optimization')));
+
+    // Simulate progress event
+    await waitFor(() => {
+      expect(progressHandler).toBeDefined();
+    });
+
+    const progressEvent = new MessageEvent('progress', {
+      data: JSON.stringify({
+        status: 'running',
+        iteration: 50,
+        total_iterations: 100,
+        message: 'Optimizing generation 50/100',
+      }),
+    });
+
+    progressHandler!(progressEvent);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('enhanced-progress')).toBeInTheDocument();
+    });
+  });
+
+  it('handles optimization completion and shows results button', async () => {
+    vi.mocked(apiClient.recommendTankType).mockResolvedValue({
+      recommended_type: 'TYPE_IV',
+      confidence: 0.95,
+      reasoning: 'Best for high pressure',
+      alternatives: [],
+      comparison: {},
+    });
+
+    const mockJobId = 'job-789';
+    vi.mocked(apiClient.startOptimization).mockResolvedValue({
+      job_id: mockJobId,
+      stream_url: `http://localhost:8000/api/optimize/${mockJobId}/stream`,
+    });
+
+    const mockResults = {
+      pareto_front: [
+        { id: 'design-1', weight_kg: 80, cost_eur: 15000 },
+        { id: 'design-2', weight_kg: 85, cost_eur: 14000 },
+      ],
+      recommended: { id: 'design-1', weight_kg: 80, cost_eur: 15000 },
+    };
+    vi.mocked(apiClient.getOptimizationResults).mockResolvedValue(mockResults);
+
+    let completeHandler: (() => void) | undefined;
+    const mockEventSource = {
+      addEventListener: vi.fn((event, handler) => {
+        if (event === 'complete') {
+          completeHandler = handler as () => void;
+        }
+      }),
+      close: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+      onerror: null,
+      onmessage: null,
+      onopen: null,
+      readyState: 0,
+      url: '',
+      withCredentials: false,
+      CONNECTING: 0,
+      OPEN: 1,
+      CLOSED: 2,
+    };
+    vi.mocked(apiClient.createOptimizationStream).mockReturnValue(mockEventSource as unknown as EventSource);
+
+    render(<RequirementsScreen />);
+
+    // Complete flow
+    fireEvent.click(screen.getByText('Complete Chat'));
+    await waitFor(() => fireEvent.click(screen.getByText('Get Tank Type Recommendation')));
+    await waitFor(() => fireEvent.click(screen.getByText('Start Optimization')));
+
+    await waitFor(() => {
+      expect(completeHandler).toBeDefined();
+    });
+
+    // Trigger completion
+    completeHandler!();
+
+    await waitFor(() => {
+      expect(apiClient.getOptimizationResults).toHaveBeenCalledWith(mockJobId);
+      expect(mockSetParetoFront).toHaveBeenCalledWith(mockResults.pareto_front);
+      expect(mockSetCurrentDesign).toHaveBeenCalledWith('design-1');
+      expect(screen.getByText('Optimization Complete!')).toBeInTheDocument();
+    });
+  });
+
+  it('handles SSE stream error and shows error message', async () => {
+    vi.mocked(apiClient.recommendTankType).mockResolvedValue({
+      recommended_type: 'TYPE_IV',
+      confidence: 0.95,
+      reasoning: 'Best for high pressure',
+      alternatives: [],
+      comparison: {},
+    });
+
+    const mockJobId = 'job-error';
+    vi.mocked(apiClient.startOptimization).mockResolvedValue({
+      job_id: mockJobId,
+      stream_url: `http://localhost:8000/api/optimize/${mockJobId}/stream`,
+    });
+
+    let errorHandler: (() => void) | undefined;
+    const mockEventSource = {
+      addEventListener: vi.fn((event, handler) => {
+        if (event === 'error') {
+          errorHandler = handler as () => void;
+        }
+      }),
+      close: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+      onerror: null,
+      onmessage: null,
+      onopen: null,
+      readyState: 0,
+      url: '',
+      withCredentials: false,
+      CONNECTING: 0,
+      OPEN: 1,
+      CLOSED: 2,
+    };
+    vi.mocked(apiClient.createOptimizationStream).mockReturnValue(mockEventSource as unknown as EventSource);
+
+    render(<RequirementsScreen />);
+
+    // Complete flow
+    fireEvent.click(screen.getByText('Complete Chat'));
+    await waitFor(() => fireEvent.click(screen.getByText('Get Tank Type Recommendation')));
+    await waitFor(() => fireEvent.click(screen.getByText('Start Optimization')));
+
+    await waitFor(() => {
+      expect(errorHandler).toBeDefined();
+    });
+
+    // Trigger error
+    errorHandler!();
+
+    await waitFor(() => {
+      expect(screen.getByText('Optimization stream error')).toBeInTheDocument();
+      expect(mockEventSource.close).toHaveBeenCalled();
+    });
+  });
+});
+
+// ============================================================================
+// VIEW RESULTS HANDLER TESTS
+// ============================================================================
+
+describe('RequirementsScreen - View Results', () => {
+  const mockSetScreen = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    vi.mocked(useAppStore).mockReturnValue({
+      setRequirements: vi.fn(),
+      setTankType: vi.fn(),
+      setParetoFront: vi.fn(),
+      setCurrentDesign: vi.fn(),
+      setScreen: mockSetScreen,
+      requirements: null,
+      tankType: null,
+      paretoFront: [],
+      currentDesignId: null,
+      screen: 'requirements',
+      currency: 'EUR',
+      setCurrency: vi.fn(),
+    });
+  });
+
+  it('calls setScreen with pareto when View Results button is clicked', async () => {
+    vi.mocked(apiClient.recommendTankType).mockResolvedValue({
+      recommended_type: 'TYPE_IV',
+      confidence: 0.95,
+      reasoning: 'Best for high pressure',
+      alternatives: [],
+      comparison: {},
+    });
+
+    const mockJobId = 'job-complete';
+    vi.mocked(apiClient.startOptimization).mockResolvedValue({
+      job_id: mockJobId,
+      stream_url: `http://localhost:8000/api/optimize/${mockJobId}/stream`,
+    });
+
+    vi.mocked(apiClient.getOptimizationResults).mockResolvedValue({
+      pareto_front: [{ id: 'design-1', weight_kg: 80, cost_eur: 15000 }],
+      recommended: { id: 'design-1', weight_kg: 80, cost_eur: 15000 },
+    });
+
+    let completeHandler: (() => void) | undefined;
+    const mockEventSource = {
+      addEventListener: vi.fn((event, handler) => {
+        if (event === 'complete') {
+          completeHandler = handler as () => void;
+        }
+      }),
+      close: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+      onerror: null,
+      onmessage: null,
+      onopen: null,
+      readyState: 0,
+      url: '',
+      withCredentials: false,
+      CONNECTING: 0,
+      OPEN: 1,
+      CLOSED: 2,
+    };
+    vi.mocked(apiClient.createOptimizationStream).mockReturnValue(mockEventSource as unknown as EventSource);
+
+    render(<RequirementsScreen />);
+
+    // Complete full flow
+    fireEvent.click(screen.getByText('Complete Chat'));
+    await waitFor(() => fireEvent.click(screen.getByText('Get Tank Type Recommendation')));
+    await waitFor(() => fireEvent.click(screen.getByText('Start Optimization')));
+    await waitFor(() => expect(completeHandler).toBeDefined());
+
+    completeHandler!();
+
+    await waitFor(() => {
+      expect(screen.getByText('View Pareto Front Results')).toBeInTheDocument();
+    });
+
+    // Click view results
+    fireEvent.click(screen.getByText('View Pareto Front Results'));
+
+    expect(mockSetScreen).toHaveBeenCalledWith('pareto');
+  });
+});
+
+// ============================================================================
+// MODE SWITCHING TESTS
+// ============================================================================
+
+describe('RequirementsScreen - Mode Switching Details', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    vi.mocked(useAppStore).mockReturnValue({
+      setRequirements: vi.fn(),
+      setTankType: vi.fn(),
+      setParetoFront: vi.fn(),
+      setCurrentDesign: vi.fn(),
+      setScreen: vi.fn(),
+      requirements: null,
+      tankType: null,
+      paretoFront: [],
+      currentDesignId: null,
+      screen: 'requirements',
+      currency: 'EUR',
+      setCurrency: vi.fn(),
+    });
+  });
+
+  it('switches from chat to wizard mode correctly', () => {
+    render(<RequirementsScreen />);
+
+    // Start in chat mode
+    expect(screen.getByTestId('requirements-chat')).toBeInTheDocument();
+    expect(screen.queryByTestId('guided-wizard')).not.toBeInTheDocument();
+
+    // Switch to wizard
+    const wizardTab = screen.getByRole('tab', { name: 'Wizard' });
+    fireEvent.click(wizardTab);
+
+    // Should now show wizard
+    expect(screen.queryByTestId('requirements-chat')).not.toBeInTheDocument();
+    expect(screen.getByTestId('guided-wizard')).toBeInTheDocument();
+  });
+
+  it('switches from wizard to chat mode correctly', () => {
+    render(<RequirementsScreen />);
+
+    // Switch to wizard first
+    fireEvent.click(screen.getByRole('tab', { name: 'Wizard' }));
+    expect(screen.getByTestId('guided-wizard')).toBeInTheDocument();
+
+    // Switch back to chat
+    fireEvent.click(screen.getByRole('tab', { name: 'Chat' }));
+    expect(screen.getByTestId('requirements-chat')).toBeInTheDocument();
+    expect(screen.queryByTestId('guided-wizard')).not.toBeInTheDocument();
+  });
+});
+
+// ============================================================================
+// ACCESSIBILITY TESTS
+// ============================================================================
+
+describe('RequirementsScreen - Enhanced Accessibility', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    vi.mocked(useAppStore).mockReturnValue({
+      setRequirements: vi.fn(),
+      setTankType: vi.fn(),
+      setParetoFront: vi.fn(),
+      setCurrentDesign: vi.fn(),
+      setScreen: vi.fn(),
+      requirements: null,
+      tankType: null,
+      paretoFront: [],
+      currentDesignId: null,
+      screen: 'requirements',
+      currency: 'EUR',
+      setCurrency: vi.fn(),
+    });
+  });
+
+  it('has proper ARIA labels on recommendation button', async () => {
+    vi.mocked(apiClient.recommendTankType).mockResolvedValue({
+      recommended_type: 'TYPE_IV',
+      confidence: 0.95,
+      reasoning: 'Best for high pressure',
+      alternatives: [],
+      comparison: {},
+    });
+
+    render(<RequirementsScreen />);
+
+    fireEvent.click(screen.getByText('Complete Chat'));
+
+    await waitFor(() => {
+      const recommendButton = screen.getByText('Get Tank Type Recommendation');
+      expect(recommendButton).toHaveAttribute('aria-label',
+        expect.stringContaining('Get AI-powered tank type recommendation'));
+    });
+  });
+
+  it('has proper role and aria-live on progress section', async () => {
+    vi.mocked(apiClient.recommendTankType).mockResolvedValue({
+      recommended_type: 'TYPE_IV',
+      confidence: 0.95,
+      reasoning: 'Best for high pressure',
+      alternatives: [],
+      comparison: {},
+    });
+
+    const mockJobId = 'job-progress';
+    vi.mocked(apiClient.startOptimization).mockResolvedValue({
+      job_id: mockJobId,
+      stream_url: `http://localhost:8000/api/optimize/${mockJobId}/stream`,
+    });
+
+    let progressHandler: ((e: MessageEvent) => void) | undefined;
+    const mockEventSource = {
+      addEventListener: vi.fn((event, handler) => {
+        if (event === 'progress') {
+          progressHandler = handler as (e: MessageEvent) => void;
+        }
+      }),
+      close: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+      onerror: null,
+      onmessage: null,
+      onopen: null,
+      readyState: 0,
+      url: '',
+      withCredentials: false,
+      CONNECTING: 0,
+      OPEN: 1,
+      CLOSED: 2,
+    };
+    vi.mocked(apiClient.createOptimizationStream).mockReturnValue(mockEventSource as unknown as EventSource);
+
+    render(<RequirementsScreen />);
+
+    fireEvent.click(screen.getByText('Complete Chat'));
+    await waitFor(() => fireEvent.click(screen.getByText('Get Tank Type Recommendation')));
+    await waitFor(() => fireEvent.click(screen.getByText('Start Optimization')));
+
+    await waitFor(() => expect(progressHandler).toBeDefined());
+
+    progressHandler!(new MessageEvent('progress', {
+      data: JSON.stringify({
+        status: 'running',
+        iteration: 50,
+        total_iterations: 100,
+        message: 'Optimizing',
+      }),
+    }));
+
+    await waitFor(() => {
+      const progressSection = screen.getByLabelText('Optimization progress');
+      expect(progressSection).toHaveAttribute('role', 'status');
+      expect(progressSection).toHaveAttribute('aria-live', 'polite');
+    });
+  });
+});

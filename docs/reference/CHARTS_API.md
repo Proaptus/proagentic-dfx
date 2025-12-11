@@ -1,4 +1,5 @@
 ﻿---
+id: REF-CHARTS-API-001
 doc_type: reference
 title: "Professional Engineering Charts for H2 Tank Designer"
 version: 1.0.0
@@ -6,6 +7,15 @@ date: 2025-12-09
 owner: "@h2-tank-team"
 status: accepted
 last_verified_at: 2025-12-09
+code_refs:
+  - path: "proagentic-dfx/src/components/charts/ParetoChart.tsx"
+  - path: "proagentic-dfx/src/components/charts/StressContourChart.tsx"
+  - path: "proagentic-dfx/src/components/charts/HistogramChart.tsx"
+  - path: "proagentic-dfx/src/components/charts/TornadoChart.tsx"
+  - path: "proagentic-dfx/src/components/charts/ConvergenceChart.tsx"
+  - path: "proagentic-dfx/src/components/charts/RadarChart.tsx"
+  - path: "proagentic-dfx/src/components/charts/LineProfileChart.tsx"
+  - path: "proagentic-dfx/src/components/charts/PieChartEnhanced.tsx"
 ---
 # Professional Engineering Charts for H2 Tank Designer
 

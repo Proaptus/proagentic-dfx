@@ -14,6 +14,7 @@ import {
   type ColormapOptions,
   getThreeColor
 } from './colormaps';
+import { createStandardCylindricalBoss } from '@/lib/tank-models/boss-components';
 
 // Re-export colormap types for consumers
 export type { ColormapName, ColormapOptions };
@@ -24,6 +25,7 @@ export interface TankMeshData {
   normals: Float32Array;
   indices: Uint32Array;
   colors?: Float32Array;
+  color?: [number, number, number];
 }
 
 export interface TankLayerMesh {
@@ -42,10 +44,15 @@ export interface TankGeometryResult {
  * Generate isotensoid dome profile points
  * Based on netting theory: r = R0 * sin(alpha0) / sin(alpha)
  *
+ * This implementation calculates the TRUE isotensoid curve by:
+ * 1. Computing r(α) using the isotensoid equation
+ * 2. Computing z from the meridional slope: dz/dr = -cot(α)
+ * 3. Using numerical integration to get accurate z-coordinates
+ *
  * @param R0 - Cylinder radius (mm)
  * @param alpha0Deg - Winding angle at cylinder (degrees), typically 54.74 from netting theory
  * @param bossRadius - Boss opening radius (mm)
- * @param domeDepth - Target dome depth (mm)
+ * @param domeDepth - Target dome depth (mm) - used for scaling if needed
  * @param numPoints - Number of profile points
  */
 export function calculateIsotensoidProfile(
@@ -58,22 +65,66 @@ export function calculateIsotensoidProfile(
   const alpha0 = (alpha0Deg * Math.PI) / 180;
   const points: { r: number; z: number }[] = [];
 
+  // First pass: calculate r values and accumulate z through integration
+  const alphas: number[] = [];
+  const rValues: number[] = [];
+
   for (let i = 0; i <= numPoints; i++) {
     const t = i / numPoints; // 0 at apex, 1 at cylinder
 
     // Alpha varies from 90deg at apex to alpha0 at cylinder
     const alpha = alpha0 + (Math.PI / 2 - alpha0) * (1 - t);
+    alphas.push(alpha);
 
     // Isotensoid equation: r = R0 * sin(alpha0) / sin(alpha)
     let r = R0 * Math.sin(alpha0) / Math.sin(alpha);
 
     // Clamp minimum radius to boss radius
     r = Math.max(r, bossRadius);
+    rValues.push(r);
+  }
 
-    // Z position (dome depth scales with t)
-    const z = domeDepth * (1 - t);
+  // Second pass: calculate z values using meridional integration
+  // For isotensoid: dz/dr = -cot(α), so dz = -cot(α) * dr
+  // We integrate from apex (i=0, z=z_apex) downward to cylinder (i=numPoints, z=0)
 
-    points.push({ r, z });
+  // Calculate total depth from geometry first
+  let totalDepth = 0;
+  for (let i = 0; i < numPoints; i++) {
+    const alpha1 = alphas[i];
+    const alpha2 = alphas[i + 1];
+    const r1 = rValues[i];
+    const r2 = rValues[i + 1];
+
+    // Average values for trapezoidal integration
+    const alphaMid = (alpha1 + alpha2) / 2;
+    const dr = r2 - r1;
+
+    // dz/dr = -cot(α), so dz = -cot(α) * dr
+    const dz = -dr / Math.tan(alphaMid);
+    totalDepth += dz;
+  }
+
+  // Scale to match the desired dome depth
+  const scaleFactor = domeDepth / totalDepth;
+
+  // Now build the actual points with scaled z values
+  let z = domeDepth; // Start at apex
+  points.push({ r: rValues[0], z });
+
+  for (let i = 0; i < numPoints; i++) {
+    const alpha1 = alphas[i];
+    const alpha2 = alphas[i + 1];
+    const r1 = rValues[i];
+    const r2 = rValues[i + 1];
+
+    const alphaMid = (alpha1 + alpha2) / 2;
+    const dr = r2 - r1;
+    const dz = -dr / Math.tan(alphaMid);
+
+    // Apply scaling to match desired depth
+    z -= dz * scaleFactor;
+    points.push({ r: rValues[i + 1], z });
   }
 
   return points;
@@ -139,11 +190,19 @@ function buildMeshFallback(geometry: DesignGeometry): TankGeometryResult {
     }
   }
 
+  // Create hollow boss geometry with proper inner/outer cylinders
+  const bossLength = 70; // mm - standard boss protrusion length
+  const hollowBoss = createStandardCylindricalBoss(
+    dome.parameters.boss_id_mm,
+    dome.parameters.boss_od_mm,
+    bossLength
+  );
+
   return {
     outer: outerMesh,
     inner: innerMesh,
     layers,
-    bosses: [createSimpleCylinderMesh(dome.parameters.boss_id_mm / 2, dome.parameters.boss_od_mm / 2, 70)],
+    bosses: [hollowBoss],
   };
 }
 
@@ -157,19 +216,19 @@ function createSimpleLatheMesh(
   const normals: number[] = [];
   const indices: number[] = [];
 
-  // Build full profile
+  // Build full profile with boss holes
   const fullProfile: { r: number; z: number }[] = [];
 
-  // Bottom dome
+  // Bottom dome - profile already clamped to boss radius, creating hole
   for (let i = profile.length - 1; i >= 0; i--) {
     fullProfile.push({ r: profile[i].r, z: -profile[i].z });
   }
 
-  // Cylinder
+  // Cylinder section
   fullProfile.push({ r: radius, z: 0 });
   fullProfile.push({ r: radius, z: cylinderLength });
 
-  // Top dome
+  // Top dome - profile already clamped to boss radius, creating hole
   for (const pt of profile) {
     fullProfile.push({ r: pt.r, z: cylinderLength + pt.z });
   }
@@ -210,34 +269,13 @@ function createSimpleLatheMesh(
   };
 }
 
-function createSimpleCylinderMesh(innerRadius: number, outerRadius: number, length: number): TankMeshData {
-  const segments = 32;
-  const positions: number[] = [];
-  const normals: number[] = [];
-  const indices: number[] = [];
-
-  for (let i = 0; i <= 1; i++) {
-    const y = i * length;
-    for (let j = 0; j <= segments; j++) {
-      const theta = (j / segments) * Math.PI * 2;
-      positions.push(outerRadius * Math.cos(theta), y, outerRadius * Math.sin(theta));
-      normals.push(Math.cos(theta), 0, Math.sin(theta));
-    }
-  }
-
-  for (let j = 0; j < segments; j++) {
-    const curr = j;
-    const next = curr + segments + 1;
-    indices.push(curr, next, curr + 1);
-    indices.push(curr + 1, next, next + 1);
-  }
-
-  return {
-    positions: new Float32Array(positions),
-    normals: new Float32Array(normals),
-    indices: new Uint32Array(indices),
-  };
-}
+// Note: createSimpleCylinderMesh removed - now using createStandardCylindricalBoss
+// from boss-components.ts which properly creates hollow boss geometry with:
+// - Outer cylinder surface
+// - Inner cylinder (thread bore)
+// - Top end cap (annulus)
+// The dome profiles are already clamped to boss radius in calculateIsotensoidProfile,
+// which creates the circular hole at the dome apex where the boss attaches.
 
 /**
  * Apply stress coloring to mesh

@@ -1,111 +1,741 @@
 {
-  "version": "1.0.0",
-  "generated_at": "2025-12-09T00:00:00Z",
-  "generator": "doc-manager skill",
-  "total_documents": 25,
+  "generated_at": "2025-12-10T10:51:58.944Z",
+  "total_documents": 53,
+  "valid_documents": 53,
+  "by_status": {
+    "accepted": 50,
+    "superseded": 3
+  },
+  "by_type": {
+    "reference": 9,
+    "test_report": 26,
+    "howto": 4,
+    "runbook": 3,
+    "explanation": 11
+  },
+  "validation": {
+    "errors": 0,
+    "warnings": 40,
+    "issues": [
+      {
+        "path": "docs/reference/DESIGN_SYSTEM_API.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/reference/HELP_COMPONENT_API.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/reference/HELP_FRAMEWORK_TOPICS.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/test-report/ARIA_CHANGES_DETAILED.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/test-report/CAD_IMPLEMENTATION.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/test-report/CAD_INTEGRATION_SUMMARY.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/test-report/COMPLIANCE_SCREEN_REFINEMENT_REPORT.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/test-report/DEEP_REFINEMENT_REPORT.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/test-report/ESLINT_ANALYSIS_REPORT.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/test-report/EXPORT_SCREEN_REFINEMENT_REPORT.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/test-report/HARDCODED_MOCK_DATA_VIOLATIONS.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/test-report/HELP_SYSTEM_IMPLEMENTATION.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/test-report/IMPLEMENTATION-SUMMARY-REQ251-255.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/test-report/IMPLEMENTATION_REQ-197-202.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/test-report/IMPLEMENTATION_SUMMARY.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/test-report/MOCK_SERVER_GAP_ANALYSIS_REPORT.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/test-report/PARETO_SCREEN_REFINEMENT_REPORT.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/test-report/README.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/test-report/README.md",
+        "severity": "warning",
+        "field": "last_verified_at",
+        "message": "Missing recommended field: last_verified_at"
+      },
+      {
+        "path": "docs/test-report/RTM_REVIEW_REPORT.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/test-report/SCF_IMPLEMENTATION_VERIFICATION.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/test-report/VIEWERSCREEN_REFINEMENT_REPORT.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/test-report/WCAG_ARIA_IMPROVEMENTS_SUMMARY.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/howto/CHARTS_USAGE.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/howto/MATERIALS_COMPLIANCE_GUIDE.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/runbook/ENTERPRISE_ACTION_PLAN.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/runbook/HANDOVER.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/runbook/MOCK_SERVER_ACTION_ITEMS.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/explanation/DOMAIN_INTEGRATION.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/explanation/FRONTEND_README.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/explanation/MOCK_SERVER_ARCHITECTURE_REVIEW.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/explanation/MOCK_SERVER_SUMMARY.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/explanation/OPENCASCADE_INTEGRATION_PLAN.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/explanation/PHYSICS_IMPLEMENTATION.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/explanation/PHYSICS_IMPLEMENTATION.md",
+        "severity": "warning",
+        "field": "last_verified_at",
+        "message": "Missing recommended field: last_verified_at"
+      },
+      {
+        "path": "docs/explanation/PROAGENTIC_DFX_PLATFORM.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/explanation/README.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/explanation/README.md",
+        "severity": "warning",
+        "field": "last_verified_at",
+        "message": "Missing recommended field: last_verified_at"
+      },
+      {
+        "path": "docs/explanation/README_PROAGENTIC_DFX.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      },
+      {
+        "path": "docs/explanation/rtm/DUPLICATE_REQUIREMENTS_REPORT.md",
+        "severity": "warning",
+        "field": "id",
+        "message": "Missing recommended field: id"
+      }
+    ]
+  },
   "documents": [
     {
-      "id": "GUIDE-ACTIVATION-001",
-      "path": "docs/guides/ACTIVATION_GUIDE.md",
-      "doc_type": "howto",
-      "title": "Quick Activation Guide - Enhanced 3D Viewer & Comparison",
+      "id": "",
+      "path": "docs/explanation/DOMAIN_INTEGRATION.md",
+      "title": "Multi-Domain Architecture Integration Guide",
+      "doc_type": "explanation",
       "status": "accepted",
       "last_verified_at": "2025-12-09",
-      "owner": "@h2-tank-team",
-      "keywords": ["activation", "viewer", "comparison", "enhanced screens"],
-      "code_refs_count": 13
+      "owner": "@h2-tank-team"
     },
     {
-      "id": "IMPL-CHARTS-001",
-      "path": "docs/implementation/CHARTS_IMPLEMENTATION_SUMMARY.md",
-      "doc_type": "test_report",
-      "title": "Professional Engineering Charts Implementation Summary",
-      "status": "accepted",
-      "last_verified_at": "2025-12-08",
-      "owner": "@h2-tank-team",
-      "keywords": ["charts", "recharts", "visualization", "implementation"],
-      "code_refs_count": 9
-    },
-    {
-      "id": "IMPL-MATERIALS-001",
-      "path": "docs/implementation/MATERIALS_COMPLIANCE_IMPLEMENTATION.md",
-      "doc_type": "test_report",
-      "title": "Enterprise Materials & Compliance Enhancement - Implementation Summary",
-      "status": "accepted",
-      "last_verified_at": "2025-12-08",
-      "owner": "@h2-tank-team",
-      "keywords": ["materials", "compliance", "implementation", "database"],
-      "code_refs_count": 11
-    },
-    {
-      "id": "IMPL-REQSCREEN-001",
-      "path": "docs/implementation/REQUIREMENTS_SCREEN_ENHANCEMENTS.md",
-      "doc_type": "test_report",
-      "title": "Requirements Screen Enterprise Enhancement Summary",
+      "id": "",
+      "path": "docs/explanation/FRONTEND_README.md",
+      "title": "or",
+      "doc_type": "explanation",
       "status": "accepted",
       "last_verified_at": "2025-12-09",
-      "owner": "@h2-tank-team",
-      "keywords": ["requirements", "screen", "enhancement", "enterprise"],
-      "code_refs_count": 13
+      "owner": "@h2-tank-team"
     },
     {
-      "id": "ANALYSIS-GAP-ENTERPRISE-001",
-      "path": "docs/ENTERPRISE_GAP_ANALYSIS.md",
-      "doc_type": "test_report",
-      "title": "Enterprise Gap Analysis Report",
+      "id": "",
+      "path": "docs/explanation/MOCK_SERVER_ARCHITECTURE_REVIEW.md",
+      "title": "Mock Server Architecture Review",
+      "doc_type": "explanation",
       "status": "accepted",
-      "last_verified_at": "2024-12-09",
-      "owner": "@h2-tank-team",
-      "keywords": ["gap analysis", "enterprise", "assessment"]
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
     },
     {
-      "id": "ANALYSIS-GAP-DETAILED-001",
-      "path": "docs/DETAILED_GAP_ANALYSIS.md",
-      "doc_type": "test_report",
-      "title": "Detailed Enterprise Gap Analysis",
+      "id": "",
+      "path": "docs/explanation/MOCK_SERVER_SUMMARY.md",
+      "title": "Mock Server Gap Analysis - Executive Summary",
+      "doc_type": "explanation",
       "status": "accepted",
-      "last_verified_at": "2024-12-09",
-      "owner": "@h2-tank-team",
-      "keywords": ["gap analysis", "detailed", "rtm"]
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "EXP-ARCH-001",
+      "path": "docs/explanation/MULTI-DOMAIN-ARCHITECTURE.md",
+      "title": "Multi-Domain Architecture",
+      "doc_type": "explanation",
+      "status": "accepted",
+      "last_verified_at": "2025-12-07",
+      "owner": "@proaptus"
+    },
+    {
+      "id": "",
+      "path": "docs/explanation/OPENCASCADE_INTEGRATION_PLAN.md",
+      "title": "OpenCascade.js CAD Integration Plan",
+      "doc_type": "explanation",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/explanation/PHYSICS_IMPLEMENTATION.md",
+      "title": "First-Principles Physics Implementation Summary",
+      "doc_type": "explanation",
+      "status": "accepted",
+      "last_verified_at": "",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/explanation/PROAGENTIC_DFX_PLATFORM.md",
+      "title": "ProAgentic DfX Platform",
+      "doc_type": "explanation",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/explanation/README_PROAGENTIC_DFX.md",
+      "title": "ProAgentic DfX Platform",
+      "doc_type": "explanation",
+      "status": "superseded",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/explanation/README.md",
+      "title": "Explanations & Architecture Documentation Index",
+      "doc_type": "reference",
+      "status": "accepted",
+      "last_verified_at": "",
+      "owner": "@doc-manager"
     },
     {
       "id": "ANALYSIS-RTM-ACTION-001",
-      "path": "docs/analysis/rtm/DUPLICATE_ACTION_PLAN.md",
-      "doc_type": "explanation",
+      "path": "docs/explanation/rtm/DUPLICATE_ACTION_PLAN.md",
       "title": "Duplicate Requirements - Action Plan",
+      "doc_type": "explanation",
       "status": "accepted",
       "last_verified_at": "2025-12-08",
-      "owner": "@h2-tank-team",
-      "keywords": ["rtm", "duplicates", "requirements"]
-    }
-  ],
-  "superseded_documents": [
-    {
-      "path": ".claude/hooks/PROSWARM_ORCHESTRATION_ENFORCEMENT.md",
-      "superseded_by": ".claude/skills/proswarm/SKILL.md",
-      "reason": "Content consolidated into canonical skill definition"
+      "owner": "@h2-tank-team"
     },
     {
-      "path": ".claude/hooks/README_PROSWARM_ORCHESTRATION.md",
-      "superseded_by": ".claude/skills/proswarm/SKILL.md",
-      "reason": "Overview content consolidated into skill documentation"
+      "id": "",
+      "path": "docs/explanation/rtm/DUPLICATE_REQUIREMENTS_REPORT.md",
+      "title": "Duplicate Requirements Analysis Report",
+      "doc_type": "explanation",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
     },
     {
-      "path": ".claude/hooks/PROSWARM_PHILOSOPHY.md",
-      "superseded_by": ".claude/skills/proswarm/SKILL.md",
-      "reason": "Philosophy concepts incorporated into canonical skill definition"
+      "id": "GUIDE-ACTIVATION-001",
+      "path": "docs/howto/ACTIVATION_GUIDE.md",
+      "title": "Quick Activation Guide - Enhanced 3D Viewer & Comparison",
+      "doc_type": "howto",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/howto/CHARTS_USAGE.md",
+      "title": "H2 Tank Designer Professional Engineering Charts",
+      "doc_type": "howto",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "HOWTO-INSTALL-001",
+      "path": "docs/howto/INSTALLATION_GUIDE.md",
+      "title": "OpenCascade.js CAD Integration - Installation Guide",
+      "doc_type": "howto",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/howto/MATERIALS_COMPLIANCE_GUIDE.md",
+      "title": "Materials & Compliance Enhancement - Implementation Guide",
+      "doc_type": "howto",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "REF-API-MAPPING-001",
+      "path": "docs/reference/API_ENDPOINT_MAPPING.md",
+      "title": "H2 Tank Designer - API Endpoint to Frontend Component Mapping",
+      "doc_type": "reference",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "REF-CHARTS-API-001",
+      "path": "docs/reference/CHARTS_API.md",
+      "title": "Professional Engineering Charts for H2 Tank Designer",
+      "doc_type": "reference",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "REF-CICD-001",
+      "path": "docs/reference/CICD_PIPELINE.md",
+      "title": "CI/CD Pipeline Reference",
+      "doc_type": "reference",
+      "status": "accepted",
+      "last_verified_at": "2025-12-07",
+      "owner": "@proaptus"
+    },
+    {
+      "id": "",
+      "path": "docs/reference/DESIGN_SYSTEM_API.md",
+      "title": "H2 Tank Designer - Design System",
+      "doc_type": "reference",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/reference/HELP_COMPONENT_API.md",
+      "title": "Help System Documentation",
+      "doc_type": "reference",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/reference/HELP_FRAMEWORK_TOPICS.md",
+      "title": "ProAgentic DfX Framework Help Topics",
+      "doc_type": "reference",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "REF-DEPLOY-001",
+      "path": "docs/runbook/DEPLOYMENT.md",
+      "title": "Deployment Guide",
+      "doc_type": "reference",
+      "status": "accepted",
+      "last_verified_at": "2025-12-07",
+      "owner": "@proaptus"
+    },
+    {
+      "id": "",
+      "path": "docs/runbook/ENTERPRISE_ACTION_PLAN.md",
+      "title": "Enterprise Readiness Action Plan",
+      "doc_type": "runbook",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/runbook/HANDOVER.md",
+      "title": "ProSWARM Template Handover Document",
+      "doc_type": "runbook",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/runbook/MOCK_SERVER_ACTION_ITEMS.md",
+      "title": "Mock Server Gap Analysis - Action Items",
+      "doc_type": "runbook",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/test-report/ARIA_CHANGES_DETAILED.md",
+      "title": "WCAG 2.1 AA ARIA Labels - Detailed Line-by-Line Changes",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/test-report/CAD_IMPLEMENTATION.md",
+      "title": "OpenCascade.js CAD Implementation",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/test-report/CAD_INTEGRATION_SUMMARY.md",
+      "title": "OpenCascade.js CAD Integration - Research Summary",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "IMPL-CHARTS-001",
+      "path": "docs/test-report/CHARTS_IMPLEMENTATION_SUMMARY.md",
+      "title": "Professional Engineering Charts Implementation Summary",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-08",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/test-report/COMPLIANCE_SCREEN_REFINEMENT_REPORT.md",
+      "title": "ComplianceScreen Deep Refinement Report",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/test-report/DEEP_REFINEMENT_REPORT.md",
+      "title": "Deep Refinement Report: Requirements Components",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "ANALYSIS-GAP-DETAILED-001",
+      "path": "docs/test-report/DETAILED_GAP_ANALYSIS.md",
+      "title": "Detailed Enterprise Gap Analysis",
+      "doc_type": "test_report",
+      "status": "superseded",
+      "last_verified_at": "2024-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "ANALYSIS-GAP-ENTERPRISE-001",
+      "path": "docs/test-report/ENTERPRISE_GAP_ANALYSIS.md",
+      "title": "Enterprise Gap Analysis Report",
+      "doc_type": "test_report",
+      "status": "superseded",
+      "last_verified_at": "2024-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/test-report/ESLINT_ANALYSIS_REPORT.md",
+      "title": "ESLint Analysis Report - ProAgentic DFX Frontend",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/test-report/EXPORT_SCREEN_REFINEMENT_REPORT.md",
+      "title": "ExportScreen Deep Refinement Report",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/test-report/HARDCODED_MOCK_DATA_VIOLATIONS.md",
+      "title": "HARDCODED MOCK DATA VIOLATIONS REPORT",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/test-report/HELP_SYSTEM_IMPLEMENTATION.md",
+      "title": "Help System Implementation Summary",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/test-report/IMPLEMENTATION_REQ-197-202.md",
+      "title": "Implementation Summary: REQ-197 to REQ-202",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/test-report/IMPLEMENTATION_SUMMARY.md",
+      "title": "OpenCascade.js CAD Viewer - Implementation Summary",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/test-report/IMPLEMENTATION-SUMMARY-REQ251-255.md",
+      "title": "Implementation Summary: REQ-251 to REQ-255",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "IMPL-MATERIALS-001",
+      "path": "docs/test-report/MATERIALS_COMPLIANCE_IMPLEMENTATION.md",
+      "title": "Enterprise Materials & Compliance Enhancement - Implementation Summary",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-08",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/test-report/MOCK_SERVER_GAP_ANALYSIS_REPORT.md",
+      "title": "H2 Tank Mock Server - Gap Analysis Report",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/test-report/PARETO_SCREEN_REFINEMENT_REPORT.md",
+      "title": "ParetoScreen Deep Refinement Report",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "TEST-QUALITY-RUN-2025-12-09",
+      "path": "docs/test-report/QUALITY_RUN_2025-12-09.md",
+      "title": "H2 Tank Designer - Quality Run Report",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/test-report/README.md",
+      "title": "Test Reports & Implementation Summaries Index",
+      "doc_type": "reference",
+      "status": "accepted",
+      "last_verified_at": "",
+      "owner": "@doc-manager"
+    },
+    {
+      "id": "GAP-ANALYSIS-COMPREHENSIVE-001",
+      "path": "docs/test-report/REQUIREMENTS_ALIGNMENT_GAP_ANALYSIS.md",
+      "title": "COMPREHENSIVE REQUIREMENTS ALIGNMENT & GAP ANALYSIS",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "IMPL-REQSCREEN-001",
+      "path": "docs/test-report/REQUIREMENTS_SCREEN_ENHANCEMENTS.md",
+      "title": "Requirements Screen Enterprise Enhancement Summary",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/test-report/RTM_REVIEW_REPORT.md",
+      "title": "Requirements Traceability Matrix - Full Review Report",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/test-report/SCF_IMPLEMENTATION_VERIFICATION.md",
+      "title": "Physics-Based Stress Concentration Factor (SCF) Implementation",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "IMPL-SECTION-CONTROLS-001",
+      "path": "docs/test-report/SECTION_CONTROLS_IMPLEMENTATION.md",
+      "title": "Section Controls Wiring - Implementation Summary",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/test-report/VIEWERSCREEN_REFINEMENT_REPORT.md",
+      "title": "ViewerScreen Deep Refinement Report",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
+    },
+    {
+      "id": "",
+      "path": "docs/test-report/WCAG_ARIA_IMPROVEMENTS_SUMMARY.md",
+      "title": "WCAG 2.1 AA ARIA Labels - Implementation Summary",
+      "doc_type": "test_report",
+      "status": "accepted",
+      "last_verified_at": "2025-12-09",
+      "owner": "@h2-tank-team"
     }
-  ],
-  "directory_structure": {
-    "docs/guides/": "How-to guides and activation instructions",
-    "docs/implementation/": "Implementation summaries and reports",
-    "docs/analysis/rtm/": "Requirements Traceability Matrix analysis",
-    "docs/reference/": "Technical references and API docs",
-    "docs/_index/": "Machine-readable indexes and manifests"
-  },
-  "statistics": {
-    "total_with_front_matter": 10,
-    "total_code_refs": 46,
-    "superseded_count": 3
-  }
+  ]
 }

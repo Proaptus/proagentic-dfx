@@ -2,12 +2,14 @@
 id: ANALYSIS-GAP-ENTERPRISE-001
 doc_type: test_report
 title: "Enterprise Gap Analysis Report"
-status: accepted
+status: superseded
+superseded_by: ["docs/test-report/REQUIREMENTS_ALIGNMENT_GAP_ANALYSIS.md"]
 last_verified_at: 2024-12-09
 owner: "@h2-tank-team"
 related_docs:
   - "docs/DETAILED_GAP_ANALYSIS.md"
 keywords: ["gap analysis", "enterprise", "assessment", "ANSYS", "Siemens NX"]
+reason: "Partial analysis superseded by comprehensive 330-requirement analysis"
 ---
 
 # Enterprise Gap Analysis Report

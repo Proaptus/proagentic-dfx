@@ -7,6 +7,7 @@
 ### Core Principle: Continuous Orchestration
 
 ProSWARM is NOT a one-time tool - it's your fundamental way of thinking about and executing ALL complex tasks. The ProSWARM MCP server provides:
+
 - **70+ Specialized Neural Models**: Instant task classification and planning (<1ms)
 - **84.8% SWE-Bench Accuracy**: Proven performance on real-world development tasks
 - **Shared Memory System**: Perfect data sharing between agents
@@ -16,22 +17,22 @@ ProSWARM is NOT a one-time tool - it's your fundamental way of thinking about an
 
 ```javascript
 // STEP 1: Initialize orchestration (ALWAYS FIRST)
-const result = await mcp__proswarm-neural__orchestrate_task("Your task description");
-await mcp__proswarm-neural__memory_store("main_task_id", result.task_id);
+const result = (await mcp__proswarm) - neural__orchestrate_task('Your task description');
+(await mcp__proswarm) - neural__memory_store('main_task_id', result.task_id);
 
 // STEP 2: Store the decomposition plan
-await mcp__proswarm-neural__memory_store("orchestration_plan", JSON.stringify(result.plan));
+(await mcp__proswarm) - neural__memory_store('orchestration_plan', JSON.stringify(result.plan));
 
 // STEP 3: Establish subtask context BEFORE any tool use
-await mcp__proswarm-neural__memory_store("subtask_work", "status: in_progress");
+(await mcp__proswarm) - neural__memory_store('subtask_work', 'status: in_progress');
 
 // STEP 4: NOW you can use any tools - they are tied to the orchestration
-Read("/src/file.ts")  // ✅ ALLOWED
-Grep("pattern", "/src")  // ✅ ALLOWED
-Bash("npm test")  // ✅ ALLOWED
+Read('/src/file.ts'); // ✅ ALLOWED
+Grep('pattern', '/src'); // ✅ ALLOWED
+Bash('npm test'); // ✅ ALLOWED
 
 // STEP 5: Execute the plan
-await mcp__proswarm-neural__execute_plan(result.task_id);
+(await mcp__proswarm) - neural__execute_plan(result.task_id);
 ```
 
 ## 📋 PROJECT OVERVIEW
@@ -40,18 +41,19 @@ await mcp__proswarm-neural__execute_plan(result.task_id);
 
 ### Competition Context
 
-| Field | Details |
-|-------|---------|
-| **Competition** | Agentic AI Pioneers Prize - Development Phase |
-| **Competition ID** | 2355 |
-| **Organiser** | Innovate UK (UKRI) + DSIT |
-| **Sector** | Advanced Manufacturing |
-| **Challenge** | Detailed Design for X Agents |
-| **Prize** | £250k (sector) + £250k (overall bonus) |
-| **Deadline** | 23 February 2026 at 11:00 UK |
-| **Interview** | 16-18 March 2026 (London) |
+| Field              | Details                                       |
+| ------------------ | --------------------------------------------- |
+| **Competition**    | Agentic AI Pioneers Prize - Development Phase |
+| **Competition ID** | 2355                                          |
+| **Organiser**      | Innovate UK (UKRI) + DSIT                     |
+| **Sector**         | Advanced Manufacturing                        |
+| **Challenge**      | Detailed Design for X Agents                  |
+| **Prize**          | £250k (sector) + £250k (overall bonus)        |
+| **Deadline**       | 23 February 2026 at 11:00 UK                  |
+| **Interview**      | 16-18 March 2026 (London)                     |
 
 ### Competition Documentation
+
 ```
 agentic-pioneers-prize/
 ├── COMPETITION_OVERVIEW.md    # Full competition details
@@ -64,6 +66,7 @@ agentic-pioneers-prize/
 ```
 
 ### Technology Stack
+
 - **Frontend**: React 18 + TypeScript + Next.js + Tailwind CSS
 - **3D Viewer**: Three.js (@react-three/fiber)
 - **Backend**: Node.js + Express
@@ -79,18 +82,22 @@ agentic-pioneers-prize/
 ### The Hook Enforces:
 
 **Phase 1: Orchestration Required**
+
 - ❌ **BLOCKED**: ANY tool without `main_task_id` set
 - ✅ **ALLOWED**: `orchestrate_task()` to start fresh orchestration
 
 **Phase 2: Subtask Binding Required**
+
 - ❌ **BLOCKED**: All tools without active subtask context
 - ✅ **REQUIRED**: `memory_store('subtask_{id}', 'status: in_progress')`
 
 **Phase 3: Agent Spawning Requires Plan**
+
 - ❌ **BLOCKED**: Task/Skill tools without captured orchestration_plan
 - ✅ **REQUIRED**: `memory_store('orchestration_plan', plan)` after orchestration
 
 **Phase 4: Session Timeout (60 seconds - BY DESIGN)**
+
 - Timeout is a FEATURE, not a bug
 - Simply call `orchestrate_task()` for your next piece of work
 - Memory is SHARED - context persists across all orchestrations
@@ -98,6 +105,7 @@ agentic-pioneers-prize/
 ### What This Means:
 
 You **CANNOT**:
+
 - ❌ Read files without orchestration
 - ❌ Search code (Grep) without orchestration
 - ❌ Run bash commands without orchestration
@@ -105,6 +113,7 @@ You **CANNOT**:
 - ❌ Spawn agents without orchestration plan
 
 You **MUST**:
+
 1. ✅ Call `orchestrate_task(description)` FIRST
 2. ✅ Store `memory_store('main_task_id', taskId)`
 3. ✅ Store `memory_store('subtask_{id}', context)` BEFORE any tool use
@@ -113,24 +122,31 @@ You **MUST**:
 ## 🐝 PROSWARM NEURAL MODELS (70+ Specialized Models)
 
 ### Testing & Quality
+
 - `test_optimizer`, `test_coverage_analyzer`, `regression_suite_builder`, `edge_case_generator`, `test_flakyness_detector`
 
 ### Bug Analysis & Resolution
+
 - `bug_router`, `crash_analyzer`, `race_condition_finder`, `memory_leak_hunter`, `performance_bug_analyzer`
 
 ### API Development
+
 - `api_builder`, `endpoint_optimizer`, `api_security_hardener`, `api_doc_generator`
 
 ### Performance Optimization
+
 - `profiler_analyzer`, `cache_strategy_planner`, `bundle_optimizer`, `query_optimizer`, `lazy_loading_planner`
 
 ### Security & Compliance
+
 - `security_audit_planner`, `penetration_test_planner`, `encryption_planner`
 
 ### Infrastructure & DevOps
+
 - `ci_pipeline_builder`, `docker_optimizer`, `k8s_manifest_generator`, `scaling_planner`
 
 ### Code Organization
+
 - `refactor_planner`, `code_splitter`, `component_splitter`, `abstraction_extractor`
 
 ## 🛠️ AVAILABLE SKILLS
@@ -169,28 +185,39 @@ Step 5: Quality Gates (≥80% coverage)
 ## 🚨 SAFETY GUIDELINES
 
 ### ⛔ FORBIDDEN:
+
 - `kill`, `killall`, `pkill -f "node.*server"`
 - **EXCEPTION**: `pkill -f chrome` is ALLOWED
+
+### 🚫 GIT COMMIT QUALITY - NO SHORTCUTS
+
+- **NEVER use `--no-verify`** to bypass pre-commit hooks
+- **ALWAYS fix file size violations** before committing
+- If pre-commit hook fails due to file size limits, **split the files** to meet standards
+- Quality gates exist for a reason - maintain code standards at all times
+- Only exception: explicit user approval for temporary bypass (document why)
 
 ## 📏 FILE SIZE LIMITS - AI-OPTIMIZED CODE
 
 **CRITICAL**: Keep files small for AI context efficiency. Large files degrade AI performance.
 
 ### Hard Limits (Enforced by pre-commit hook)
-| File Type | Max Lines | Max Size |
-|-----------|-----------|----------|
-| Components/Routes | 500 | 35KB |
-| Type definitions | 800 | 35KB |
-| Test files | 800 | 35KB |
+
+| File Type         | Max Lines | Max Size |
+| ----------------- | --------- | -------- |
+| Components/Routes | 500       | 35KB     |
+| Type definitions  | 800       | 35KB     |
+| Test files        | 800       | 35KB     |
 
 ### Recommended Limits (ESLint warnings)
-| Metric | Limit | Why |
-|--------|-------|-----|
-| Lines per file | 350 | Fits in AI context window |
-| Lines per function | 50 | Single responsibility |
-| Parameters | 5 | Cognitive load |
-| Nesting depth | 4 | Readability |
-| Complexity | 15 | Maintainability |
+
+| Metric             | Limit | Why                       |
+| ------------------ | ----- | ------------------------- |
+| Lines per file     | 350   | Fits in AI context window |
+| Lines per function | 50    | Single responsibility     |
+| Parameters         | 5     | Cognitive load            |
+| Nesting depth      | 4     | Readability               |
+| Complexity         | 15    | Maintainability           |
 
 ### When You Hit Limits - Split Patterns
 
@@ -209,6 +236,7 @@ Step 5: Quality Gates (≥80% coverage)
 ```
 
 ### Commands
+
 ```bash
 npm run check:sizes      # Check all files
 npm run check:sizes:staged  # Check staged files only (pre-commit)
@@ -218,10 +246,10 @@ npm run check:sizes:staged  # Check staged files only (pre-commit)
 
 ```javascript
 // Standard Keys
-"main_task_id"          // Primary task identifier
-"orchestration_plan"    // Full decomposition structure
-"subtask_{id}"          // Individual subtask data
-"test_results"          // Test execution results
+'main_task_id'; // Primary task identifier
+'orchestration_plan'; // Full decomposition structure
+'subtask_{id}'; // Individual subtask data
+'test_results'; // Test execution results
 ```
 
 ## 🔴 REQUIRED MCP SERVERS
@@ -252,6 +280,7 @@ await execute_plan(result.task_id);
 ```
 
 ### Performance Benchmarks:
+
 - Task Decomposition: <1ms
 - SWE-Bench Accuracy: 84.8%
 - Parallel Speedup: 2.8-4.4x

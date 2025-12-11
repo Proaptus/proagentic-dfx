@@ -44,7 +44,8 @@ describe('ComplianceStatCard', () => {
       />
     );
 
-    const card = container.querySelector('.from-green-50');
+    // Component uses neutral professional styling (gray) for all variants
+    const card = container.querySelector('.bg-white');
     expect(card).toBeInTheDocument();
   });
 
@@ -58,7 +59,8 @@ describe('ComplianceStatCard', () => {
       />
     );
 
-    const card = container.querySelector('.from-red-50');
+    // Component uses neutral professional styling (gray) for all variants
+    const card = container.querySelector('.bg-white');
     expect(card).toBeInTheDocument();
   });
 

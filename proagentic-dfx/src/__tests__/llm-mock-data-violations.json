@@ -1,7 +1,7 @@
 [
   {
     "file": "components\\analysis\\ReliabilityPanel.tsx",
-    "line": 183,
+    "line": 149,
     "type": "filler_text",
     "category": "Filler Text",
     "match": ": 'N/A'",
@@ -37,7 +37,7 @@
   },
   {
     "file": "components\\screens\\ValidationScreen.tsx",
-    "line": 73,
+    "line": 78,
     "type": "repeated_structure",
     "category": "Repeated Structure",
     "match": "{\r     id: 'permeation',\r     name: 'Permeation Test',\r     standard: 'ISO 19881 Annex B',\r     arti",
@@ -46,7 +46,7 @@
   },
   {
     "file": "components\\screens\\ValidationScreen.tsx",
-    "line": 93,
+    "line": 98,
     "type": "repeated_structure",
     "category": "Repeated Structure",
     "match": "{\r     id: 'fire',\r     name: 'Bonfire Test',\r     standard: 'UN R134 §6.2.8',\r     articles: 1,\r   ",
@@ -55,11 +55,47 @@
   },
   {
     "file": "components\\screens\\ValidationScreen.tsx",
-    "line": 111,
+    "line": 116,
     "type": "repeated_structure",
     "category": "Repeated Structure",
     "match": "{\r     id: 'fatigue',\r     name: 'Accelerated Stress Rupture',\r     standard: 'ISO 11119-3',\r     ar",
     "severity": "medium",
     "description": "Repeated object structure"
+  },
+  {
+    "file": "app\\api\\auth\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\designs\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\designs\\[designId]\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\designs\\[designId]\\stress\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
   }
 ]

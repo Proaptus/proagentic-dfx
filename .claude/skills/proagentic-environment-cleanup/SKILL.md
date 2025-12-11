@@ -198,29 +198,24 @@ This skill is designed to be **safe and non-destructive**:
 
 ## 🔧 Scripts Used
 
-The skill automates these scripts:
+The skill provides both Windows (PowerShell) and Linux/WSL (Bash) scripts:
 
-### Port & Process Management
+### Windows PowerShell Scripts (.ps1)
+1. **aggressive-port-cleanup.ps1** - Windows port management (3000, 5173, 8080)
+2. **cleanup-artifacts.ps1** - Test artifact removal (coverage, .next, logs)
+3. **system-health-check.ps1** - Windows diagnostics and resource monitoring
+
+### Linux/WSL Bash Scripts (.sh)
 1. **aggressive-port-cleanup.sh** - WSL2-safe port management
 2. **safe-test-wrapper.sh** - Prevents concurrent test execution (memory exhaustion protection)
 3. **cleanup-test-processes.sh** - Kills zombie/long-running test processes with age-based filtering
-
-### Docker & Storage Management
 4. **docker-cleanup.sh** - Docker image and volume cleanup
 5. **cleanup-artifacts.sh** - Test artifact removal
-
-### Monitoring & Diagnostics
 6. **monitor-memory.sh** - Real-time memory monitoring
 7. **system-health-check.sh** - Diagnostics and reporting
-8. **cleanup-validator.sh** - Safety validation before operations
-
-### Test Script Safety (Trap Handlers)
-9. **run-uat.sh** - UAT tests with automatic cleanup on interrupt (Ctrl+C)
-10. **test-auth-quick.sh** - Auth tests with trap handlers for orphaned processes
-11. **test-rate-limiting.sh** - Rate limit tests with automatic cleanup
 
 ### Configuration Files
-12. **playwright.config.ts** - Timeout configurations (30s per test, 10s per action) to prevent runaway Playwright tests
+- **playwright.config.ts** - Timeout configurations (30s per test, 10s per action) to prevent runaway Playwright tests
 
 ## 📈 Expected Improvements
 

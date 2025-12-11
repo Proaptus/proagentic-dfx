@@ -4,8 +4,10 @@ title: "ProAgentic DfX Platform"
 version: 1.0.0
 date: 2025-12-09
 owner: "@h2-tank-team"
-status: accepted
+status: superseded
+superseded_by: ["README.md"]
 last_verified_at: 2025-12-09
+reason: "Marketing-focused README superseded by competition-focused canonical README"
 ---
 # ProAgentic DfX Platform
 

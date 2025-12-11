@@ -1,164 +1,190 @@
 # UAT Automation - Quick Reference Card
 
-## One-Page Guide to Running ProAgentic Smoke Tests
+## One-Page Guide to Running H2 Tank Designer Smoke Tests
 
 ### Essential Commands
 
 ```bash
-# Start ProAgentic development environment
-cd /home/chine/projects/proagentic-clean
+# Start H2 Tank Designer development environment
+cd proagentic-dfx
 npm run dev
 
 # Verify services running
-curl http://localhost:5173  # Frontend
-curl http://localhost:8080/api/health  # Backend
+curl http://localhost:3000       # Frontend
+curl http://localhost:3001       # Mock server (if needed)
 ```
 
 ### Execute UAT Suite
 
 ```
-"Run the UAT smoke test suite with screenshot validation for all 25 tests and generate comprehensive report"
+"Run the UAT smoke test suite with screenshot validation for all 30 tests and generate comprehensive report"
 ```
 
-### Test Coverage: 25 Tests Across 10 Phases
+### Test Coverage: 30 Tests Across 7 Phases
 
 | Phase | Tests | Focus |
 |-------|-------|-------|
-| 1 | 3 | Homepage & templates |
-| 2 | 2 | Swarm mode processing |
-| 3 | 3 | Dashboard navigation |
-| 4 | 2 | Agent mode commands |
-| 5 | 3 | Agile mode & sprints |
-| 6 | 2 | Inline editing |
-| 7 | 3 | Project save/load |
-| 8 | 2 | Charter upload |
-| 9 | 2 | Data synchronization |
-| 10 | 2 | AI report generation |
-| Final | 1 | Validation check |
+| 1 | 4 | App initialization & navigation |
+| 2 | 5 | Requirements entry (wizard/chat) |
+| 3 | 4 | Pareto optimization |
+| 4 | 4 | 3D visualization |
+| 5 | 4 | Analysis screens |
+| 6 | 4 | Validation & compliance |
+| 7 | 5 | Export & sentry mode |
 
 ### Success Criteria
 
 ```
-✅ PASS:          23+ tests pass (92%+)
-⚠️  CONDITIONAL:  20-22 tests pass (80-91%)
-❌ FAIL:          <20 tests pass (<80%)
+✅ PASS:          24+ tests pass (80%+)
+⚠️ CONDITIONAL:  21-23 tests pass (70-79%)
+❌ FAIL:          <21 tests pass (<70%)
 ```
 
 ### Key URLs
 
 | Page | URL |
 |------|-----|
-| Homepage | http://localhost:5173 |
-| Workflow | http://localhost:5173/workflow/[projectId] |
-| Agent Mode | http://localhost:5173/agent/[projectId] |
-| Agile Mode | http://localhost:5173/workflow/[projectId]/agile |
-| API Health | http://localhost:8080/api/health |
+| App (Normal) | http://localhost:3000 |
+| App (Dev Mode) | http://localhost:3000?dev=true |
+| Mock Server | http://localhost:3001 |
+
+### Navigation Shortcuts
+
+| Key | Screen |
+|-----|--------|
+| 1 | Requirements |
+| 2 | Pareto Explorer |
+| 3 | 3D Viewer |
+| 4 | Compare |
+| 5 | Analysis |
+| 6 | Compliance |
+| 7 | Validation |
+| 8 | Export |
+| 9 | Sentry Mode |
+| ? | Help Panel |
 
 ### Critical Test Points
 
-**SMOKE-001**: Logo visible, Create Project button, 8+ templates
-**SMOKE-004**: 8 agents generate in parallel, progress shows
-**SMOKE-006**: Requirements dashboard with counts and metrics
-**SMOKE-012**: Sprint board with Kanban columns (To Do, In Progress, Done)
-**SMOKE-023**: Executive summary generates with metrics
-**SMOKE-025**: All dashboards accessible, no console errors
+**SMOKE-001**: Sidebar visible, ProAgentic DfX header, H2 Tank module
+**SMOKE-005**: Requirements wizard with form fields
+**SMOKE-014**: 3D tank model renders in canvas
+**SMOKE-019**: Analysis tabs load different content
+**SMOKE-025**: Validation tests execute with results
+**SMOKE-029**: Sentry dashboard shows monitoring data
 
 ### Common Issues & Fixes
 
 | Issue | Fix |
 |-------|-----|
-| Browser navigation timeout | Check localhost:5173 accessible, increase wait time to 5s |
-| Element not found | Use JavaScript evaluation instead of ref selection |
-| Screenshot token limit | Use `take_screenshot` not `snapshot`, viewport only |
-| State lost after navigation | Wait 3s for page load, reload if needed |
-| Agile mode fails | Complete full 5-step wizard, don't skip steps |
+| Navigation blocked | Use `?dev=true` to bypass restrictions |
+| 3D model blank | Wait 5+ seconds for Three.js to render |
+| Element not found | Use `take_snapshot()` to get UIDs |
+| Charts not visible | Wait for SVG elements to render |
+| Screenshot blank | Verify correct page is active |
 
-### Progress Tracking
+### 6-Step Test Sequence (MANDATORY)
 
 ```
-1. Open TodoWrite with 25 test items
-2. Mark tests as "in_progress" while executing
-3. Capture screenshot after each test
-4. Mark as "completed" with ✅ PASS or ❌ FAIL
-5. Update progress after every 5 tests
-6. Generate UAT report when all 25 complete
+1. EXECUTE  → Action (navigate, click, fill)
+2. WAIT     → For completion (3-5+ seconds)
+3. CAPTURE  → take_screenshot({ filename: "..." })
+4. ANALYZE  → Read({ file_path: "..." })
+5. UPDATE   → Edit report immediately
+6. PROCEED  → Update todo, next test
 ```
 
 ### Screenshot Checklist
 
 ✅ PNG format
-✅ Filename: `[phase]-[test-id]-[name].png`
+✅ Filename: `smoke-[num]-[name].png`
 ✅ Test-specific UI elements visible
-✅ No critical errors in console
-✅ Correct mode active (Workflow/Agent/Agile)
-✅ Full viewport captured
+✅ No loading spinners
+✅ No error messages
+✅ Correct screen active
 
-### Execution Flow
+### Chrome DevTools MCP Commands
 
-```
-START
-  ↓
-Navigate to http://localhost:5173
-  ↓
-Create Project (Cloud Migration Initiative template)
-  ↓
-Enable Swarm Mode
-  ↓
-SMOKE-001 → Screenshot → PASS ✅
-SMOKE-002 → Screenshot → PASS ✅
-...
-SMOKE-025 → Screenshot → PASS ✅
-  ↓
-Generate UAT Report
-  ↓
-END
+```typescript
+// Navigate
+mcp__chrome-devtools__navigate_page({ url: "..." })
+
+// Take snapshot (get UIDs)
+mcp__chrome-devtools__take_snapshot()
+
+// Click element
+mcp__chrome-devtools__click({ uid: "..." })
+
+// Fill input
+mcp__chrome-devtools__fill({ uid: "...", value: "..." })
+
+// Press key
+mcp__chrome-devtools__press_key({ key: "3" })
+
+// Screenshot
+mcp__chrome-devtools__take_screenshot({ filename: "..." })
+
+// Evaluate JS
+mcp__chrome-devtools__evaluate_script({
+  function: `() => document.querySelector('canvas') !== null`
+})
 ```
 
 ### Files & Templates
 
 ```
 .claude/skills/uat-automation/
-├── SKILL.md                     # Core skill definition
-├── README.md                    # Full documentation
-├── QUICK_REFERENCE.md          # This file
-├── USAGE_EXAMPLES.md           # Step-by-step examples
-├── CHECKLIST.md                # Pre/post checklists
-├── templates/
-│   ├── UAT_TEST_CASE.md        # Individual test template
-│   ├── UAT_REPORT.md           # Report template
-│   └── SCREENSHOT_VALIDATION.md # Validation checklist
-└── scripts/
-    ├── validate-screenshots.sh # Screenshot validation
-    └── generate-report.sh      # Report generation
+├── SKILL.md              # Core skill definition (30 tests)
+├── README.md             # Full documentation
+├── QUICK_REFERENCE.md    # This file
+├── CHECKLIST.md          # Pre/post execution checklists
+├── rules/
+│   ├── ABSOLUTE_RULES.md # Critical rules
+│   ├── test-sequence.md  # 6-step mandatory sequence
+│   └── validation-gates.md
+└── templates/
+    └── UAT_REPORT.md     # Report template
 ```
 
 ### Most Important Rules
 
-1. **Execute Sequentially**: SMOKE-001 → SMOKE-025 in order
-2. **Screenshot Every Test**: Proof of execution
-3. **Never Stop Early**: Complete all 25 tests
-4. **Update Progress**: Mark todos as completed
-5. **No Skipping**: Failed test? Retry once, mark FAILED, continue
-6. **Continuous Control**: Use TodoWrite to maintain context
+1. **Complete ALL 30 tests** - No stopping early
+2. **Screenshot EVERY test** - Evidence required
+3. **WAIT for completion** - No premature screenshots
+4. **ANALYZE screenshots** - Use Read tool, write description
+5. **UPDATE report IMMEDIATELY** - No batching
+6. **CONTINUE on failure** - Retry once, mark FAIL, move on
 
 ### Tips for Success
 
-- Use `mcp__playwright__browser_evaluate()` for complex selectors
-- Always `wait_for` 3 seconds after navigation
-- Use `take_screenshot` (not `snapshot`) for large pages
-- Verify element with `evaluate` before clicking
-- Document failures for troubleshooting
-- Check console for errors: `browser_console_messages()`
+- Use `?dev=true` for unrestricted navigation
+- Wait 5+ seconds for 3D models to render
+- Use `take_snapshot()` to find element UIDs
+- Always verify canvas is rendered before 3D screenshots
+- Check for loading spinners before capturing
 
-### Getting Help
+### Execution Flow
 
-- **Full Guide**: See README.md for comprehensive documentation
-- **Step-by-Step**: See USAGE_EXAMPLES.md for detailed scenarios
-- **Checklists**: See CHECKLIST.md for pre/post verification
-- **Test Specs**: See `/docs/UAT_SMOKE_TEST_SPECIFICATION.md`
+```
+START
+  ↓
+Navigate to http://localhost:3000?dev=true
+  ↓
+Initialize todo list with 30 tests
+  ↓
+SMOKE-001 → Screenshot → Analyze → Report → ✅
+SMOKE-002 → Screenshot → Analyze → Report → ✅
+...
+SMOKE-030 → Screenshot → Analyze → Report → ✅
+  ↓
+Update summary statistics
+  ↓
+Generate final report
+  ↓
+END
+```
 
 ---
 
-**Total Execution Time**: 25-35 minutes for full suite
-**Screenshot Directory**: `./tests/uat-results/`
-**Report Location**: `./UAT_REPORT_[date].md`
+**Total Execution Time**: 30-45 minutes for full suite
+**Report File**: `H2_UAT_REPORT.md`
+**Pass Threshold**: 80% (24/30 tests)

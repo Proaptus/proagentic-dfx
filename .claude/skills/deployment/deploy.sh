@@ -1,7 +1,11 @@
 #!/bin/bash
 #
-# Simple ProAgentic Deployment Script
-# Follows the standard workflow: Backend → Staging → Smoke UAT → Production → Final UAT
+# ProAgentic DfX - Local CI/CD Pipeline Runner
+# Mirrors the GitHub Actions workflow for local validation
+#
+# Usage:
+#   ./deploy.sh          # Run full pipeline
+#   ./deploy.sh --quick  # Skip E2E tests
 #
 
 set -e
@@ -11,132 +15,201 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m'
 
+# Parse arguments
+QUICK_MODE=false
+for arg in "$@"; do
+    case $arg in
+        --quick|-q)
+            QUICK_MODE=true
+            shift
+            ;;
+    esac
+done
+
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}ProAgentic Production Deployment${NC}"
+echo -e "${BLUE}ProAgentic DfX - CI/CD Pipeline${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
-# Step 1: Deploy Backend
-echo -e "${BLUE}Step 1/6: Deploying Backend${NC}"
-echo "Running: ./deploy-server.sh"
-echo ""
+# Determine project root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+FRONTEND_DIR="$PROJECT_ROOT/proagentic-dfx"
+MOCK_SERVER_DIR="$PROJECT_ROOT/h2-tank-mock-server"
 
-if ./deploy-server.sh; then
-  echo -e "${GREEN}✅ Backend deployed successfully${NC}"
+# Check we're in the right place
+if [ ! -d "$FRONTEND_DIR" ]; then
+    echo -e "${RED}Error: Cannot find proagentic-dfx directory${NC}"
+    echo "Expected: $FRONTEND_DIR"
+    exit 1
+fi
+
+cd "$FRONTEND_DIR"
+
+# Track timing
+START_TIME=$(date +%s)
+
+step_header() {
+    echo ""
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${CYAN}$1${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+}
+
+# Pre-flight checks
+step_header "Pre-Flight Checks"
+
+echo -n "Checking git status... "
+if git diff --quiet && git diff --staged --quiet; then
+    echo -e "${GREEN}clean${NC}"
 else
-  echo -e "${RED}❌ Backend deployment failed${NC}"
-  exit 1
+    echo -e "${YELLOW}uncommitted changes${NC}"
+    echo -e "${YELLOW}Warning: You have uncommitted changes. Consider committing first.${NC}"
+fi
+
+echo -n "Current branch: "
+BRANCH=$(git branch --show-current)
+echo -e "${CYAN}$BRANCH${NC}"
+
+echo -n "Node version: "
+node --version
+
+# Gate 0: File Size Check
+step_header "Gate 0: File Size Check"
+
+if [ -f "$PROJECT_ROOT/scripts/check-file-sizes.mjs" ]; then
+    if node "$PROJECT_ROOT/scripts/check-file-sizes.mjs" all; then
+        echo -e "${GREEN}✓ File sizes OK${NC}"
+    else
+        echo -e "${RED}✗ File size check failed${NC}"
+        exit 1
+    fi
+else
+    echo -e "${YELLOW}⚠ File size check script not found, skipping${NC}"
+fi
+
+# Gate 1: Lint & Type Check
+step_header "Gate 1: Lint & Type Check"
+
+echo "Running ESLint..."
+if npm run lint; then
+    echo -e "${GREEN}✓ Lint passed${NC}"
+else
+    echo -e "${RED}✗ Lint failed${NC}"
+    exit 1
 fi
 
 echo ""
-echo "Waiting 5 seconds for backend to stabilize..."
-sleep 5
-
-# Step 2: Health Check
-echo ""
-echo -e "${BLUE}Step 2/6: Health Check${NC}"
-echo "Checking: https://proagentic-server-705044459306.europe-west2.run.app/api/health"
-echo ""
-
-HEALTH_CHECK=$(curl -s https://proagentic-server-705044459306.europe-west2.run.app/api/health)
-if echo "$HEALTH_CHECK" | grep -q '"status":"ok"'; then
-  echo -e "${GREEN}✅ Backend health check passed${NC}"
-  echo "$HEALTH_CHECK" | python3 -m json.tool
+echo "Running TypeScript check..."
+if npx tsc --noEmit; then
+    echo -e "${GREEN}✓ Type check passed${NC}"
 else
-  echo -e "${RED}❌ Backend health check failed${NC}"
-  echo "$HEALTH_CHECK"
-  exit 1
+    echo -e "${RED}✗ Type check failed${NC}"
+    exit 1
 fi
 
-# Step 3: Deploy to Staging
-echo ""
-echo -e "${BLUE}Step 3/6: Deploying to Staging${NC}"
-echo "Building frontend..."
-npm run build
+# Gate 2: Unit Tests
+step_header "Gate 2: Unit Tests with Coverage"
 
-echo ""
-echo "Deploying to Netlify staging..."
-netlify deploy --alias=staging --dir=dist
-
-if [ $? -eq 0 ]; then
-  echo -e "${GREEN}✅ Staging deployed: https://staging--proagentic1.netlify.app${NC}"
+if npm run test:coverage; then
+    echo -e "${GREEN}✓ Unit tests passed${NC}"
 else
-  echo -e "${RED}❌ Staging deployment failed${NC}"
-  exit 1
+    echo -e "${RED}✗ Unit tests failed${NC}"
+    exit 1
 fi
 
-# Step 4: Smoke UAT on Staging
-echo ""
-echo -e "${BLUE}Step 4/6: Running Smoke UAT on Staging${NC}"
-echo -e "${YELLOW}⚠️  UAT Skill activation required - please run smoke tests on staging${NC}"
-echo ""
-echo "Target: https://staging--proagentic1.netlify.app"
-echo "Scope: Smoke tests (auth, dashboard, basic functionality)"
-echo ""
-read -p "Press Enter when UAT tests complete, or Ctrl+C to abort..."
+# Gate 3: Build
+step_header "Gate 3: Build Verification"
 
-echo ""
-read -p "Were critical bugs found? (y/N): " critical_bugs
-if [[ "$critical_bugs" =~ ^[Yy]$ ]]; then
-  echo -e "${RED}❌ Critical bugs found in staging UAT - stopping deployment${NC}"
-  exit 1
+if npm run build; then
+    echo -e "${GREEN}✓ Build successful${NC}"
 else
-  echo -e "${GREEN}✅ Staging UAT passed (or non-critical issues only)${NC}"
+    echo -e "${RED}✗ Build failed${NC}"
+    exit 1
 fi
 
-# Step 5: Deploy to Production
-echo ""
-echo -e "${BLUE}Step 5/6: Deploying to Production${NC}"
-echo "Building frontend..."
-npm run build
+# Gate 4: Mock Server Tests
+step_header "Gate 4: Mock Server Tests"
 
-echo ""
-echo "Deploying to Netlify production..."
-netlify deploy --prod --dir=dist
-
-if [ $? -eq 0 ]; then
-  echo -e "${GREEN}✅ Production deployed: https://proagentic.ai${NC}"
+if [ -d "$MOCK_SERVER_DIR" ]; then
+    cd "$MOCK_SERVER_DIR"
+    if npm test; then
+        echo -e "${GREEN}✓ Mock server tests passed${NC}"
+    else
+        echo -e "${RED}✗ Mock server tests failed${NC}"
+        exit 1
+    fi
+    cd "$FRONTEND_DIR"
 else
-  echo -e "${RED}❌ Production deployment failed${NC}"
-  exit 1
+    echo -e "${YELLOW}⚠ Mock server directory not found, skipping${NC}"
 fi
 
-# Step 6: Final Smoke UAT on Production
-echo ""
-echo -e "${BLUE}Step 6/6: Running Final Smoke UAT on Production${NC}"
-echo -e "${YELLOW}⚠️  UAT Skill activation required - please run smoke tests on production${NC}"
-echo ""
-echo "Target: https://proagentic.ai"
-echo "Scope: Smoke tests (auth, dashboard, basic functionality)"
-echo ""
-read -p "Press Enter when UAT tests complete..."
-
-echo ""
-read -p "Were critical bugs found? (y/N): " critical_bugs_prod
-if [[ "$critical_bugs_prod" =~ ^[Yy]$ ]]; then
-  echo -e "${RED}❌ Critical bugs found in production - immediate attention required${NC}"
-  echo ""
-  echo "Consider rollback:"
-  echo "  Netlify: Dashboard → Deployments → Publish previous version"
-  exit 1
+# Gate 5: E2E Tests (optional with --quick)
+if [ "$QUICK_MODE" = true ]; then
+    step_header "Gate 5: E2E Tests (SKIPPED - quick mode)"
+    echo -e "${YELLOW}⚠ E2E tests skipped due to --quick flag${NC}"
 else
-  echo -e "${GREEN}✅ Production UAT passed${NC}"
+    step_header "Gate 5: E2E Tests"
+
+    echo "Installing Playwright browsers..."
+    npx playwright install --with-deps chromium
+
+    if npm run test:e2e; then
+        echo -e "${GREEN}✓ E2E tests passed${NC}"
+    else
+        echo -e "${RED}✗ E2E tests failed${NC}"
+        echo ""
+        echo "View report: npx playwright show-report"
+        exit 1
+    fi
 fi
 
-# Success
+# Calculate duration
+END_TIME=$(date +%s)
+DURATION=$((END_TIME - START_TIME))
+MINUTES=$((DURATION / 60))
+SECONDS=$((DURATION % 60))
+
+# Summary
 echo ""
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}✅ Deployment Complete!${NC}"
+echo -e "${GREEN}✓ All Quality Gates Passed!${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
-echo "Backend:     https://proagentic-server-705044459306.europe-west2.run.app"
-echo "Staging:     https://staging--proagentic1.netlify.app"
-echo "Production:  https://proagentic.ai"
+echo -e "Duration: ${CYAN}${MINUTES}m ${SECONDS}s${NC}"
 echo ""
-echo "Next steps:"
-echo "  - Monitor Cloud Run logs for any backend errors"
-echo "  - Check Netlify dashboard for frontend metrics"
-echo "  - Review UAT reports for tracked issues"
+echo "Ready to deploy:"
 echo ""
+echo -e "  ${CYAN}Production:${NC}  git push origin main"
+echo -e "  ${CYAN}Staging:${NC}     git push origin staging"
+echo -e "  ${CYAN}Preview:${NC}     Push branch and open PR"
+echo ""
+echo "Deployment URLs:"
+echo ""
+echo -e "  ${CYAN}Production:${NC}  https://dfx.proagentic.ai"
+echo -e "  ${CYAN}Staging:${NC}     https://proagentic-dfx-staging.vercel.app"
+echo ""
+
+# Offer to push
+if [ "$BRANCH" = "main" ]; then
+    echo -e "${YELLOW}You're on main branch.${NC}"
+    read -p "Push to production? (y/N): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        git push origin main
+        echo -e "${GREEN}✓ Pushed to production. GitHub Actions will deploy.${NC}"
+    fi
+elif [ "$BRANCH" = "staging" ]; then
+    echo -e "${YELLOW}You're on staging branch.${NC}"
+    read -p "Push to staging? (y/N): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        git push origin staging
+        echo -e "${GREEN}✓ Pushed to staging. GitHub Actions will deploy.${NC}"
+    fi
+else
+    echo "Push your branch to create a PR for preview deployment."
+fi

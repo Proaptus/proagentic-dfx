@@ -57,7 +57,7 @@ const SURROGATE_METRICS: SurrogateMetric[] = [
   },
 ];
 
-const getStatusColor = (status: string) => {
+export const getStatusColor = (status: string) => {
   switch (status) {
     case 'excellent':
       return '#22c55e';
@@ -72,7 +72,7 @@ const getStatusColor = (status: string) => {
   }
 };
 
-const getStatusIcon = (status: string) => {
+export const getStatusIcon = (status: string) => {
   switch (status) {
     case 'excellent':
     case 'good':
