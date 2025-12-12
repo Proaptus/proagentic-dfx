@@ -37,7 +37,7 @@
   },
   {
     "file": "components\\screens\\ValidationScreen.tsx",
-    "line": 78,
+    "line": 73,
     "type": "repeated_structure",
     "category": "Repeated Structure",
     "match": "{\r     id: 'permeation',\r     name: 'Permeation Test',\r     standard: 'ISO 19881 Annex B',\r     arti",
@@ -46,7 +46,7 @@
   },
   {
     "file": "components\\screens\\ValidationScreen.tsx",
-    "line": 98,
+    "line": 93,
     "type": "repeated_structure",
     "category": "Repeated Structure",
     "match": "{\r     id: 'fire',\r     name: 'Bonfire Test',\r     standard: 'UN R134 §6.2.8',\r     articles: 1,\r   ",
@@ -55,7 +55,7 @@
   },
   {
     "file": "components\\screens\\ValidationScreen.tsx",
-    "line": 116,
+    "line": 111,
     "type": "repeated_structure",
     "category": "Repeated Structure",
     "match": "{\r     id: 'fatigue',\r     name: 'Accelerated Stress Rupture',\r     standard: 'ISO 11119-3',\r     ar",

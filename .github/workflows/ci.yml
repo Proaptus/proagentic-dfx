@@ -140,7 +140,7 @@ jobs:
       - name: Install dependencies (fresh for platform-specific native modules)
         run: |
           rm -f package-lock.json
-          npm install
+          npm install --legacy-peer-deps
 
       - name: Build application
         working-directory: proagentic-dfx
