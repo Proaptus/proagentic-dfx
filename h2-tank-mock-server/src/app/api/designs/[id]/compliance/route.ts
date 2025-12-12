@@ -37,6 +37,23 @@ export async function GET(
     // Overall status is pass only if all critical clauses pass
     const allPass = burstRatioPass && fatigueCyclesPass && permeationPass && burstPressurePass;
 
+    // ISSUE-010: Helper to create clause with explicit verified status
+    const createClause = (
+      clause: string,
+      description: string,
+      passes: boolean,
+      actualValue: string,
+      requiredValue: string
+    ) => ({
+      clause,
+      description,
+      status: passes ? 'pass' : 'fail',
+      actual_value: actualValue,
+      required_value: requiredValue,
+      // ISSUE-010: Explicitly set verified based on pass status
+      verified: passes ? 'yes' : 'no',
+    });
+
     const response = {
       design_id: design.id,
       overall_status: allPass ? 'pass' : 'fail',
@@ -46,10 +63,10 @@ export async function GET(
           standard_name: 'Gas cylinders - Composite construction',
           status: burstRatioPass && fatigueCyclesPass && permeationPass ? 'pass' : 'fail',
           clauses: [
-            { clause: '6.2.1', description: 'Burst ratio ≥ 2.25', status: burstRatioPass ? 'pass' : 'fail', actual_value: `${burstRatio}`, required_value: '≥ 2.25' },
-            { clause: '6.4.1', description: 'Ambient cycling ≥ 11,000', status: fatigueCyclesPass ? 'pass' : 'fail', actual_value: `${fatigueCycles}`, required_value: '≥ 11,000' },
-            { clause: '6.5.1', description: 'Permeation ≤ 46 NmL/hr/L', status: permeationPass ? 'pass' : 'fail', actual_value: `${permeationRate}`, required_value: '≤ 46' },
-            { clause: '6.6.1', description: 'Fire test (bonfire)', status: 'pass', actual_value: 'PRD activation', required_value: 'PRD activation' }
+            createClause('6.2.1', 'Burst ratio ≥ 2.25', burstRatioPass, `${burstRatio}`, '≥ 2.25'),
+            createClause('6.4.1', 'Ambient cycling ≥ 11,000', fatigueCyclesPass, `${fatigueCycles}`, '≥ 11,000'),
+            createClause('6.5.1', 'Permeation ≤ 46 NmL/hr/L', permeationPass, `${permeationRate}`, '≤ 46'),
+            createClause('6.6.1', 'Fire test (bonfire)', true, 'PRD activation', 'PRD activation'),
           ]
         },
         {
@@ -57,9 +74,9 @@ export async function GET(
           standard_name: 'Hydrogen vehicles - Safety requirements',
           status: 'pass',
           clauses: [
-            { clause: '5.1.1', description: 'Temperature range -40°C to +85°C', status: 'pass', actual_value: '-40 to +85', required_value: '-40 to +85' },
-            { clause: '5.2.1', description: 'Bonfire test', status: 'pass', actual_value: 'Pass', required_value: 'PRD activation < 20min' },
-            { clause: '5.3.1', description: 'Gunshot penetration test', status: 'pass', actual_value: 'Pass', required_value: 'No rupture' }
+            createClause('5.1.1', 'Temperature range -40°C to +85°C', true, '-40 to +85', '-40 to +85'),
+            createClause('5.2.1', 'Bonfire test', true, 'Pass', 'PRD activation < 20min'),
+            createClause('5.3.1', 'Gunshot penetration test', true, 'Pass', 'No rupture'),
           ]
         },
         {
@@ -67,8 +84,8 @@ export async function GET(
           standard_name: 'Type-approval (superseded)',
           status: burstPressurePass && ec79CyclesPass ? 'pass' : 'fail',
           clauses: [
-            { clause: '4.1', description: 'Burst test', status: burstPressurePass ? 'pass' : 'fail', actual_value: `${burstPressure} bar`, required_value: '≥ 1575 bar' },
-            { clause: '4.2', description: 'Pressure cycling', status: ec79CyclesPass ? 'pass' : 'fail', actual_value: `${fatigueCycles}`, required_value: '≥ 5,500' }
+            createClause('4.1', 'Burst test', burstPressurePass, `${burstPressure} bar`, '≥ 1575 bar'),
+            createClause('4.2', 'Pressure cycling', ec79CyclesPass, `${fatigueCycles}`, '≥ 5,500'),
           ]
         }
       ]

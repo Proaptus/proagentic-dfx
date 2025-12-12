@@ -45,6 +45,20 @@ const STATIC_RESPONSE = {
   clarification_needed: []
 };
 
+// ISSUE-008: Helper to parse numbers with SI prefixes (k=1000, M=1000000)
+function parseNumberWithSuffix(value: string): number {
+  const cleanValue = value.replace(/[,\s]/g, '').toLowerCase();
+  const match = cleanValue.match(/^([\d.]+)([km])?$/i);
+  if (!match) return parseFloat(cleanValue) || 0;
+
+  const num = parseFloat(match[1]);
+  const suffix = match[2]?.toLowerCase();
+
+  if (suffix === 'k') return num * 1000;
+  if (suffix === 'm') return num * 1000000;
+  return num;
+}
+
 // Simple NL parsing logic for simulated mode
 function parseNaturalLanguage(text: string) {
   const result = JSON.parse(JSON.stringify(STATIC_RESPONSE));
@@ -58,22 +72,22 @@ function parseNaturalLanguage(text: string) {
     result.derived_requirements.burst_pressure_bar = result.parsed_requirements.working_pressure_bar * 2.25;
   }
 
-  // Parse volume
-  const volumeMatch = lowerText.match(/(\d+)\s*l(?:iter)?s?/);
+  // ISSUE-008: Parse volume with k/M suffix support (e.g., "50k liters")
+  const volumeMatch = lowerText.match(/([\d.]+[km]?)\s*l(?:iter)?s?/i);
   if (volumeMatch) {
-    result.parsed_requirements.internal_volume_liters = parseInt(volumeMatch[1]);
+    result.parsed_requirements.internal_volume_liters = parseNumberWithSuffix(volumeMatch[1]);
   }
 
-  // Parse weight
-  const weightMatch = lowerText.match(/(\d+)\s*kg/);
+  // ISSUE-008: Parse weight with k/M suffix support
+  const weightMatch = lowerText.match(/([\d.]+[km]?)\s*kg/i);
   if (weightMatch) {
-    result.parsed_requirements.target_weight_kg = parseInt(weightMatch[1]);
+    result.parsed_requirements.target_weight_kg = parseNumberWithSuffix(weightMatch[1]);
   }
 
-  // Parse cost
-  const costMatch = lowerText.match(/[€$]?\s*(\d+[,.]?\d*)\s*(?:maximum|max)?/);
+  // ISSUE-008: Parse cost with k/M suffix support (e.g., "€15k", "$50k")
+  const costMatch = lowerText.match(/[€$£]?\s*([\d,.]+[km]?)\s*(?:maximum|max)?/i);
   if (costMatch && lowerText.includes('cost')) {
-    result.parsed_requirements.target_cost_eur = parseInt(costMatch[1].replace(/[,\.]/g, ''));
+    result.parsed_requirements.target_cost_eur = parseNumberWithSuffix(costMatch[1]);
   }
 
   // Parse temperature range
@@ -95,10 +109,10 @@ function parseNaturalLanguage(text: string) {
     result.parsed_requirements.max_permeation_rate = parseInt(permMatch[1]);
   }
 
-  // Parse fatigue cycles
-  const fatigueMatch = lowerText.match(/(\d+[,.]?\d*)\s*cycles/);
+  // ISSUE-008: Parse fatigue cycles with k/M suffix support (e.g., "50k cycles")
+  const fatigueMatch = lowerText.match(/([\d,.]+[km]?)\s*cycles/i);
   if (fatigueMatch) {
-    result.parsed_requirements.fatigue_cycles = parseInt(fatigueMatch[1].replace(/[,\.]/g, ''));
+    result.parsed_requirements.fatigue_cycles = parseNumberWithSuffix(fatigueMatch[1]);
   }
 
   // Parse region

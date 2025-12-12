@@ -40,8 +40,8 @@ export async function GET(
       const templateContent = await fs.readFile(templatePath, 'utf-8');
       const template = JSON.parse(templateContent);
 
-      // Load Pareto data to get design parameters
-      const paretoPath = path.join(process.cwd(), '..', 'proagentic-dfx', 'data', 'static', 'pareto', 'pareto-50.json');
+      // ISSUE-003: Load Pareto data from mock server's own data directory
+      const paretoPath = path.join(process.cwd(), 'data', 'static', 'pareto', 'pareto-50.json');
       const paretoContent = await fs.readFile(paretoPath, 'utf-8');
       const paretoData = JSON.parse(paretoContent);
 

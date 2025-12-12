@@ -165,31 +165,40 @@ export function ComplianceScreenEnhanced() {
   }, [compliance]);
 
   // Transform to matrix format (memoized)
+  // ISSUE-010: Use verified field from API if available, fallback to status-based logic
   const matrixRequirements: MatrixRequirement[] = useMemo(() => {
     if (!compliance) return [];
 
     return compliance.standards.flatMap((standard) =>
-      standard.clauses.map((clause, idx) => ({
-        requirement_id: `REQ-${standard.standard_id.replace(/[^0-9]/g, '')}-${String(idx + 1).padStart(3, '0')}`,
-        standard: standard.standard_id,
-        clause: clause.clause,
-        description: clause.description,
-        design_check: clause.status === 'pass' ? ('complete' as const) : ('incomplete' as const),
-        test_required: clause.status === 'fail',
-        verified:
-          clause.status === 'pass'
-            ? ('yes' as const)
-            : clause.status === 'fail'
-              ? ('no' as const)
-              : ('pending' as const),
-        status: clause.status,
-        priority:
-          clause.status === 'fail'
-            ? ('critical' as const)
-            : clause.status === 'warning'
-              ? ('high' as const)
-              : ('medium' as const),
-      }))
+      standard.clauses.map((clause, idx) => {
+        // ISSUE-010: Check for explicit verified field from API
+        const clauseWithVerified = clause as typeof clause & { verified?: 'yes' | 'no' | 'pending' };
+        const verifiedFromApi = clauseWithVerified.verified;
+
+        return {
+          requirement_id: `REQ-${standard.standard_id.replace(/[^0-9]/g, '')}-${String(idx + 1).padStart(3, '0')}`,
+          standard: standard.standard_id,
+          clause: clause.clause,
+          description: clause.description,
+          design_check: clause.status === 'pass' ? ('complete' as const) : ('incomplete' as const),
+          test_required: clause.status === 'fail',
+          // ISSUE-010: Use API verified field if available, otherwise derive from status
+          verified: verifiedFromApi ?? (
+            clause.status === 'pass'
+              ? ('yes' as const)
+              : clause.status === 'fail'
+                ? ('no' as const)
+                : ('pending' as const)
+          ),
+          status: clause.status,
+          priority:
+            clause.status === 'fail'
+              ? ('critical' as const)
+              : clause.status === 'warning'
+                ? ('high' as const)
+                : ('medium' as const),
+        };
+      })
     );
   }, [compliance]);
 

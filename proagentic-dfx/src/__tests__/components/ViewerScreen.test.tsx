@@ -707,7 +707,8 @@ describe('ViewerScreen', () => {
   });
 
   describe('Design Selection - Pareto Front', () => {
-    it('should show only first 5 designs from Pareto front', () => {
+    // ISSUE-002: Updated to show ALL Pareto designs plus featured designs
+    it('should show all Pareto designs plus featured designs', () => {
       (useAppStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         currentDesign: 'P1',
         setCurrentDesign: mockSetCurrentDesign,
@@ -725,10 +726,14 @@ describe('ViewerScreen', () => {
 
       render(<ViewerScreen />);
 
-      // Should show first 5 Pareto designs
+      // ISSUE-002: Should show ALL Pareto designs (P1-P7)
       expect(screen.getByRole('button', { name: /Select Design P1/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Select Design P5/i })).toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: /Select Design P6/i })).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Select Design P6/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Select Design P7/i })).toBeInTheDocument();
+      // Should also show featured designs A-E
+      expect(screen.getByRole('button', { name: /Select Design A/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Select Design E/i })).toBeInTheDocument();
     });
 
     it('should fall back to default designs when Pareto front is empty', () => {

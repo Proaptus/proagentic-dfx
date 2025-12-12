@@ -146,11 +146,12 @@ export function ViewerScreen() {
     }
   }, []);
 
-  // Available designs - memoized for performance
+  // ISSUE-002: Available designs - show all Pareto designs + featured designs (A-E)
   const designs = useMemo(() => {
-    return paretoFront.length > 0
-      ? paretoFront.slice(0, 5).map((d) => d.id)
-      : ['A', 'B', 'C', 'D', 'E'];
+    const featuredDesigns = ['A', 'B', 'C', 'D', 'E'];
+    const paretoIds = paretoFront.map((d) => d.id);
+    // Combine: Pareto designs first, then featured designs (deduped)
+    return [...paretoIds, ...featuredDesigns.filter(id => !paretoIds.includes(id))];
   }, [paretoFront]);
 
   return (
@@ -333,24 +334,25 @@ export function ViewerScreen() {
             pendingPoints={pendingPoints}
           />
 
-          {/* Professional Design Selector */}
+          {/* Professional Design Selector - ISSUE-002: Updated to show all Pareto designs */}
           <nav
             className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
             aria-label="Design selection"
           >
-            <div className="bg-gray-50 border-b border-gray-200 px-4 py-3">
+            <div className="bg-gray-50 border-b border-gray-200 px-4 py-3 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
                 Design Selection
               </h2>
+              <span className="text-xs text-gray-500">{designs.length} designs</span>
             </div>
-            <div className="p-4 space-y-2" role="group" aria-label="Available designs">
+            <div className="p-4 space-y-2 max-h-[400px] overflow-y-auto" role="group" aria-label="Available designs">
               {designs.map((id) => (
                 <button
                   key={id}
                   onClick={() => setCurrentDesign(id)}
-                  className={`w-full px-4 py-3 rounded-lg text-left text-sm font-medium transition-all duration-200 ${
+                  className={`w-full px-4 py-2.5 rounded-lg text-left text-sm font-medium transition-all duration-200 ${
                     currentDesign === id
-                      ? 'bg-blue-600 text-white shadow-md transform scale-105'
+                      ? 'bg-blue-600 text-white shadow-md'
                       : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200'
                   }`}
                   aria-pressed={currentDesign === id}
