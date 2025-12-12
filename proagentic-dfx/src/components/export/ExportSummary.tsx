@@ -11,7 +11,7 @@
  * - Accessible status announcements
  */
 
-import { CheckCircle, Download, FileArchive, Mail } from 'lucide-react';
+import { CheckCircle, Download, FileArchive, Mail, Loader2 } from 'lucide-react';
 import { memo } from 'react';
 import { Button } from '@/components/ui/Button';
 import { ExportProgressIndicator } from './ExportProgressIndicator';
@@ -79,18 +79,30 @@ export const ExportSummary = memo(function ExportSummary({
             </div>
           </div>
 
-          {/* Action Buttons */}
-          {!exportId ? (
+          {/* Action Buttons - ISSUE-012: Enhanced progress indicator */}
+          {!exportId && !exporting ? (
             <Button
               className="w-full"
               onClick={onExport}
-              loading={exporting}
               disabled={totalSelected === 0}
               aria-label={`Generate export package with ${totalSelected} files`}
             >
               <FileArchive className="mr-2" size={16} />
               Generate Export
             </Button>
+          ) : !exportId && exporting ? (
+            /* ISSUE-012: Show preparing state while API call is in progress */
+            <div className="space-y-3">
+              <div
+                className="flex items-center justify-center gap-3 py-4 bg-blue-50 rounded-lg border border-blue-200"
+                role="status"
+                aria-live="polite"
+              >
+                <Loader2 className="animate-spin text-blue-600" size={20} />
+                <span className="text-sm font-medium text-blue-700">Preparing export package...</span>
+              </div>
+              <p className="text-xs text-center text-gray-500">Initializing export process</p>
+            </div>
           ) : isReady ? (
             <div className="space-y-2">
               <Button

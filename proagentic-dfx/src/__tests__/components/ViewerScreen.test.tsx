@@ -444,9 +444,13 @@ describe('ViewerScreen', () => {
 
       render(<ViewerScreen />);
 
+      // ISSUE-011: Updated to match new error UI with retry button
       await waitFor(() => {
-        expect(screen.getByText(/No geometry data available/i)).toBeInTheDocument();
+        expect(screen.getByText(/Failed to Load Geometry/i)).toBeInTheDocument();
       });
+
+      // Should show retry button for error recovery
+      expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
 
       expect(consoleError).toHaveBeenCalled();
       consoleError.mockRestore();

@@ -336,7 +336,11 @@ describe('ExportScreen', () => {
       });
       await user.click(generateButton);
 
-      expect(generateButton).toHaveAttribute('aria-busy', 'true');
+      // ISSUE-012: Button is replaced with loading spinner during export preparation
+      // Check that the loading state is displayed instead of the button
+      await waitFor(() => {
+        expect(screen.getByText(/Preparing export package/i)).toBeInTheDocument();
+      });
     });
   });
 

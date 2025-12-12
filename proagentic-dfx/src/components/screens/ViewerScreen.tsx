@@ -2,23 +2,19 @@
 
 import { useEffect, useState, useMemo, lazy, Suspense, useCallback } from 'react';
 import { useAppStore } from '@/lib/stores/app-store';
-import { getDesignGeometry, getDesignStress, getDesign } from '@/lib/api/client';
+import { getDesignStress } from '@/lib/api/client';
 import type { StressType, LoadCase } from '@/lib/api/client';
 import { Button } from '@/components/ui/Button';
 import type { DesignGeometry, DesignStress, DesignSummary, CompositeLayer } from '@/lib/types';
-import { Eye, Activity, ArrowRight, Camera } from 'lucide-react';
-import {
-  MeasurementTools,
-  type MeasurementMode,
-  type Measurement,
-  calculateDistance,
-  calculateAngle,
-  calculateRadius
-} from '@/components/viewer/MeasurementTools';
+import { Eye, Activity, ArrowRight, Camera, RefreshCw, AlertCircle } from 'lucide-react';
+import { MeasurementTools, type Measurement } from '@/components/viewer/MeasurementTools';
 import { ViewModeControls } from '@/components/viewer/ViewModeControls';
 import { LayerControls } from '@/components/viewer/LayerControls';
 import { ExportDialog } from '@/components/viewer/ExportDialog';
 import { captureAndDownloadScreenshot, type ScreenshotOptions } from '@/lib/export/screenshot-utils';
+import { useViewerKeyboardShortcuts } from '@/components/viewer/useViewerKeyboardShortcuts';
+import { useGeometryLoader } from '@/components/viewer/useGeometryLoader';
+import { useMeasurements } from '@/components/viewer/useMeasurements';
 
 // Dynamic import for CAD viewer (client-side only)
 const CADTankViewer = lazy(() => import('@/components/cad/CADTankViewer'));
@@ -26,10 +22,10 @@ const CADTankViewer = lazy(() => import('@/components/cad/CADTankViewer'));
 export function ViewerScreen() {
   const { currentDesign, setCurrentDesign, setScreen, paretoFront } = useAppStore();
 
-  const [geometry, setGeometry] = useState<DesignGeometry | null>(null);
+  // ISSUE-011: Geometry loading with timeout and retry (extracted to hook)
+  const { geometry, summary, loading, loadError, retryLoadGeometry } = useGeometryLoader(currentDesign);
+
   const [stress, setStress] = useState<DesignStress | null>(null);
-  const [summary, setSummary] = useState<DesignSummary | null>(null);
-  const [loading, setLoading] = useState(false);
 
   // Stress type selection state
   const [selectedStressType, setSelectedStressType] = useState<StressType>('vonMises');
@@ -48,14 +44,30 @@ export function ViewerScreen() {
   // Layer visibility controls
   const [visibleLayers, setVisibleLayers] = useState<Set<number> | undefined>(undefined);
 
-  // Measurement state
-  const [measurementMode, setMeasurementMode] = useState<MeasurementMode>(null);
-  const [measurements, setMeasurements] = useState<Measurement[]>([]);
-  const [pendingPoints, setPendingPoints] = useState<Array<{ x: number; y: number; z: number }>>([]);
+  // Measurement state (extracted to hook)
+  const {
+    measurementMode,
+    measurements,
+    pendingPoints,
+    setMeasurementMode,
+    handlePointClick,
+    clearMeasurements,
+    deleteMeasurement,
+    clearPendingPoints,
+  } = useMeasurements();
 
   // Export state
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [exportPreview, setExportPreview] = useState<string>('');
+
+  // ISSUE-020: Keyboard shortcuts for view mode toggles (extracted to hook)
+  useViewerKeyboardShortcuts(useMemo(() => ({
+    onToggleStress: () => setShowStress((prev) => !prev),
+    onToggleWireframe: () => setShowWireframe((prev) => !prev),
+    onToggleCrossSection: () => setShowCrossSection((prev) => !prev),
+    onToggleAutoRotate: () => setAutoRotate((prev) => !prev),
+    onToggleLiner: () => setShowLiner((prev) => !prev),
+  }), []));
 
   // Auto-disable auto-rotate when measuring
   useEffect(() => {
@@ -63,49 +75,6 @@ export function ViewerScreen() {
       setAutoRotate(false);
     }
   }, [measurementMode]);
-
-  // Handle point selection with useCallback for performance
-  const handlePointClick = useCallback((point: { x: number; y: number; z: number }) => {
-    if (!measurementMode) return;
-    setPendingPoints((prev) => [...prev, point]);
-  }, [measurementMode]);
-
-  // Auto-create measurements
-  useEffect(() => {
-    if (!measurementMode || pendingPoints.length === 0) return;
-
-    let value = 0;
-    let unit = '';
-    let complete = false;
-
-    if (measurementMode === 'distance' && pendingPoints.length === 2) {
-      value = calculateDistance(pendingPoints[0], pendingPoints[1]);
-      unit = 'mm';
-      complete = true;
-    } else if (measurementMode === 'angle' && pendingPoints.length === 3) {
-      value = calculateAngle(pendingPoints[0], pendingPoints[1], pendingPoints[2]);
-      unit = '°';
-      complete = true;
-    } else if (measurementMode === 'radius' && pendingPoints.length === 2) {
-      value = calculateRadius(pendingPoints[0], pendingPoints[1]);
-      unit = 'mm';
-      complete = true;
-    }
-
-    if (complete) {
-      const newMeasurement: Measurement = {
-        id: Math.random().toString(36).substr(2, 9),
-        type: measurementMode,
-        value,
-        unit,
-        points: [...pendingPoints],
-        timestamp: Date.now(),
-      };
-      setMeasurements((prev) => [newMeasurement, ...prev]);
-      setPendingPoints([]);
-      // Optional: Exit mode after one measurement? No, let user continue.
-    }
-  }, [pendingPoints, measurementMode]);
 
   // Get layers from geometry with useMemo for performance
   const layers: CompositeLayer[] = useMemo(() => {
@@ -121,23 +90,6 @@ export function ViewerScreen() {
       setCurrentDesign('C');
     }
   }, [currentDesign, setCurrentDesign]);
-
-  // Load geometry and summary data (not stress - that's handled separately)
-  useEffect(() => {
-    if (!currentDesign) return;
-
-    setLoading(true);
-    Promise.all([
-      getDesignGeometry(currentDesign),
-      getDesign(currentDesign),
-    ])
-      .then(([geo, sum]) => {
-        setGeometry(geo as DesignGeometry);
-        setSummary(sum as DesignSummary);
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [currentDesign]);
 
   // Load stress data when design, stress type, or load case changes
   useEffect(() => {
@@ -259,6 +211,21 @@ export function ViewerScreen() {
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4" aria-hidden="true"></div>
                   <p className="text-sm font-medium">Loading geometry...</p>
                 </div>
+              ) : loadError ? (
+                /* ISSUE-011: Error state with retry button */
+                <div className="h-full flex flex-col items-center justify-center text-red-500" role="alert" aria-live="assertive">
+                  <AlertCircle size={48} className="mb-4" aria-hidden="true" />
+                  <p className="text-sm font-semibold mb-2">Failed to Load Geometry</p>
+                  <p className="text-xs text-gray-500 mb-4 max-w-xs text-center">{loadError}</p>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={retryLoadGeometry}
+                    icon={<RefreshCw size={14} />}
+                  >
+                    Retry
+                  </Button>
+                </div>
               ) : geometry ? (
                 <Suspense fallback={
                   <div className="h-full flex flex-col items-center justify-center text-gray-500" role="status" aria-live="polite">
@@ -358,11 +325,11 @@ export function ViewerScreen() {
             mode={measurementMode}
             onModeChange={(mode) => {
               setMeasurementMode(mode);
-              setPendingPoints([]); // Clear pending on mode change
+              clearPendingPoints(); // Clear pending on mode change
             }}
             measurements={measurements}
-            onClearMeasurement={(id) => setMeasurements(prev => prev.filter(m => m.id !== id))}
-            onClearAll={() => setMeasurements([])}
+            onClearMeasurement={deleteMeasurement}
+            onClearAll={clearMeasurements}
             pendingPoints={pendingPoints}
           />
 

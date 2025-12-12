@@ -181,8 +181,8 @@ describe('ParetoScreen', () => {
       mockStore.paretoFront = mockParetoDesigns;
       render(<ParetoScreen />);
 
-      // Check for design cards in the "Featured Optimal Designs" section
-      const featuredSection = screen.getByText('Featured Optimal Designs').closest('div');
+      // Check for design cards in the "All Pareto Designs" section (updated ISSUE-014/015)
+      const featuredSection = screen.getByText('All Pareto Designs').closest('div');
       expect(featuredSection).toBeInTheDocument();
 
       // Verify all designs are present by checking for their selection buttons

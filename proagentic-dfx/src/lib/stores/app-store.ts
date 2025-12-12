@@ -65,7 +65,15 @@ interface AppState extends StateSnapshot {
 }
 
 // Valid design IDs from mock server
+// Featured designs: A-E, Pareto optimization designs: P06-P50
 const VALID_DESIGN_IDS = ['A', 'B', 'C', 'D', 'E'];
+
+// Extended validation to include Pareto-generated designs (P06-P50)
+const isValidParetoDesignId = (id: string): boolean => {
+  if (!id) return false;
+  // Match P followed by 2 digits (P06-P99)
+  return /^P\d{2}$/i.test(id);
+};
 
 const initialState: StateSnapshot = {
   currentScreen: 'requirements',
@@ -78,10 +86,12 @@ const initialState: StateSnapshot = {
   currency: 'EUR',
 };
 
-// Validate design ID
+// Validate design ID - accepts A-E (featured) or P06-P50 (Pareto optimization)
 const isValidDesignId = (id: string | null): boolean => {
   if (!id) return true; // null is valid
-  return VALID_DESIGN_IDS.includes(id.toUpperCase());
+  const upperCaseId = id.toUpperCase();
+  // Accept A-E (featured designs) or P06-P99 (Pareto-generated)
+  return VALID_DESIGN_IDS.includes(upperCaseId) || isValidParetoDesignId(upperCaseId);
 };
 
 // Helper to create snapshot from state

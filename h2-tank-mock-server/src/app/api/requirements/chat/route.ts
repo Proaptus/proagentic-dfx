@@ -62,6 +62,20 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// ISSUE-008: Helper to parse numbers with "k/K" multiplier (e.g., "50k" -> 50000)
+function parseNumberWithMultiplier(str: string): number {
+  const cleaned = str.replace(/,/g, '').trim();
+  const match = cleaned.match(/^(\d+\.?\d*)\s*([kKmM])?$/);
+  if (!match) return parseInt(cleaned, 10) || 0;
+
+  const base = parseFloat(match[1]);
+  const multiplier = match[2]?.toLowerCase();
+
+  if (multiplier === 'k') return base * 1000;
+  if (multiplier === 'm') return base * 1000000;
+  return base;
+}
+
 function extractRequirementsFromConversation(
   history: ConversationMessage[],
   latestMessage: string
@@ -138,13 +152,30 @@ function extractRequirementsFromConversation(
     requirements.certification_region = { value: 'USA', confidence: 0.9 };
   }
 
-  // Fatigue cycles
-  const fatigueMatch = allUserMessages.match(/(\d+[,\d]*)\s*cycles?/i);
+  // ISSUE-008: Fatigue cycles with "k" multiplier support
+  // Matches: "50k cycles", "50,000 cycles", "50000 cycles", "11k fatigue cycles"
+  const fatigueMatch = allUserMessages.match(/(\d+[,\d]*[kKmM]?)\s*(?:fatigue\s*)?cycles?/i);
   if (fatigueMatch) {
     requirements.fatigue_cycles = {
-      value: parseInt(fatigueMatch[1].replace(/,/g, ''), 10),
+      value: parseNumberWithMultiplier(fatigueMatch[1]),
       confidence: 0.9,
     };
+  }
+
+  // ISSUE-009: Better capacity vs weight detection with context awareness
+  // Look for explicit "capacity" keyword first
+  const capacityKeywordMatch = allUserMessages.match(/(?:storage\s+)?capacity\s*(?:of\s+)?(\d+\.?\d*)\s*kg/i);
+  if (capacityKeywordMatch) {
+    const value = parseFloat(capacityKeywordMatch[1]);
+    requirements.storage_capacity_kg = { value, confidence: 0.95 };
+    // Estimate volume from mass (assuming 700 bar)
+    requirements.internal_volume_liters = { value: Math.round(value * 30), confidence: 0.7 };
+  }
+
+  // Look for explicit "weight" or "weigh" keywords (not "capacity")
+  const weightKeywordMatch = allUserMessages.match(/(?:target\s+)?(?:weight|weigh|max(?:imum)?\s+weight)\s*(?:of\s+)?(\d+\.?\d*)\s*kg/i);
+  if (weightKeywordMatch && !capacityKeywordMatch) {
+    requirements.target_weight_kg = { value: parseFloat(weightKeywordMatch[1]), confidence: 0.95 };
   }
 
   return requirements;

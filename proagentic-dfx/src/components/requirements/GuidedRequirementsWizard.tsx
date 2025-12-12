@@ -1,87 +1,19 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/Button';
+import { ChevronRight, ChevronLeft, Check, AlertTriangle } from 'lucide-react';
 import {
-  Car,
-  Plane,
-  Factory,
-  Zap,
-  ChevronRight,
-  ChevronLeft,
-  Check,
-} from 'lucide-react';
+  type ApplicationType,
+  type ValidationErrors,
+  VALIDATION_RULES,
+  STEPS,
+  APPLICATION_PRESETS,
+} from './wizard-constants';
 
 interface GuidedRequirementsWizardProps {
   onComplete: (requirements: Record<string, unknown>) => void;
 }
-
-type ApplicationType = 'automotive' | 'aviation' | 'stationary' | 'custom';
-
-const STEPS = ['Application', 'Pressure', 'Capacity', 'Constraints', 'Environment', 'Certification', 'Review'];
-
-const APPLICATION_PRESETS = {
-  automotive: {
-    label: 'Automotive',
-    icon: Car,
-    description: '700 bar Type IV for fuel cell vehicles',
-    defaults: {
-      working_pressure_bar: 700,
-      internal_volume_liters: 150,
-      target_weight_kg: 80,
-      target_cost_eur: 15000,
-      operating_temp_min_c: -40,
-      operating_temp_max_c: 85,
-      fatigue_cycles: 11000,
-      certification_region: 'EU',
-    },
-  },
-  aviation: {
-    label: 'Aviation',
-    icon: Plane,
-    description: '350 bar lightweight for drones/aircraft',
-    defaults: {
-      working_pressure_bar: 350,
-      internal_volume_liters: 50,
-      target_weight_kg: 25,
-      target_cost_eur: 20000,
-      operating_temp_min_c: -55,
-      operating_temp_max_c: 70,
-      fatigue_cycles: 20000,
-      certification_region: 'International',
-    },
-  },
-  stationary: {
-    label: 'Stationary',
-    icon: Factory,
-    description: '500 bar for energy storage',
-    defaults: {
-      working_pressure_bar: 500,
-      internal_volume_liters: 500,
-      target_weight_kg: 200,
-      target_cost_eur: 8000,
-      operating_temp_min_c: -10,
-      operating_temp_max_c: 50,
-      fatigue_cycles: 45000,
-      certification_region: 'EU',
-    },
-  },
-  custom: {
-    label: 'Custom',
-    icon: Zap,
-    description: 'Define your own specs',
-    defaults: {
-      working_pressure_bar: 700,
-      internal_volume_liters: 100,
-      target_weight_kg: 50,
-      target_cost_eur: 10000,
-      operating_temp_min_c: -40,
-      operating_temp_max_c: 85,
-      fatigue_cycles: 11000,
-      certification_region: 'EU',
-    },
-  },
-};
 
 export function GuidedRequirementsWizard({ onComplete }: GuidedRequirementsWizardProps) {
   const [currentStep, setCurrentStep] = useState(0);
@@ -97,6 +29,60 @@ export function GuidedRequirementsWizard({ onComplete }: GuidedRequirementsWizar
     certification_region: 'EU',
   });
 
+  // Validation logic (ISSUE-005, ISSUE-006, ISSUE-007)
+  const validationErrors = useMemo((): ValidationErrors => {
+    const errors: ValidationErrors = {};
+
+    // ISSUE-005: Pressure validation (200-1000 bar)
+    if (requirements.working_pressure_bar < VALIDATION_RULES.pressure.min) {
+      errors.working_pressure_bar = `Pressure must be at least ${VALIDATION_RULES.pressure.min} bar`;
+    } else if (requirements.working_pressure_bar > VALIDATION_RULES.pressure.max) {
+      errors.working_pressure_bar = `Pressure cannot exceed ${VALIDATION_RULES.pressure.max} bar (max for H2 tanks)`;
+    }
+
+    // ISSUE-006: Weight validation (must be positive)
+    if (requirements.target_weight_kg <= 0) {
+      errors.target_weight_kg = 'Weight must be greater than 0 kg';
+    }
+
+    // ISSUE-007: Temperature range validation (max > min)
+    if (requirements.operating_temp_max_c <= requirements.operating_temp_min_c) {
+      errors.operating_temp = 'Maximum temperature must be greater than minimum temperature';
+    }
+
+    // Volume validation
+    if (requirements.internal_volume_liters < VALIDATION_RULES.volume.min) {
+      errors.internal_volume_liters = `Volume must be at least ${VALIDATION_RULES.volume.min} liters`;
+    } else if (requirements.internal_volume_liters > VALIDATION_RULES.volume.max) {
+      errors.internal_volume_liters = `Volume cannot exceed ${VALIDATION_RULES.volume.max} liters`;
+    }
+
+    // Cost validation
+    if (requirements.target_cost_eur <= 0) {
+      errors.target_cost_eur = 'Cost must be greater than 0';
+    }
+
+    // Fatigue cycles validation
+    if (requirements.fatigue_cycles < VALIDATION_RULES.fatigueCycles.min) {
+      errors.fatigue_cycles = `Fatigue cycles must be at least ${VALIDATION_RULES.fatigueCycles.min.toLocaleString()}`;
+    }
+
+    return errors;
+  }, [requirements]);
+
+  // Check if current step has validation errors
+  const currentStepHasErrors = useMemo(() => {
+    switch (currentStep) {
+      case 1: return !!validationErrors.working_pressure_bar;
+      case 2: return !!validationErrors.internal_volume_liters;
+      case 3: return !!validationErrors.target_weight_kg || !!validationErrors.target_cost_eur;
+      case 4: return !!validationErrors.operating_temp || !!validationErrors.fatigue_cycles;
+      default: return false;
+    }
+  }, [currentStep, validationErrors]);
+
+  const hasAnyErrors = Object.keys(validationErrors).length > 0;
+
   const handleApplicationSelect = useCallback((type: ApplicationType) => {
     setApplicationType(type);
     const preset = APPLICATION_PRESETS[type];
@@ -108,9 +94,17 @@ export function GuidedRequirementsWizard({ onComplete }: GuidedRequirementsWizar
     setRequirements((prev) => ({ ...prev, [key]: value }));
   }, []);
 
-  const nextStep = () => currentStep < STEPS.length - 1 && setCurrentStep(currentStep + 1);
+  const nextStep = () => {
+    if (!currentStepHasErrors && currentStep < STEPS.length - 1) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
   const prevStep = () => currentStep > 0 && setCurrentStep(currentStep - 1);
-  const handleComplete = () => onComplete(requirements);
+  const handleComplete = () => {
+    if (!hasAnyErrors) {
+      onComplete(requirements);
+    }
+  };
 
   const renderContent = () => {
     switch (currentStep) {
@@ -165,9 +159,20 @@ export function GuidedRequirementsWizard({ onComplete }: GuidedRequirementsWizar
               type="number"
               value={requirements.working_pressure_bar}
               onChange={(e) => updateRequirement('working_pressure_bar', parseInt(e.target.value) || 0)}
-              className="w-full px-3 py-2 border border-gray-200 rounded text-sm"
+              className={`w-full px-3 py-2 border rounded text-sm ${
+                validationErrors.working_pressure_bar ? 'border-red-500 bg-red-50' : 'border-gray-200'
+              }`}
               placeholder="Custom pressure"
+              min={VALIDATION_RULES.pressure.min}
+              max={VALIDATION_RULES.pressure.max}
             />
+            {validationErrors.working_pressure_bar && (
+              <div className="flex items-center gap-2 text-red-600 text-sm" role="alert">
+                <AlertTriangle size={16} />
+                <span>{validationErrors.working_pressure_bar}</span>
+              </div>
+            )}
+            <p className="text-xs text-gray-500">Valid range: {VALIDATION_RULES.pressure.min}-{VALIDATION_RULES.pressure.max} bar</p>
           </div>
         );
 
@@ -209,8 +214,17 @@ export function GuidedRequirementsWizard({ onComplete }: GuidedRequirementsWizar
                 type="number"
                 value={requirements.target_weight_kg}
                 onChange={(e) => updateRequirement('target_weight_kg', parseInt(e.target.value) || 0)}
-                className="w-full px-3 py-2 border border-gray-200 rounded text-sm"
+                className={`w-full px-3 py-2 border rounded text-sm ${
+                  validationErrors.target_weight_kg ? 'border-red-500 bg-red-50' : 'border-gray-200'
+                }`}
+                min={1}
               />
+              {validationErrors.target_weight_kg && (
+                <div className="flex items-center gap-2 text-red-600 text-sm mt-1" role="alert">
+                  <AlertTriangle size={16} />
+                  <span>{validationErrors.target_weight_kg}</span>
+                </div>
+              )}
               <div className="flex gap-2 mt-2">
                 {[50, 80, 100, 150].map((w) => (
                   <button
@@ -231,8 +245,17 @@ export function GuidedRequirementsWizard({ onComplete }: GuidedRequirementsWizar
                 type="number"
                 value={requirements.target_cost_eur}
                 onChange={(e) => updateRequirement('target_cost_eur', parseInt(e.target.value) || 0)}
-                className="w-full px-3 py-2 border border-gray-200 rounded text-sm"
+                className={`w-full px-3 py-2 border rounded text-sm ${
+                  validationErrors.target_cost_eur ? 'border-red-500 bg-red-50' : 'border-gray-200'
+                }`}
+                min={100}
               />
+              {validationErrors.target_cost_eur && (
+                <div className="flex items-center gap-2 text-red-600 text-sm mt-1" role="alert">
+                  <AlertTriangle size={16} />
+                  <span>{validationErrors.target_cost_eur}</span>
+                </div>
+              )}
               <div className="flex gap-2 mt-2">
                 {[8000, 12000, 15000, 20000].map((c) => (
                   <button
@@ -260,7 +283,9 @@ export function GuidedRequirementsWizard({ onComplete }: GuidedRequirementsWizar
                   type="number"
                   value={requirements.operating_temp_min_c}
                   onChange={(e) => updateRequirement('operating_temp_min_c', parseInt(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded text-sm"
+                  className={`w-full px-3 py-2 border rounded text-sm ${
+                    validationErrors.operating_temp ? 'border-red-500 bg-red-50' : 'border-gray-200'
+                  }`}
                 />
               </div>
               <div>
@@ -269,18 +294,35 @@ export function GuidedRequirementsWizard({ onComplete }: GuidedRequirementsWizar
                   type="number"
                   value={requirements.operating_temp_max_c}
                   onChange={(e) => updateRequirement('operating_temp_max_c', parseInt(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded text-sm"
+                  className={`w-full px-3 py-2 border rounded text-sm ${
+                    validationErrors.operating_temp ? 'border-red-500 bg-red-50' : 'border-gray-200'
+                  }`}
                 />
               </div>
             </div>
+            {validationErrors.operating_temp && (
+              <div className="flex items-center gap-2 text-red-600 text-sm" role="alert">
+                <AlertTriangle size={16} />
+                <span>{validationErrors.operating_temp}</span>
+              </div>
+            )}
             <div>
               <label className="text-sm text-gray-600 block mb-1">Fatigue cycles:</label>
               <input
                 type="number"
                 value={requirements.fatigue_cycles}
                 onChange={(e) => updateRequirement('fatigue_cycles', parseInt(e.target.value) || 0)}
-                className="w-full px-3 py-2 border border-gray-200 rounded text-sm"
+                className={`w-full px-3 py-2 border rounded text-sm ${
+                  validationErrors.fatigue_cycles ? 'border-red-500 bg-red-50' : 'border-gray-200'
+                }`}
+                min={VALIDATION_RULES.fatigueCycles.min}
               />
+              {validationErrors.fatigue_cycles && (
+                <div className="flex items-center gap-2 text-red-600 text-sm mt-1" role="alert">
+                  <AlertTriangle size={16} />
+                  <span>{validationErrors.fatigue_cycles}</span>
+                </div>
+              )}
               <div className="flex gap-2 mt-2">
                 {[11000, 20000, 45000].map((c) => (
                   <button
@@ -392,16 +434,26 @@ export function GuidedRequirementsWizard({ onComplete }: GuidedRequirementsWizar
       <div className="p-4">{renderContent()}</div>
 
       {/* Navigation */}
-      <div className="px-4 py-3 border-t border-gray-100 flex justify-between">
+      <div className="px-4 py-3 border-t border-gray-100 flex justify-between items-center">
         <Button variant="outline" onClick={prevStep} disabled={currentStep === 0} size="sm">
           <ChevronLeft size={16} className="mr-1" /> Back
         </Button>
+        {currentStepHasErrors && (
+          <span className="text-xs text-red-600 flex items-center gap-1">
+            <AlertTriangle size={14} />
+            Fix errors to continue
+          </span>
+        )}
         {currentStep === STEPS.length - 1 ? (
-          <Button onClick={handleComplete} size="sm">
+          <Button onClick={handleComplete} disabled={hasAnyErrors} size="sm">
             <Check size={16} className="mr-1" /> Complete
           </Button>
         ) : (
-          <Button onClick={nextStep} disabled={currentStep === 0 && !applicationType} size="sm">
+          <Button
+            onClick={nextStep}
+            disabled={(currentStep === 0 && !applicationType) || currentStepHasErrors}
+            size="sm"
+          >
             Next <ChevronRight size={16} className="ml-1" />
           </Button>
         )}

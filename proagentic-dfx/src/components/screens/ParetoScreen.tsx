@@ -5,7 +5,7 @@ import { useAppStore } from '@/lib/stores/app-store';
 import { getOptimizationResults } from '@/lib/api/client';
 import { Button } from '@/components/ui/Button';
 import type { ParetoDesign } from '@/lib/types';
-import { CheckCircle, ArrowRight, Info } from 'lucide-react';
+import { CheckCircle, ArrowRight, Info, Filter, ArrowUpDown, ChevronDown, ChevronUp } from 'lucide-react';
 import { ParetoChart } from '@/components/charts/ParetoChart';
 import {
   type ParetoXMetric,
@@ -22,6 +22,28 @@ import {
 const MAX_SELECTIONS = 3;
 const MIN_COMPARE_DESIGNS = 2;
 
+// ISSUE-014: Category filter options
+type CategoryFilter = 'all' | 'lightweight' | 'economical' | 'balanced' | 'conservative' | 'max_margin';
+const CATEGORY_OPTIONS: { value: CategoryFilter; label: string }[] = [
+  { value: 'all', label: 'All Categories' },
+  { value: 'lightweight', label: 'Lightweight' },
+  { value: 'economical', label: 'Economical' },
+  { value: 'balanced', label: 'Balanced' },
+  { value: 'conservative', label: 'Conservative' },
+  { value: 'max_margin', label: 'Max Margin' },
+];
+
+// ISSUE-015: Sorting options
+type SortField = 'id' | 'weight_kg' | 'cost_eur' | 'burst_pressure_bar' | 'p_failure';
+type SortDirection = 'asc' | 'desc';
+const SORT_OPTIONS: { value: SortField; label: string }[] = [
+  { value: 'id', label: 'Design ID' },
+  { value: 'weight_kg', label: 'Weight' },
+  { value: 'cost_eur', label: 'Cost' },
+  { value: 'burst_pressure_bar', label: 'Burst Pressure' },
+  { value: 'p_failure', label: 'Reliability' },
+];
+
 export function ParetoScreen() {
   const {
     paretoFront,
@@ -37,6 +59,16 @@ export function ParetoScreen() {
   const [yMetric, setYMetric] = useState<ParetoYMetric>('cost_eur');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // ISSUE-014: Category filter state
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
+
+  // ISSUE-015: Sorting state
+  const [sortField, setSortField] = useState<SortField>('id');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+
+  // ISSUE-018: Expandable cards state
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   // Load Pareto data if not already loaded
   useEffect(() => {
@@ -76,6 +108,42 @@ export function ParetoScreen() {
       setScreen('compare');
     }
   }, [selectedDesigns.length, setScreen]);
+
+  // ISSUE-014 & ISSUE-015: Filter and sort designs for cards
+  const filteredAndSortedDesigns = useMemo(() => {
+    let designs = [...paretoFront];
+
+    // Apply category filter
+    if (categoryFilter !== 'all') {
+      designs = designs.filter(d => d.trade_off_category === categoryFilter);
+    }
+
+    // Apply sorting
+    designs.sort((a, b) => {
+      let aVal: number | string;
+      let bVal: number | string;
+
+      if (sortField === 'id') {
+        aVal = a.id;
+        bVal = b.id;
+      } else {
+        aVal = a[sortField] as number;
+        bVal = b[sortField] as number;
+      }
+
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return sortDirection === 'asc'
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+
+      return sortDirection === 'asc'
+        ? (aVal as number) - (bVal as number)
+        : (bVal as number) - (aVal as number);
+    });
+
+    return designs;
+  }, [paretoFront, categoryFilter, sortField, sortDirection]);
 
   // Memoized computed values
   const highlights = useMemo(() => extractHighlightedDesigns(paretoFront), [paretoFront]);
@@ -240,14 +308,56 @@ export function ParetoScreen() {
       {/* Enterprise Design Selection Cards */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900">Featured Optimal Designs</h3>
-          <p className="text-sm text-gray-600 mt-1">
-            Pre-selected designs representing key trade-off strategies. Click to select or view in 3D.
-          </p>
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">All Pareto Designs</h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Browse {filteredAndSortedDesigns.length} designs. Click to select or view in 3D.
+              </p>
+            </div>
+            {/* ISSUE-014 & ISSUE-015: Filter and Sort Controls */}
+            <div className="flex items-center gap-4">
+              {/* Category Filter */}
+              <div className="flex items-center gap-2">
+                <Filter size={16} className="text-gray-500" aria-hidden="true" />
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value as CategoryFilter)}
+                  className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm bg-white hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  aria-label="Filter by category"
+                >
+                  {CATEGORY_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              {/* Sort Controls */}
+              <div className="flex items-center gap-2">
+                <ArrowUpDown size={16} className="text-gray-500" aria-hidden="true" />
+                <select
+                  value={sortField}
+                  onChange={(e) => setSortField(e.target.value as SortField)}
+                  className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm bg-white hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  aria-label="Sort by field"
+                >
+                  {SORT_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => setSortDirection(d => d === 'asc' ? 'desc' : 'asc')}
+                  className="p-1.5 rounded-lg border border-gray-300 hover:bg-gray-50"
+                  aria-label={`Sort ${sortDirection === 'asc' ? 'ascending' : 'descending'}`}
+                >
+                  {sortDirection === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
         <div className="p-6 bg-gray-50">
           <div className="grid grid-cols-4 gap-4">
-            {highlights.map((design) => {
+            {filteredAndSortedDesigns.map((design) => {
               const isSelected = selectedDesigns.includes(design.id);
               const colors = getCategoryColors(design.trade_off_category);
 
@@ -287,7 +397,7 @@ export function ParetoScreen() {
                     )}
                   </div>
                   <div className="text-xl font-bold text-gray-900 mb-3">Design {design.id}</div>
-                  <dl className="text-sm space-y-2 mb-4">
+                  <dl className="text-sm space-y-2 mb-3">
                     <div className="flex justify-between items-center py-1 border-b border-gray-100">
                       <dt className="text-gray-600 font-medium">Weight:</dt>
                       <dd className="font-semibold text-gray-900">{design.weight_kg} kg</dd>
@@ -301,6 +411,37 @@ export function ParetoScreen() {
                       <dd className="font-semibold text-gray-900">{design.burst_pressure_bar} bar</dd>
                     </div>
                   </dl>
+                  {/* ISSUE-018: Expandable metrics section */}
+                  {expandedCard === design.id && (
+                    <dl className="text-sm space-y-2 mb-3 pt-2 border-t border-gray-200 bg-gray-50 -mx-4 px-4 pb-2">
+                      <div className="flex justify-between items-center py-1">
+                        <dt className="text-gray-600 text-xs">Burst Ratio:</dt>
+                        <dd className="font-semibold text-gray-900 text-xs">{design.burst_ratio?.toFixed(2)}</dd>
+                      </div>
+                      <div className="flex justify-between items-center py-1">
+                        <dt className="text-gray-600 text-xs">P(failure):</dt>
+                        <dd className="font-mono font-semibold text-green-600 text-xs">{design.p_failure?.toExponential(1)}</dd>
+                      </div>
+                      <div className="flex justify-between items-center py-1">
+                        <dt className="text-gray-600 text-xs">Fatigue Life:</dt>
+                        <dd className="font-semibold text-gray-900 text-xs">{design.fatigue_life_cycles?.toLocaleString()} cyc</dd>
+                      </div>
+                      <div className="flex justify-between items-center py-1">
+                        <dt className="text-gray-600 text-xs">Vol. Efficiency:</dt>
+                        <dd className="font-semibold text-gray-900 text-xs">{(design.volumetric_efficiency * 100).toFixed(1)}%</dd>
+                      </div>
+                    </dl>
+                  )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedCard(expandedCard === design.id ? null : design.id);
+                    }}
+                    className="w-full text-xs text-blue-600 hover:text-blue-800 py-1 mb-2"
+                    aria-expanded={expandedCard === design.id}
+                  >
+                    {expandedCard === design.id ? '▲ Less details' : '▼ More details'}
+                  </button>
                   <Button
                     variant="outline"
                     size="sm"
