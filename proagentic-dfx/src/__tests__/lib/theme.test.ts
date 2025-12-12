@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Theme Provider Tests - Comprehensive Unit Tests
  *

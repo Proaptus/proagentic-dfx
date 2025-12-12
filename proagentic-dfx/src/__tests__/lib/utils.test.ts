@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/ban-ts-comment */
 /**
  * Utility Functions Tests
  * Tests for comparison.ts and currency.ts utility functions
