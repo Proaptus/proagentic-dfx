@@ -5,31 +5,22 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { EquationDisplay } from './EquationDisplay';
 import { TornadoChart, RadarChart } from '@/components/charts';
 import type { DesignFailure } from '@/lib/types';
-import type { SensitivityParameter } from '@/components/charts/TornadoChart';
-import type { RadarMetric, RadarDesignData } from '@/components/charts/RadarChart';
 import { AlertTriangle, CheckCircle, TrendingUp } from 'lucide-react';
+import {
+  type LoadCase,
+  type FailureMode,
+  LOAD_CASES,
+  FAILURE_MODES,
+  DEFAULT_SENSITIVITY_DATA,
+  FAILURE_METRICS,
+  buildFailureEnvelopeData,
+} from './failure-analysis.constants';
 
 interface FailureAnalysisPanelProps {
   data: DesignFailure;
   designId?: string;
   onFailureDataChange?: (data: DesignFailure) => void;
 }
-
-type LoadCase = 'test_pressure' | 'burst_pressure' | 'operating_pressure';
-type FailureMode = 'fiber_tension' | 'fiber_compression' | 'matrix_tension' | 'matrix_compression';
-
-const LOAD_CASES: Record<LoadCase, string> = {
-  test_pressure: 'Test Pressure (1.5×)',
-  burst_pressure: 'Burst Pressure (2.25×)',
-  operating_pressure: 'Operating Pressure (1.0×)',
-};
-
-const FAILURE_MODES: Record<FailureMode, string> = {
-  fiber_tension: 'Fiber Tension',
-  fiber_compression: 'Fiber Compression',
-  matrix_tension: 'Matrix Tension',
-  matrix_compression: 'Matrix Compression',
-};
 
 export function FailureAnalysisPanel({ data: initialData, designId = 'C', onFailureDataChange }: FailureAnalysisPanelProps) {
   const [failureData, setFailureData] = useState<DesignFailure>(initialData);
@@ -96,96 +87,10 @@ export function FailureAnalysisPanel({ data: initialData, designId = 'C', onFail
   const designMarginValue = (safetyFactorValue - 1) * 100;
   const designMargin = designMarginValue.toFixed(1);
 
-  // Prepare sensitivity analysis data for Tornado Chart
-  const sensitivityData: SensitivityParameter[] = [
-    {
-      parameter: 'fiber_strength',
-      label: 'Fiber Strength',
-      low_impact: -12.5,
-      high_impact: 15.8,
-      baseline: 2700,
-      unit: 'MPa',
-    },
-    {
-      parameter: 'fiber_volume_fraction',
-      label: 'Fiber Volume Fraction',
-      low_impact: -8.2,
-      high_impact: 9.4,
-      baseline: 0.62,
-    },
-    {
-      parameter: 'layer_thickness',
-      label: 'Layer Thickness',
-      low_impact: -6.1,
-      high_impact: 7.3,
-      baseline: 0.15,
-      unit: 'mm',
-    },
-    {
-      parameter: 'matrix_strength',
-      label: 'Matrix Strength',
-      low_impact: -5.4,
-      high_impact: 6.2,
-      baseline: 85,
-      unit: 'MPa',
-    },
-    {
-      parameter: 'winding_angle',
-      label: 'Winding Angle',
-      low_impact: -4.8,
-      high_impact: 5.1,
-      baseline: 15,
-      unit: '°',
-    },
-  ];
-
-  // Prepare failure envelope data for Radar Chart (Tsai-Wu, Max Stress, Hashin criteria)
-  const failureMetrics: RadarMetric[] = [
-    { metric: 'fiber_tension', label: 'Fiber Tension', unit: '', higherIsBetter: false },
-    { metric: 'fiber_compression', label: 'Fiber Compression', unit: '', higherIsBetter: false },
-    { metric: 'matrix_tension', label: 'Matrix Tension', unit: '', higherIsBetter: false },
-    { metric: 'matrix_compression', label: 'Matrix Compression', unit: '', higherIsBetter: false },
-    { metric: 'shear', label: 'Shear', unit: '', higherIsBetter: false },
-  ];
-
-  const failureEnvelopeData: RadarDesignData[] = [
-    {
-      designId: 'hashin',
-      designName: 'Hashin Criteria',
-      values: {
-        fiber_tension: hashinCriteria.find(h => h.mode === 'Fiber Tension')?.value || 0.38,
-        fiber_compression: hashinCriteria.find(h => h.mode === 'Fiber Compression')?.value || 0.22,
-        matrix_tension: hashinCriteria.find(h => h.mode === 'Matrix Tension')?.value || 0.65,
-        matrix_compression: hashinCriteria.find(h => h.mode === 'Matrix Compression')?.value || 0.41,
-        shear: 0.52,
-      },
-      color: '#3B82F6',
-    },
-    {
-      designId: 'tsai_wu',
-      designName: 'Tsai-Wu',
-      values: {
-        fiber_tension: failureData.tsai_wu?.max_at_test?.value || 0.85,
-        fiber_compression: 0.72,
-        matrix_tension: 0.88,
-        matrix_compression: 0.68,
-        shear: 0.75,
-      },
-      color: '#10B981',
-    },
-    {
-      designId: 'max_stress',
-      designName: 'Max Stress',
-      values: {
-        fiber_tension: 0.92,
-        fiber_compression: 0.78,
-        matrix_tension: 0.95,
-        matrix_compression: 0.82,
-        shear: 0.88,
-      },
-      color: '#F59E0B',
-    },
-  ];
+  // Use extracted constants for chart data
+  const sensitivityData = DEFAULT_SENSITIVITY_DATA;
+  const failureMetrics = FAILURE_METRICS;
+  const failureEnvelopeData = buildFailureEnvelopeData(failureData, hashinCriteria);
 
   return (
     <div className="space-y-4">

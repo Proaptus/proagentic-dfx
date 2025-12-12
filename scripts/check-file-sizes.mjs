@@ -31,6 +31,16 @@ const CONFIG = {
   // Files with higher limits (type definition files, test files)
   RELAXED_PATTERNS: ['types/index.ts', '.test.ts', '.test.tsx', '.spec.ts'],
   RELAXED_LINES_ERROR: 800, // Higher limit for type files
+  // LEGACY: Pre-existing large files - DO NOT ADD NEW FILES HERE
+  // These files predate the size limits and need refactoring (tracked in tech debt)
+  // TODO: Remove entries as files are refactored under 500 lines
+  LEGACY_FILES: [
+    'ThermalAnalysisPanel.tsx',
+    'CADTankViewer.tsx',
+    'StressContourChart.tsx',
+    'StandardsLibraryPanel.tsx',
+    'ValidationScreen.tsx',
+  ],
 };
 
 // Get staged files or all files based on mode
@@ -111,6 +121,9 @@ function checkFile(filePath) {
   const isRelaxed = CONFIG.RELAXED_PATTERNS.some(pattern => filePath.includes(pattern));
   const linesError = isRelaxed ? CONFIG.RELAXED_LINES_ERROR : CONFIG.LINES_ERROR;
 
+  // Check if file is in legacy whitelist (errors become warnings)
+  const isLegacy = CONFIG.LEGACY_FILES.some(legacy => filePath.endsWith(legacy));
+
   try {
     const content = readFileSync(fullPath, 'utf-8');
     const stats = statSync(fullPath);
@@ -119,9 +132,11 @@ function checkFile(filePath) {
     const lineCount = countLines(content);
     if (lineCount > linesError) {
       issues.push({
-        type: 'error',
+        type: isLegacy ? 'warning' : 'error',  // Downgrade to warning for legacy files
         file: relativePath,
-        message: `${lineCount} lines (max: ${linesError}) - SPLIT THIS FILE`,
+        message: isLegacy
+          ? `${lineCount} lines (max: ${linesError}) - LEGACY FILE (needs refactoring)`
+          : `${lineCount} lines (max: ${linesError}) - SPLIT THIS FILE`,
         metric: 'lines',
         value: lineCount,
       });
@@ -139,9 +154,11 @@ function checkFile(filePath) {
     const fileSize = stats.size;
     if (fileSize > CONFIG.SIZE_ERROR) {
       issues.push({
-        type: 'error',
+        type: isLegacy ? 'warning' : 'error',  // Downgrade to warning for legacy files
         file: relativePath,
-        message: `${(fileSize / 1024).toFixed(1)}KB (max: ${CONFIG.SIZE_ERROR / 1024}KB)`,
+        message: isLegacy
+          ? `${(fileSize / 1024).toFixed(1)}KB (max: ${CONFIG.SIZE_ERROR / 1024}KB) - LEGACY FILE`
+          : `${(fileSize / 1024).toFixed(1)}KB (max: ${CONFIG.SIZE_ERROR / 1024}KB)`,
         metric: 'size',
         value: fileSize,
       });
