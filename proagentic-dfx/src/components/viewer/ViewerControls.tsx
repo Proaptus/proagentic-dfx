@@ -5,7 +5,7 @@ import { Camera, Home, ZoomIn, ZoomOut, RotateCw, Download } from 'lucide-react'
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 
-export type ViewPreset = 'front' | 'side' | 'top' | 'isometric' | 'section';
+export type ViewPreset = 'front' | 'back' | 'left' | 'right' | 'top' | 'bottom' | 'isometric';
 
 export interface CameraState {
   position: [number, number, number];
@@ -42,11 +42,13 @@ export function ViewerControls({
   };
 
   const presets: { id: ViewPreset; label: string; description: string }[] = [
-    { id: 'front', label: 'Front', description: 'Front view (XY plane)' },
-    { id: 'side', label: 'Side', description: 'Side view (YZ plane)' },
-    { id: 'top', label: 'Top', description: 'Top view (XZ plane)' },
+    { id: 'front', label: 'Front', description: 'Front view' },
+    { id: 'back', label: 'Back', description: 'Back view' },
+    { id: 'left', label: 'Left', description: 'Left side view' },
+    { id: 'right', label: 'Right', description: 'Right side view' },
+    { id: 'top', label: 'Top', description: 'Top view' },
+    { id: 'bottom', label: 'Bottom', description: 'Bottom view' },
     { id: 'isometric', label: 'Iso', description: 'Isometric view' },
-    { id: 'section', label: 'Section', description: 'Section cut view' },
   ];
 
   return (
@@ -58,29 +60,47 @@ export function ViewerControls({
         </h3>
 
         {/* View Presets */}
-        <div className="grid grid-cols-3 gap-2 mb-4">
-          {presets.map((preset) => (
+        <div className="space-y-2 mb-4">
+          <div className="grid grid-cols-3 gap-2">
+            {presets.slice(0, 6).map((preset) => (
+              <button
+                key={preset.id}
+                onClick={() => handlePresetClick(preset.id)}
+                className={`px-3 py-2 text-xs font-medium rounded-lg transition-all ${
+                  activePreset === preset.id
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+                title={preset.description}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {presets.slice(6).map((preset) => (
+              <button
+                key={preset.id}
+                onClick={() => handlePresetClick(preset.id)}
+                className={`px-3 py-2 text-xs font-medium rounded-lg transition-all ${
+                  activePreset === preset.id
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+                title={preset.description}
+              >
+                {preset.label}
+              </button>
+            ))}
             <button
-              key={preset.id}
-              onClick={() => handlePresetClick(preset.id)}
-              className={`px-3 py-2 text-xs font-medium rounded-lg transition-all ${
-                activePreset === preset.id
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-              title={preset.description}
+              onClick={onResetView}
+              className="px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all flex items-center justify-center gap-1"
+              title="Reset to default view"
             >
-              {preset.label}
+              <Home size={14} />
+              Reset
             </button>
-          ))}
-          <button
-            onClick={onResetView}
-            className="px-3 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all flex items-center justify-center gap-1"
-            title="Reset to default view"
-          >
-            <Home size={14} />
-            Reset
-          </button>
+          </div>
         </div>
 
         {/* Camera Position Display */}

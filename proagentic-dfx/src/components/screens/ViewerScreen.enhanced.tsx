@@ -110,21 +110,19 @@ export function ViewerScreen() {
 
   // Handlers
   const handleViewPreset = useCallback((preset: ViewPreset) => {
-    // Implement view preset logic
+    // Implement view preset logic matching CADTankViewer camera presets
     const presets: Record<ViewPreset, Partial<CameraState>> = {
       front: { position: [0, 0, 2], rotation: [0, 0] },
-      side: { position: [2, 0, 0], rotation: [0, Math.PI / 2] },
-      top: { position: [0, 2, 0], rotation: [Math.PI / 2, 0] },
-      isometric: { position: [1.5, 1.5, 1.5], rotation: [Math.PI / 4, Math.PI / 4] },
-      section: { position: [0, 0, 2], rotation: [0, 0] },
+      back: { position: [0, 0, 2], rotation: [0, Math.PI] },
+      left: { position: [0, 0, 2], rotation: [0, -Math.PI / 2] },
+      right: { position: [0, 0, 2], rotation: [0, Math.PI / 2] },
+      top: { position: [0, 0, 2], rotation: [-Math.PI / 2, 0] },
+      bottom: { position: [0, 0, 2], rotation: [Math.PI / 2, 0] },
+      isometric: { position: [0, 0, 2], rotation: [0.5, 0.8] },
     };
 
     const newState = { ...cameraState, ...presets[preset] };
     setCameraState(newState);
-
-    if (preset === 'section') {
-      setShowCrossSection(true);
-    }
   }, [cameraState]);
 
   const handleResetView = useCallback(() => {
