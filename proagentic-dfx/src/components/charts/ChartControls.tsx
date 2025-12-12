@@ -133,7 +133,7 @@ export function ChartControls<T extends string = ColorMode>({
   position = 'top-right',
   className = '',
 }: ChartControlsProps<T>) {
-  const [showSettings, setShowSettings] = useState(false);
+  const [_showSettings, _setShowSettings] = useState(false);
 
   // Position classes
   const positionClasses: Record<string, string> = {

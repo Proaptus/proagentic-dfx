@@ -80,7 +80,7 @@ export function FailureAnalysisPanel({ data: initialData, designId = 'C', onFail
     : 0.65;
   // Convert to approximate failure probability percentage (scaled for visualization)
   // At test pressure, these should be comfortably below 1.0 for a safe design
-  const failureProbability = Math.min(maxHashinIndex * 100, 99.9); // Cap at 99.9%
+  const _failureProbability = Math.min(maxHashinIndex * 100, 99.9); // Cap at 99.9%
 
   // Design Margin = (SF - 1) × 100% = ((1/sqrt(TW)) - 1) × 100%
   // Positive margin means reserve capacity beyond required
