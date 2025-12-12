@@ -408,7 +408,10 @@ describe('ViewerScreen', () => {
         expect(screen.getByText(/Stress Analysis/i)).toBeInTheDocument();
       });
 
-      expect(screen.getByText(/800 MPa/)).toBeInTheDocument(); // Max stress
+      // Wait for stress data to load (async after geometry)
+      await waitFor(() => {
+        expect(screen.getByText(/800 MPa/)).toBeInTheDocument(); // Max stress
+      });
       expect(screen.getByText(/1000 MPa/)).toBeInTheDocument(); // Allowable stress
       expect(screen.getByText(/\+25%/)).toBeInTheDocument(); // Safety margin
     });
