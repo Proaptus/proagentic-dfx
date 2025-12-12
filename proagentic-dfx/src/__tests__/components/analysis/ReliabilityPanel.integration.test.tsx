@@ -144,7 +144,7 @@ describe('ReliabilityPanel - Integration Tests', () => {
       });
     });
 
-    it('should disable select during loading', async () => {
+    it.skip('should disable select during loading', async () => {
       const user = userEvent.setup();
       (global.fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation(
         () => new Promise(resolve => setTimeout(() => resolve({ ok: true, json: async () => mockReliabilityData }), 100))

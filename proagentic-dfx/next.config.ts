@@ -12,12 +12,13 @@ const nextConfig: NextConfig = {
     resolveExtensions: ['.ts', '.tsx', '.js', '.jsx', '.json', '.wasm'],
   },
 
-  // Proxy API requests to mock server
+  // Proxy API requests to mock server (except auth which is handled locally)
   async rewrites() {
+    const mockServerUrl = process.env.MOCK_SERVER_URL || 'http://localhost:3001';
     return [
       {
-        source: '/api/:path*',
-        destination: 'http://localhost:3001/api/:path*',
+        source: '/api/designs/:path*',
+        destination: `${mockServerUrl}/api/designs/:path*`,
       },
     ];
   },
