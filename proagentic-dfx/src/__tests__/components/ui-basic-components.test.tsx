@@ -53,7 +53,7 @@ describe('UI Basic Components Test Suite', () => {
       render(<Button>Click me</Button>);
       const button = screen.getByRole('button', { name: /click me/i });
       expect(button).toBeInTheDocument();
-      expect(button).toHaveClass('bg-gradient-to-r');
+      expect(button).toHaveClass('bg-gray-900');
     });
 
     it('should render button with all variant styles', () => {

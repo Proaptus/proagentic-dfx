@@ -5,18 +5,18 @@ import { sendChatMessage } from '@/lib/api/client';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import type { ChatMessage, ExtractedRequirement, ChatRequirementsResponse } from '@/lib/types';
-import { Send, CheckCircle, Edit2, AlertTriangle, Sparkles, MessageSquare, Bot, User, Car, Plane, Factory, Zap, ArrowRight } from 'lucide-react';
+import { Send, CheckCircle, Edit2, AlertTriangle, MessageSquare, Bot, User, Car, Plane, Factory, Zap, ArrowRight } from 'lucide-react';
 
 interface RequirementsChatProps {
   onComplete?: (requirements: Record<string, unknown>) => void;
 }
 
-// Generate unique IDs for messages using a counter
-let messageIdCounter = 1;
-const generateMessageId = () => `msg-${messageIdCounter++}`;
+// Generate unique IDs for messages using timestamp + counter
+let messageIdCounter = 0;
+const generateMessageId = () => `msg-${Date.now()}-${++messageIdCounter}`;
 
 const INITIAL_MESSAGE: ChatMessage = {
-  id: '1',
+  id: 'initial-welcome',
   role: 'assistant',
   content: "Hello! I'm your hydrogen tank engineering assistant. Select an application type below to get started quickly, or type your specific requirements.",
   timestamp: Date.now(),
@@ -172,21 +172,21 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
   const getConfidenceBadge = useCallback((confidence: number) => {
     if (confidence >= 0.8) {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-900 text-white text-xs rounded-full">
           <CheckCircle size={12} aria-hidden="true" />
           High
         </span>
       );
     } else if (confidence >= 0.5) {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded-full">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-500 text-white text-xs rounded-full">
           <AlertTriangle size={12} aria-hidden="true" />
           Medium
         </span>
       );
     } else {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-100 text-orange-700 text-xs rounded-full">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-300 text-gray-700 text-xs rounded-full">
           <AlertTriangle size={12} aria-hidden="true" />
           Low
         </span>
@@ -212,14 +212,14 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
   }, [extractedRequirements, onComplete]);
 
   return (
-    <div className="flex-1 min-h-0 flex gap-6">
+    <div className="h-[calc(100vh-220px)] flex gap-6 overflow-hidden">
       {/* Left Panel - Chat */}
-      <div className="flex-1 flex flex-col">
-        <Card padding="none" className="flex-1 flex flex-col">
-          <div className="p-6 border-b border-gray-100">
+      <div className="flex-1 flex flex-col min-h-0">
+        <Card padding="none" className="h-full flex flex-col">
+          <div className="flex-shrink-0 p-6 border-b border-gray-200">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 bg-blue-50 rounded-lg" aria-hidden="true">
-                <MessageSquare className="text-blue-600" size={20} />
+              <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg" aria-hidden="true">
+                <MessageSquare className="text-gray-700" size={20} />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Requirements Conversation</h3>
@@ -231,14 +231,14 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4" role="log" aria-label="Chat messages" aria-live="polite">
+          <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4" role="log" aria-label="Chat messages" aria-live="polite">
             {messages.map((msg, index) => (
               <div key={msg.id}>
                 <div
                   className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
                 >
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    msg.role === 'user' ? 'bg-blue-500' : 'bg-gray-200'
+                    msg.role === 'user' ? 'bg-gray-900' : 'bg-gray-200'
                   }`} aria-hidden="true">
                     {msg.role === 'user' ? (
                       <User className="w-4 h-4 text-white" />
@@ -249,19 +249,19 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
                   <div
                     className={`max-w-[80%] rounded-lg px-4 py-3 ${
                       msg.role === 'user'
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-gray-900 text-white'
                         : 'bg-gray-100 text-gray-900'
                     }`}
                   >
                     {msg.role === 'assistant' && (
                       <div className="flex items-center gap-2 mb-1">
-                        <Sparkles size={14} className="text-blue-600" aria-hidden="true" />
-                        <span className="text-xs font-medium text-blue-600">
+                        <Bot size={14} className="text-gray-600" aria-hidden="true" />
+                        <span className="text-xs font-medium text-gray-600">
                           Engineering Assistant
                         </span>
                       </div>
                     )}
-                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                    <span className={`text-sm whitespace-pre-wrap block ${msg.role === 'user' ? 'text-white' : 'text-gray-900'}`}>{msg.content}</span>
                   </div>
                 </div>
 
@@ -269,37 +269,25 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
                 {index === 0 && showPresets && msg.role === 'assistant' && (
                   <div className="mt-4 ml-11">
                     <p className="text-xs font-medium text-gray-500 mb-3 uppercase tracking-wide">
-                      Quick Start - Click to auto-fill requirements
+                      Quick Start - Select Application Type
                     </p>
                     <div className="grid grid-cols-2 gap-3">
                       {APPLICATION_PRESETS.map((preset) => {
                         const PresetIcon = preset.icon;
-                        const colorClasses = {
-                          blue: 'border-blue-200 hover:border-blue-400 hover:bg-blue-50 text-blue-700',
-                          purple: 'border-purple-200 hover:border-purple-400 hover:bg-purple-50 text-purple-700',
-                          green: 'border-green-200 hover:border-green-400 hover:bg-green-50 text-green-700',
-                          amber: 'border-amber-200 hover:border-amber-400 hover:bg-amber-50 text-amber-700',
-                        };
-                        const iconBgClasses = {
-                          blue: 'bg-blue-100',
-                          purple: 'bg-purple-100',
-                          green: 'bg-green-100',
-                          amber: 'bg-amber-100',
-                        };
                         return (
                           <button
                             key={preset.id}
                             onClick={() => handlePresetClick(preset)}
-                            className={`group p-4 rounded-xl border-2 transition-all text-left ${colorClasses[preset.color as keyof typeof colorClasses]}`}
+                            className="group p-4 rounded-lg border border-gray-300 hover:border-gray-900 hover:bg-gray-50 text-gray-900 transition-all text-left"
                           >
                             <div className="flex items-center gap-3 mb-2">
-                              <div className={`p-2 rounded-lg ${iconBgClasses[preset.color as keyof typeof iconBgClasses]}`}>
-                                <PresetIcon size={20} />
+                              <div className="p-2 rounded-lg bg-gray-100">
+                                <PresetIcon size={20} className="text-gray-700" />
                               </div>
                               <span className="font-semibold">{preset.label}</span>
-                              <ArrowRight size={16} className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                              <ArrowRight size={16} className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-gray-600" />
                             </div>
-                            <p className="text-xs text-gray-600">{preset.description}</p>
+                            <p className="text-xs text-gray-500">{preset.description}</p>
                           </button>
                         );
                       })}
@@ -325,23 +313,22 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Suggestions - Enhanced with prominent clickable cards */}
+          {/* Suggestions */}
           {suggestions.length > 0 && (
-            <div className="px-4 pb-3 border-t border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+            <div className="flex-shrink-0 px-4 pb-3 border-t border-gray-200 bg-gray-50">
               <div className="pt-3">
-                <p className="text-xs font-semibold text-blue-700 mb-2 flex items-center gap-2">
-                  <Sparkles size={12} />
-                  CLICK TO RESPOND
+                <p className="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
+                  Suggested Responses
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {suggestions.map((suggestion) => (
                     <button
                       key={`suggestion-${suggestion}`}
                       onClick={() => handleSuggestionClick(suggestion)}
-                      className="group flex items-center gap-2 px-4 py-2.5 text-sm bg-white text-blue-700 rounded-lg border-2 border-blue-200 hover:border-blue-400 hover:bg-blue-50 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                      className="group flex items-center gap-2 px-4 py-2.5 text-sm bg-white text-gray-900 rounded-lg border border-gray-300 hover:border-gray-900 hover:bg-gray-50 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                     >
                       <span className="font-medium">{suggestion}</span>
-                      <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-600" />
                     </button>
                   ))}
                 </div>
@@ -349,8 +336,8 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
             </div>
           )}
 
-          {/* Input */}
-          <div className="border-t border-gray-100 p-4 bg-gray-50">
+          {/* Input - Fixed at bottom */}
+          <div className="flex-shrink-0 border-t border-gray-200 p-4 bg-gray-50">
             <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex gap-3">
               <label htmlFor="chat-input" className="sr-only">Type your response</label>
               <input
@@ -360,7 +347,7 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Type your response..."
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-shadow"
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-gray-400 bg-white transition-shadow"
                 disabled={isLoading}
               />
               <Button
@@ -378,12 +365,12 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
       </div>
 
       {/* Right Panel - Extracted Requirements */}
-      <div className="w-96">
+      <div className="w-96 flex-shrink-0 min-h-0">
         <Card padding="none" className="h-full flex flex-col">
-          <div className="p-6 border-b border-gray-100">
+          <div className="flex-shrink-0 p-6 border-b border-gray-200">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 bg-purple-50 rounded-lg" aria-hidden="true">
-                <Sparkles className="text-purple-600" size={20} />
+              <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg" aria-hidden="true">
+                <CheckCircle className="text-gray-700" size={20} />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Extracted Requirements</h3>
@@ -394,11 +381,11 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-3">
+          <div className="flex-1 min-h-0 overflow-y-auto p-6 space-y-3">
             {extractedRequirements.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center py-12">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4" aria-hidden="true">
-                  <Sparkles size={28} className="text-gray-400" />
+                  <CheckCircle size={28} className="text-gray-400" />
                 </div>
                 <h4 className="text-sm font-medium text-gray-700 mb-1">No Requirements Yet</h4>
                 <p className="text-sm text-gray-500 max-w-xs">
@@ -427,7 +414,7 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
                     {req.editable && req.value !== null && editingField !== req.field && (
                       <button
                         onClick={() => handleEditRequirement(req.field, req.value)}
-                        className="text-blue-600 hover:text-blue-700 p-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+                        className="text-gray-600 hover:text-gray-900 p-1 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 rounded"
                         aria-label={`Edit ${req.label}`}
                       >
                         <Edit2 size={14} />
@@ -443,13 +430,13 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
                         type="text"
                         value={editValue}
                         onChange={(e) => setEditValue(e.target.value)}
-                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-gray-400"
                         autoFocus
                       />
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleSaveEdit(req.field)}
-                          className="flex-1 px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                          className="flex-1 px-2 py-1 text-xs bg-gray-900 text-white rounded hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                         >
                           Save
                         </button>
@@ -479,7 +466,7 @@ export function RequirementsChat({ onComplete }: RequirementsChatProps) {
           </div>
 
           {extractedRequirements.length > 0 && (
-            <div className="border-t border-gray-100 p-6 bg-gray-50">
+            <div className="flex-shrink-0 border-t border-gray-200 p-6 bg-gray-50">
               <Button
                 onClick={handleConfirmRequirements}
                 disabled={!canConfirm}

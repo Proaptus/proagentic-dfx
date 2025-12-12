@@ -83,6 +83,7 @@ class ProSWARMEnforcer:
         return {
             "session_started": datetime.now().isoformat(),
             "last_activity": datetime.now().isoformat(),
+            "proswarm_skill_active": False,  # Only enforce when skill is loaded
             "orchestrations": [],  # List of orchestrate_task calls
             "main_task_id": None,
             "active_subtasks": [],  # Subtasks being worked on
@@ -137,6 +138,10 @@ class ProSWARMEnforcer:
         Returns: (is_valid, reason)
         """
         state = self.get_session_state()
+
+        # CRITICAL: Only enforce when ProSWARM skill is active
+        if not state.get("proswarm_skill_active", False):
+            return True, "ProSWARM skill not active - no enforcement"
 
         # Phase 1: Allow orchestration setup tools (always allowed)
         if self._is_orchestration_tool(tool_name):
@@ -262,10 +267,24 @@ class ProSWARMEnforcer:
 
         Returns: (allow, reason)
         """
+        state = self.get_session_state()
+
+        # Detect ProSWARM skill activation
+        if tool_name == "Skill":
+            skill_name = tool_input.get("skill", "")
+            if "proswarm" in skill_name.lower():
+                state["proswarm_skill_active"] = True
+                state["skill_activated_at"] = datetime.now().isoformat()
+                self.save_session_state(state)
+                return True, "ProSWARM skill activated - enforcement enabled"
+
         # START FRESH when a new orchestration begins
         # This prevents stale subtasks/main_task_id from previous orchestrations being reused
         if "orchestrate_task" in tool_name:
+            # Preserve skill activation state across orchestration resets
+            was_active = state.get("proswarm_skill_active", False)
             state = self._new_session()  # Reset to clean state
+            state["proswarm_skill_active"] = was_active  # Preserve activation
             state["orchestrations"] = [{
                 "timestamp": datetime.now().isoformat(),
                 "description": tool_input.get("task_description", ""),

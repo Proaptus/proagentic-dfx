@@ -1,0 +1,84 @@
+{
+  "session_started": "2025-12-12T10:36:10.761128",
+  "last_activity": "2025-12-12T11:05:06.663020",
+  "uat_active": true,
+  "current_test": "SMOKE-014",
+  "tests_completed": [
+    "SMOKE-001",
+    "SMOKE-002",
+    "SMOKE-003",
+    "SMOKE-004",
+    "SMOKE-005",
+    "SMOKE-006",
+    "SMOKE-010",
+    "SMOKE-014"
+  ],
+  "tests_with_screenshot": [
+    "SMOKE-001",
+    "SMOKE-002",
+    "SMOKE-003",
+    "SMOKE-004",
+    "SMOKE-005",
+    "SMOKE-006",
+    "SMOKE-009",
+    "SMOKE-010",
+    "SMOKE-014"
+  ],
+  "tests_with_analysis": [
+    "SMOKE-001",
+    "SMOKE-002",
+    "SMOKE-003",
+    "SMOKE-005",
+    "SMOKE-004",
+    "SMOKE-006",
+    "SMOKE-009",
+    "SMOKE-010",
+    "SMOKE-014"
+  ],
+  "tests_with_report_update": [
+    "SMOKE-001",
+    "SMOKE-002",
+    "SMOKE-003",
+    "SMOKE-004",
+    "SMOKE-005",
+    "SMOKE-006",
+    "SMOKE-009",
+    "SMOKE-010",
+    "SMOKE-014"
+  ],
+  "screenshot_files": [
+    "smoke-001-app-loads.png",
+    "smoke-002-requirements-default.png",
+    "smoke-003-module-selector.png",
+    "smoke-004-help-panel.png",
+    "smoke-005-wizard-mode.png",
+    "smoke-004-help-panel.png",
+    "smoke-004-help.png",
+    "smoke-003-module-selector.png",
+    "smoke-004-help-panel.png",
+    "smoke-005-wizard-mode.png",
+    "C:\\Users\\chine\\Projects\\proagentic-dfx\\smoke-004-help-panel.png",
+    "C:\\Users\\chine\\Projects\\proagentic-dfx\\smoke-005-requirements-wizard.png",
+    "C:\\Users\\chine\\Projects\\proagentic-dfx\\smoke-006-tank-parameters.png",
+    "C:\\Users\\chine\\Projects\\proagentic-dfx\\smoke-009-review-requirements.png",
+    "C:\\Users\\chine\\Projects\\proagentic-dfx\\smoke-010-pareto-chart.png",
+    "C:\\Users\\chine\\Projects\\proagentic-dfx\\smoke-014-3d-viewer.png"
+  ],
+  "validation_failures": [
+    {
+      "test_id": "SMOKE-001",
+      "timestamp": "2025-12-12T10:23:05.316020",
+      "reason": "\ud83d\udea8 UAT VALIDATION BLOCKED - SMOKE-001 cannot be marked complete:\n\nANALYSIS MISSING: Screenshot for SMOKE-001 was not analyzed with Read tool. Use: Read({ file_path: 'screenshot-file.png' }) to view and describe what's visible.\n\nREPORT NOT UPDATED: Test SMOKE-001 results not written to H2_UAT_REPORT.md. Use: Edit({ file_path: 'H2_UAT_REPORT.md', ... }) to add test results immediately.\n\nComplete ALL steps before marking test as completed. NO FABRICATION ALLOWED."
+    },
+    {
+      "test_id": "SMOKE-007",
+      "timestamp": "2025-12-12T11:03:51.228878",
+      "reason": "\ud83d\udea8 UAT VALIDATION BLOCKED - SMOKE-007 cannot be marked complete:\n\nSCREENSHOT MISSING: No screenshot captured for SMOKE-007. Use: mcp__chrome-devtools__take_screenshot({ filename: 'smoke-007-*.png' })\n\nANALYSIS MISSING: Screenshot for SMOKE-007 was not analyzed with Read tool. Use: Read({ file_path: 'screenshot-file.png' }) to view and describe what's visible.\n\nREPORT NOT UPDATED: Test SMOKE-007 results not written to H2_UAT_REPORT.md. Use: Edit({ file_path: 'H2_UAT_REPORT.md', ... }) to add test results immediately.\n\nComplete ALL steps before marking test as completed. NO FABRICATION ALLOWED."
+    },
+    {
+      "test_id": "SMOKE-015",
+      "timestamp": "2025-12-12T11:05:06.663020",
+      "reason": "\ud83d\udea8 UAT VALIDATION BLOCKED - SMOKE-015 cannot be marked complete:\n\nSCREENSHOT MISSING: No screenshot captured for SMOKE-015. Use: mcp__chrome-devtools__take_screenshot({ filename: 'smoke-015-*.png' })\n\nANALYSIS MISSING: Screenshot for SMOKE-015 was not analyzed with Read tool. Use: Read({ file_path: 'screenshot-file.png' }) to view and describe what's visible.\n\nREPORT NOT UPDATED: Test SMOKE-015 results not written to H2_UAT_REPORT.md. Use: Edit({ file_path: 'H2_UAT_REPORT.md', ... }) to add test results immediately.\n\nComplete ALL steps before marking test as completed. NO FABRICATION ALLOWED."
+    }
+  ]
+}

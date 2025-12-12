@@ -97,5 +97,14 @@
     "match": "API route file exists in frontend (should be in mock server only)",
     "severity": "critical",
     "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\requirements\\chat\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
   }
 ]

@@ -18,6 +18,15 @@
             "command": "python .claude/hooks/enforce-proswarm.py"
           }
         ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/enforce-uat-validation.py"
+          }
+        ]
       }
     ],
     "SubagentStop": [

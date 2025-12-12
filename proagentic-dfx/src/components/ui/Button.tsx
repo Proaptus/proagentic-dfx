@@ -42,15 +42,15 @@ export function Button({
   // Base classes applied to all buttons
   const baseClasses = 'inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
 
-  // Variant styles with enterprise-grade polish
+  // Variant styles with enterprise-grade polish - Professional black/white theme
   const variantClasses = {
-    primary: 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-sm hover:from-blue-700 hover:to-blue-800 hover:shadow-md active:shadow-sm focus:ring-blue-500',
+    primary: 'bg-gray-900 text-white shadow-sm hover:bg-gray-800 hover:shadow-md active:bg-gray-700 active:shadow-sm focus:ring-gray-500',
     secondary: 'bg-white text-gray-700 border border-gray-300 shadow-sm hover:bg-gray-50 hover:border-gray-400 active:bg-gray-100 focus:ring-gray-500',
     ghost: 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 active:bg-gray-200 focus:ring-gray-500',
-    destructive: 'bg-red-600 text-white shadow-sm hover:bg-red-700 hover:shadow-md active:bg-red-800 active:shadow-sm focus:ring-red-500',
-    success: 'bg-green-600 text-white shadow-sm hover:bg-green-700 hover:shadow-md active:bg-green-800 active:shadow-sm focus:ring-green-500',
-    outline: 'border-2 border-blue-600 text-blue-600 bg-transparent hover:bg-blue-50 active:bg-blue-100 focus:ring-blue-500',
-    link: 'text-blue-600 hover:text-blue-700 hover:underline focus:ring-blue-500 bg-transparent p-0 shadow-none',
+    destructive: 'bg-gray-800 text-white shadow-sm hover:bg-gray-700 hover:shadow-md active:bg-gray-600 active:shadow-sm focus:ring-gray-500',
+    success: 'bg-gray-900 text-white shadow-sm hover:bg-gray-800 hover:shadow-md active:bg-gray-700 active:shadow-sm focus:ring-gray-500',
+    outline: 'border-2 border-gray-900 text-gray-900 bg-transparent hover:bg-gray-50 active:bg-gray-100 focus:ring-gray-500',
+    link: 'text-gray-900 hover:text-gray-700 hover:underline focus:ring-gray-500 bg-transparent p-0 shadow-none',
   };
 
   // Size styles with proper spacing and border radius

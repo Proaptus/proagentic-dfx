@@ -334,8 +334,8 @@ describe('Accessibility Tests - WCAG 2.1 AA Compliance', () => {
       render(<Button variant="primary">Primary</Button>);
       const button = screen.getByRole('button');
 
-      // Primary uses gradient blue with white text (high contrast)
-      expect(button.className).toContain('blue-600');
+      // Primary uses gray-900 with white text (high contrast - professional theme)
+      expect(button.className).toContain('bg-gray-900');
       expect(button.className).toContain('text-white');
     });
 
@@ -343,8 +343,8 @@ describe('Accessibility Tests - WCAG 2.1 AA Compliance', () => {
       render(<Button variant="destructive">Delete</Button>);
       const button = screen.getByRole('button');
 
-      // Destructive uses red-600 with white text (high contrast)
-      expect(button.className).toContain('red-600');
+      // Destructive uses gray-800 with white text (high contrast - professional theme)
+      expect(button.className).toContain('bg-gray-800');
       expect(button.className).toContain('text-white');
     });
 

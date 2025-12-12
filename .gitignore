@@ -80,3 +80,8 @@ h2-tank-mock-server/.husky/
 
 .vercel
 .env*.local
+
+# UAT test artifacts (screenshots)
+smoke-*.png
+uat-*.png
+screenshots/

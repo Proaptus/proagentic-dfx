@@ -142,14 +142,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { currentDomain: _currentDomain } = useDomainStore();
   const [helpOpen, setHelpOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  // Track dev mode after hydration to prevent server/client mismatch
+  const [isDevMode, setIsDevMode] = useState(false);
+
+  // Initialize dev mode detection after hydration
+  useEffect(() => {
+    const isDev = process.env.NODE_ENV === 'development';
+    if (isDev && window.location.search.includes('dev=true')) {
+      setIsDevMode(true);
+    }
+  }, []);
 
   const canNavigate = useCallback((screen: Screen): boolean => {
-    // Dev mode bypass: allow all navigation in development
-    const isDev = process.env.NODE_ENV === 'development';
-    if (isDev && typeof window !== 'undefined' && window.location.search.includes('dev=true')) {
+    // Dev mode bypass: allow all navigation in development (after hydration)
+    if (isDevMode) {
       return true;
     }
-    
+
     switch (screen) {
       case 'requirements':
         return true;
@@ -166,7 +175,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       default:
         return false;
     }
-  }, [requirements, paretoFront, currentDesign]);
+  }, [isDevMode, requirements, paretoFront, currentDesign]);
 
   // Global keyboard shortcut for search (Cmd+K / Ctrl+K)
   useEffect(() => {
@@ -310,6 +319,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                             onClick={() => enabled && setScreen(item.id)}
                             disabled={!enabled}
                             aria-current={isActive ? 'page' : undefined}
+                            suppressHydrationWarning
                             className={cn(
                               'w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-all duration-150 relative group',
                               {
@@ -329,10 +339,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
                             )}
 
                             {/* Icon with opacity transition */}
-                            <span className={cn(
-                              'transition-opacity',
-                              isActive ? 'opacity-100' : enabled ? 'opacity-70 group-hover:opacity-100' : 'opacity-40'
-                            )}>
+                            <span
+                              suppressHydrationWarning
+                              className={cn(
+                                'transition-opacity',
+                                isActive ? 'opacity-100' : enabled ? 'opacity-70 group-hover:opacity-100' : 'opacity-40'
+                              )}
+                            >
                               {item.icon}
                             </span>
 
