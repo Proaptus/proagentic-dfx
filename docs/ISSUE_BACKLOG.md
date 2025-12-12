@@ -240,7 +240,7 @@ When user types "50k cycles" or "50,000 cycles", the AI extracts only "50" inste
 
 **Module**: Requirements Chat
 **Type**: Bug
-**Status**: Open
+**Status**: ✅ RESOLVED
 **Reported**: 2025-12-12
 
 **Description**:
@@ -248,11 +248,14 @@ When user mentions "5 kg capacity", the AI sometimes interprets this as target w
 
 **Impact**: Wrong requirement category populated
 
+**Resolution**:
+Added context-aware regex patterns in parse/route.ts that distinguish between hydrogen capacity patterns ("5 kg capacity", "store 5 kg hydrogen") and tank weight patterns ("target weight 80 kg", "weight limit").
+
 **Acceptance Criteria**:
 
-- [ ] "5 kg capacity" → hydrogen_capacity_kg
-- [ ] "target weight 80 kg" → target_weight_kg
-- [ ] Context-aware parsing
+- [x] "5 kg capacity" → hydrogen_capacity_kg
+- [x] "target weight 80 kg" → target_weight_kg
+- [x] Context-aware parsing with multiple patterns
 
 **Labels**: `bug`, `high`, `ai`, `requirements`
 
@@ -390,7 +393,7 @@ Design cards P1-P50 cannot be sorted. Would be useful to sort by weight, cost, o
 
 **Module**: Pareto Explorer
 **Type**: Bug
-**Status**: Open
+**Status**: ✅ RESOLVED
 
 **Description**:
 Console shows warnings about chart width/height during rendering:
@@ -401,10 +404,13 @@ Warning: The chart component has a width of 0
 
 **Impact**: Minor - charts still render, but indicates timing issue
 
+**Resolution**:
+Added `min-w-[300px] min-h-[300px]` to ParetoChart wrapper div to ensure ResponsiveContainer always has dimensions on initial render.
+
 **Acceptance Criteria**:
 
-- [ ] No console warnings on chart render
-- [ ] Proper container sizing before render
+- [x] No console warnings on chart render
+- [x] Proper container sizing before render
 
 **Labels**: `bug`, `medium`, `pareto`, `charts`
 
@@ -414,16 +420,27 @@ Warning: The chart component has a width of 0
 
 **Module**: Pareto Explorer
 **Type**: Feature Request
-**Status**: Open
+**Status**: ✅ RESOLVED
 
 **Description**:
 Hovering over points in Pareto scatter plot doesn't show detailed tooltip with design info.
 
+**Resolution**:
+Already implemented in ParetoChart.tsx (lines 404-474) with comprehensive tooltip showing:
+
+- Design ID with Recommended/Selected badges
+- Weight and Cost
+- Burst Pressure and Ratio
+- P(failure) with scientific notation
+- Fatigue Life cycles
+- Trade-off category with color coding
+- Click instruction for selection
+
 **Acceptance Criteria**:
 
-- [ ] Hover shows design ID
-- [ ] Shows key metrics (weight, cost)
-- [ ] Shows category
+- [x] Hover shows design ID
+- [x] Shows key metrics (weight, cost)
+- [x] Shows category
 
 **Labels**: `enhancement`, `medium`, `pareto`, `charts`
 
@@ -470,22 +487,25 @@ Design cards show limited info. Would be useful to see more metrics without navi
 
 **Module**: 3D Viewer
 **Type**: Feature Request
-**Status**: Open
+**Status**: ✅ RESOLVED
 
 **Description**:
 View mode toggles (Stress, Wireframe, Cross-section) have no keyboard shortcuts.
 
-**Suggested Shortcuts**:
+**Resolution**:
+Already implemented in `useViewerKeyboardShortcuts.ts` and documented in `KeyboardShortcutsHelp.tsx`:
 
-- S: Stress view
-- W: Wireframe
-- C: Cross-section
-- R: Reset view
+- S: Toggle stress view
+- W: Toggle wireframe
+- C: Toggle cross-section
+- Shift+R: Toggle auto-rotate
+- Shift+L: Toggle liner visibility
+- ?: Show keyboard shortcuts help overlay
 
 **Acceptance Criteria**:
 
-- [ ] Shortcuts documented
-- [ ] Work when viewer focused
+- [x] Shortcuts documented (KeyboardShortcutsHelp.tsx)
+- [x] Work when viewer focused (useViewerKeyboardShortcuts.ts)
 
 **Labels**: `enhancement`, `medium`, `viewer`
 

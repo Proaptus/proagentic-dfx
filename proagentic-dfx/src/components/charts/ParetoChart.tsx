@@ -285,7 +285,8 @@ export function ParetoChart({
   const handleZoomReset = useCallback(() => setZoomDomain(null), []);
 
   return (
-    <div className="relative w-full h-full">
+    // ISSUE-016: Added min-w and min-h to prevent ResponsiveContainer width=0 warning
+    <div className="relative w-full h-full min-w-[300px] min-h-[300px]">
       {/* Controls */}
       {showControls && (
         <ChartControls

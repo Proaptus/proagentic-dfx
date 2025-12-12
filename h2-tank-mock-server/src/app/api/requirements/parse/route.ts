@@ -78,10 +78,56 @@ function parseNaturalLanguage(text: string) {
     result.parsed_requirements.internal_volume_liters = parseNumberWithSuffix(volumeMatch[1]);
   }
 
-  // ISSUE-008: Parse weight with k/M suffix support
-  const weightMatch = lowerText.match(/([\d.]+[km]?)\s*kg/i);
-  if (weightMatch) {
-    result.parsed_requirements.target_weight_kg = parseNumberWithSuffix(weightMatch[1]);
+  // ISSUE-009: Context-aware parsing for weight vs hydrogen capacity
+  // First check for hydrogen capacity patterns (e.g., "5 kg capacity", "hydrogen capacity 5 kg", "store 5 kg")
+  const hydrogenCapacityPatterns = [
+    /hydrogen\s*(?:storage\s*)?capacity[:\s]*([\d.]+[km]?)\s*kg/i,
+    /([\d.]+[km]?)\s*kg\s*(?:of\s*)?(?:hydrogen\s*)?(?:storage\s*)?capacity/i,
+    /store\s*([\d.]+[km]?)\s*kg\s*(?:of\s*)?hydrogen/i,
+    /(?:hold|store|contain)\s*([\d.]+[km]?)\s*kg/i,
+    /([\d.]+[km]?)\s*kg\s*(?:h2|hydrogen)\s*(?:storage)?/i,
+  ];
+
+  let hydrogenCapacityFound = false;
+  for (const pattern of hydrogenCapacityPatterns) {
+    const match = lowerText.match(pattern);
+    if (match) {
+      result.parsed_requirements.hydrogen_capacity_kg = parseNumberWithSuffix(match[1]);
+      hydrogenCapacityFound = true;
+      break;
+    }
+  }
+
+  // ISSUE-008/009: Parse tank weight with context awareness
+  // Look for explicit weight patterns (e.g., "target weight 80 kg", "weight limit", "tank weight", "max weight")
+  const tankWeightPatterns = [
+    /(?:target|tank|maximum|max|total)\s*weight[:\s]*([\d.]+[km]?)\s*kg/i,
+    /weight\s*(?:limit|target|max)[:\s]*([\d.]+[km]?)\s*kg/i,
+    /weigh(?:s|ing)?\s*(?:less\s*than\s*)?([\d.]+[km]?)\s*kg/i,
+    /([\d.]+[km]?)\s*kg\s*(?:max(?:imum)?\s*)?weight/i,
+  ];
+
+  let tankWeightFound = false;
+  for (const pattern of tankWeightPatterns) {
+    const match = lowerText.match(pattern);
+    if (match) {
+      result.parsed_requirements.target_weight_kg = parseNumberWithSuffix(match[1]);
+      tankWeightFound = true;
+      break;
+    }
+  }
+
+  // Fallback: If no specific context found, use generic "X kg" pattern for weight
+  // but only if hydrogen capacity wasn't already captured with this value
+  if (!tankWeightFound) {
+    const genericWeightMatch = lowerText.match(/([\d.]+[km]?)\s*kg/i);
+    if (genericWeightMatch) {
+      const value = parseNumberWithSuffix(genericWeightMatch[1]);
+      // Only assign to weight if this value wasn't already assigned to hydrogen capacity
+      if (!hydrogenCapacityFound || result.parsed_requirements.hydrogen_capacity_kg !== value) {
+        result.parsed_requirements.target_weight_kg = value;
+      }
+    }
   }
 
   // ISSUE-008: Parse cost with k/M suffix support (e.g., "€15k", "$50k")
