@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * ValidationStatCard Component Tests
  * PHASE 2 Coverage: Validation Components

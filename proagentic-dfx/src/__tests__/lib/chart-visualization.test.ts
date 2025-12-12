@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Chart Visualization Integration Tests
  * PHASE 2 Coverage: Recharts integration and chart rendering edge cases
