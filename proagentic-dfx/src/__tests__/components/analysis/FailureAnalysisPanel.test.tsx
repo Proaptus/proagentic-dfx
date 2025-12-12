@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * FailureAnalysisPanel Component - Comprehensive Integration Tests
  *
@@ -10,7 +11,7 @@
  * - Proper async/await handling with waitFor and act()
  */
 
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, beforeEach, describe, it, expect } from 'vitest';
 import { FailureAnalysisPanel } from '@/components/analysis/FailureAnalysisPanel';

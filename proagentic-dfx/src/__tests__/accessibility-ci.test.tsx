@@ -13,7 +13,7 @@
  * - Heading hierarchy
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render } from '@testing-library/react';
 import React from 'react';
 
@@ -175,7 +175,7 @@ import { ViewerScreen } from '@/components/screens/ViewerScreen';
 import { ComplianceScreen } from '@/components/screens/ComplianceScreen';
 
 // Helper to run axe
-async function runAxe(container: HTMLElement, options?: object) {
+async function runAxe(_container: HTMLElement, _options?: object) {
   // Return mock result for all axe calls
   return { violations: [] };
 }

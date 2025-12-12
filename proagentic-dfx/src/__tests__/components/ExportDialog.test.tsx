@@ -3,7 +3,7 @@
  * Core functionality tests without brittle implementation details
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ExportDialog } from '@/components/viewer/ExportDialog';
@@ -15,7 +15,7 @@ vi.mock('@/lib/export/screenshot-utils', () => ({
     const base64 = dataUrl.split(',')[1] || '';
     return Math.round((base64.length * 6) / 8 / 1024);
   },
-  generateFilename: (options: any) => {
+  generateFilename: (options: { filename?: string; format: string }) => {
     if (options.filename) {
       const hasExtension = options.filename.match(/\.(png|jpeg|jpg|webp)$/i);
       return hasExtension ? options.filename : `${options.filename}.${options.format}`;
