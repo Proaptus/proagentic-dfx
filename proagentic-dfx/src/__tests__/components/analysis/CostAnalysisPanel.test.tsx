@@ -423,6 +423,14 @@ describe('CostAnalysisPanel', () => {
       render(<CostAnalysisPanel data={mockCostData} />);
       const select = await screen.findByLabelText('Production Volume') as HTMLSelectElement;
 
+      // Wait for initial fetch to complete
+      await waitFor(() => {
+        expect(select.value).toBe('5k');
+      });
+
+      // Clear mock to only track new calls
+      vi.mocked(global.fetch).mockClear();
+
       await user.selectOptions(select, '50k');
 
       await waitFor(() => {
