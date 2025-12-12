@@ -1,3 +1,14 @@
+---
+id: WALKTHROUGH-REQUIREMENTS-DD-001
+doc_type: test-report
+title: 'Deep Dive Walkthrough: Requirements Module'
+status: draft
+date: 2025-12-12
+owner: '@h2-tank-team'
+last_verified_at: 2025-12-12
+keywords: ['uat', 'walkthrough', 'requirements', 'deep-dive']
+---
+
 # Deep Dive Walkthrough: Requirements Module
 
 **Status**: In Progress

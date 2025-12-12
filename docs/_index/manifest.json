@@ -1,14 +1,23 @@
 {
-  "generated_at": "2025-12-10T10:51:58.944Z",
-  "total_documents": 53,
-  "valid_documents": 53,
+  "generated_at": "2025-12-12T00:00:00Z",
+  "total_documents": 72,
+  "valid_documents": 72,
+  "last_sweep": {
+    "date": "2025-12-12",
+    "phases_completed": 7,
+    "conflicts_resolved": 1,
+    "files_updated": 20,
+    "code_refs_added": 30,
+    "test_refs_added": 13
+  },
   "by_status": {
     "accepted": 50,
+    "draft": 19,
     "superseded": 3
   },
   "by_type": {
     "reference": 9,
-    "test_report": 26,
+    "test_report": 45,
     "howto": 4,
     "runbook": 3,
     "explanation": 11
@@ -270,13 +279,14 @@
       "owner": "@h2-tank-team"
     },
     {
-      "id": "",
+      "id": "EXPL-2025-12-frontend-readme",
       "path": "docs/explanation/FRONTEND_README.md",
-      "title": "or",
+      "title": "Next.js Frontend Development Guide",
       "doc_type": "explanation",
       "status": "accepted",
       "last_verified_at": "2025-12-09",
-      "owner": "@h2-tank-team"
+      "owner": "@h2-tank-team",
+      "keywords": ["nextjs", "frontend", "development", "getting-started"]
     },
     {
       "id": "",

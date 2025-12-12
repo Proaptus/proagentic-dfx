@@ -14,7 +14,6 @@ import {
   Users,
   ChevronDown,
   ChevronRight,
-  ExternalLink,
   AlertCircle,
   CheckCircle2,
   Clock,

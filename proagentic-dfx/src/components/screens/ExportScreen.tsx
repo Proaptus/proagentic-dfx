@@ -23,7 +23,6 @@ import { ManufacturingPreview } from '@/components/export/ManufacturingPreview';
 import { ExportConfiguration, type ExportConfigOptions } from '@/components/export/ExportConfiguration';
 import { ExportSummary, type ExportStatus } from '@/components/export/ExportSummary';
 import {
-  FileArchive,
   Box,
   Settings,
   FileText,

@@ -4,18 +4,20 @@
 
 This project is being developed for the **Agentic AI Pioneers Prize - Development Phase** (Competition ID: 2355).
 
-| Field | Details |
-|-------|---------|
-| **Competition** | Agentic AI Pioneers Prize - Development Phase |
-| **Organiser** | Innovate UK (UKRI) + DSIT |
-| **Sector** | Advanced Manufacturing |
-| **Challenge** | Detailed Design for X Agents |
-| **Prize** | £250,000 (sector) + £250,000 (overall winner bonus) |
-| **Application Deadline** | 23 February 2026 at 11:00 UK |
-| **Interview Dates** | 16-18 March 2026 (London) |
+| Field                    | Details                                             |
+| ------------------------ | --------------------------------------------------- |
+| **Competition**          | Agentic AI Pioneers Prize - Development Phase       |
+| **Organiser**            | Innovate UK (UKRI) + DSIT                           |
+| **Sector**               | Advanced Manufacturing                              |
+| **Challenge**            | Detailed Design for X Agents                        |
+| **Prize**                | £250,000 (sector) + £250,000 (overall winner bonus) |
+| **Application Deadline** | 23 February 2026 at 11:00 UK                        |
+| **Interview Dates**      | 16-18 March 2026 (London)                           |
 
 ### Competition Documentation
+
 See `agentic-pioneers-prize/` folder for:
+
 - `COMPETITION_OVERVIEW.md` - Full competition details
 - `SCORING_CRITERIA.md` - Assessor scoring guidance
 - `TIMELINE.md` - Key dates and milestones
@@ -54,15 +56,17 @@ ProAgentic DfX (Platform)
 
 ## Technology Stack
 
-| Layer | Technology |
-|-------|------------|
-| Frontend | React 18 + TypeScript + Vite + Tailwind CSS |
-| 3D Viewer | Three.js (@react-three/fiber) |
-| Backend | Node.js + Express |
-| Analysis | CadQuery, Gmsh, CalculiX |
-| AI/LLM | Claude API, GPT-4 (fallback) |
-| Testing | Vitest + React Testing Library + Playwright |
-| Deployment | Docker + Docker Compose |
+| Layer       | Technology                                        | Notes                            |
+| ----------- | ------------------------------------------------- | -------------------------------- |
+| Frontend    | React 18 + TypeScript + Next.js 14 + Tailwind CSS | App Router                       |
+| 3D/CAD      | Three.js (@react-three/fiber) + OpenCascade.js    | B-rep solids, STEP export        |
+| Mock Server | Next.js 14 (App Router) + TypeScript              | Port 3001                        |
+| Physics     | First-principles equations                        | Pressure vessel, Tsai-Wu, Hashin |
+| AI/LLM      | Claude API, GPT-4 (fallback)                      | Requirements chat                |
+| Testing     | Vitest + React Testing Library + Playwright       | 80%+ coverage                    |
+| Deployment  | Vercel (production) + Docker (local)              | CI/CD pipeline                   |
+
+> **Note**: CadQuery, Gmsh, CalculiX are planned for production backend (not yet implemented).
 
 ---
 
@@ -93,6 +97,7 @@ proagentic-dfx/
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js 18+
 - npm or yarn
 
@@ -116,6 +121,7 @@ npm run dev
 ```
 
 ### Access
+
 - Frontend: http://localhost:3000
 - Mock Server: http://localhost:3001
 
@@ -125,22 +131,23 @@ npm run dev
 
 The DfX system uses 8 specialised agents:
 
-| Order | Agent | Purpose |
-|-------|-------|---------|
-| 1 | REQ-AGENT | Parse natural language requirements |
-| 2 | CONCEPT-AGENT | Generate candidate concepts |
-| 3 | GEOM-AGENT | Create parametric CAD geometry |
-| 4 | FEA-AGENT | Run structural analysis (FEA) |
-| 5 | DFM-AGENT | Assess manufacturability |
-| 6 | COST-AGENT | Estimate costs |
-| 7 | OPT-AGENT | Optimise and rank options |
-| 8 | DOC-AGENT | Generate reports and documentation |
+| Order | Agent         | Purpose                             |
+| ----- | ------------- | ----------------------------------- |
+| 1     | REQ-AGENT     | Parse natural language requirements |
+| 2     | CONCEPT-AGENT | Generate candidate concepts         |
+| 3     | GEOM-AGENT    | Create parametric CAD geometry      |
+| 4     | FEA-AGENT     | Run structural analysis (FEA)       |
+| 5     | DFM-AGENT     | Assess manufacturability            |
+| 6     | COST-AGENT    | Estimate costs                      |
+| 7     | OPT-AGENT     | Optimise and rank options           |
+| 8     | DOC-AGENT     | Generate reports and documentation  |
 
 ---
 
 ## Development
 
 ### Skills Available
+
 ```bash
 Skill({ skill: "proswarm" })      # Master orchestration
 Skill({ skill: "tdd" })           # Test-Driven Development
@@ -149,6 +156,7 @@ Skill({ skill: "bug-fixer" })     # Batch bug fixing
 ```
 
 ### Testing
+
 ```bash
 npm test              # Run unit tests
 npm run test:e2e      # Run Playwright E2E tests
@@ -159,10 +167,10 @@ npm run lint          # Run ESLint
 
 ## Key Contacts
 
-| Role | Name | Email |
-|------|------|-------|
-| Founder/CEO | Chinedu Achara | chinedu@proaptus.co.uk |
-| Organisation | Proaptus Ltd | - |
+| Role         | Name           | Email                  |
+| ------------ | -------------- | ---------------------- |
+| Founder/CEO  | Chinedu Achara | chinedu@proaptus.co.uk |
+| Organisation | Proaptus Ltd   | -                      |
 
 ---
 
@@ -172,5 +180,5 @@ Proprietary - All rights reserved. Built on IP-owned codebase as per competition
 
 ---
 
-*Last Updated: December 2024*
-*Competition Deadline: 23 February 2026*
+_Last Updated: December 2024_
+_Competition Deadline: 23 February 2026_

@@ -1,3 +1,14 @@
+---
+id: WALKTHROUGH-GAP-SUMMARY-001
+doc_type: test-report
+title: 'H2 Tank Designer: User Walkthrough & Gap Analysis Summary'
+status: draft
+date: 2025-12-12
+owner: '@h2-tank-team'
+last_verified_at: 2025-12-12
+keywords: ['uat', 'walkthrough', 'gap-analysis', 'summary', 'h2-tank']
+---
+
 # H2 Tank Designer: User Walkthrough & Gap Analysis Summary
 
 **Date**: 2025-12-12

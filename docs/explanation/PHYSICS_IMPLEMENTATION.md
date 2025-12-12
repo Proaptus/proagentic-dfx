@@ -1,10 +1,34 @@
 ---
 doc_type: explanation
-title: "First-Principles Physics Implementation Summary"
+title: 'First-Principles Physics Implementation Summary'
 status: accepted
 date: 2025-12-07
-owner: "@h2-tank-team"
-requirements: ["REQ-231", "REQ-232", "REQ-233", "REQ-234", "REQ-235"]
+owner: '@h2-tank-team'
+requirements: ['REQ-231', 'REQ-232', 'REQ-233', 'REQ-234', 'REQ-235']
+code_refs:
+  - path: 'h2-tank-mock-server/src/lib/physics/pressure-vessel.ts'
+    symbol: 'calculateHoopStress'
+  - path: 'h2-tank-mock-server/src/lib/physics/pressure-vessel.ts'
+    symbol: 'calculateAxialStress'
+  - path: 'h2-tank-mock-server/src/lib/physics/composite-analysis.ts'
+    symbol: 'calculateTsaiWuIndex'
+  - path: 'h2-tank-mock-server/src/lib/physics/composite-analysis.ts'
+    symbol: 'calculateHashinIndices'
+  - path: 'h2-tank-mock-server/src/lib/physics/dome-geometry.ts'
+    symbol: 'generateIsotensoidDome'
+  - path: 'h2-tank-mock-server/src/lib/physics/reliability.ts'
+    symbol: 'calculateReliability'
+  - path: 'h2-tank-mock-server/src/lib/physics/fatigue.ts'
+    symbol: 'calculateFatigueLife'
+  - path: 'h2-tank-mock-server/src/lib/physics/permeation.ts'
+    symbol: 'calculatePermeationRate'
+  - path: 'h2-tank-mock-server/src/lib/physics/index.ts'
+  - path: 'h2-tank-mock-server/src/app/api/designs/[id]/stress/route.ts'
+  - path: 'h2-tank-mock-server/src/app/api/designs/[id]/failure/route.ts'
+  - path: 'h2-tank-mock-server/src/app/api/designs/[id]/geometry/route.ts'
+  - path: 'h2-tank-mock-server/src/app/api/designs/[id]/reliability/route.ts'
+test_refs:
+  - path: 'h2-tank-mock-server/src/lib/physics/__tests__/physics-verification.test.ts'
 ---
 
 # First-Principles Physics Implementation Summary
@@ -71,53 +95,71 @@ Implemented real first-principles physics equations for the H2 Tank Designer moc
 ## API Routes Updated
 
 ### 1. **`/api/designs/[id]/stress`**
+
 **Changes**:
+
 - Replaced hardcoded stress values with real calculations
 - Uses `calculateHoopStress()` and `calculateAxialStress()`
 - Calculates stress from pressure and geometry
 - Real stress ratio verification (2:1 hoop to axial)
 
 **Example**:
+
 ```typescript
 const hoopStress = calculateHoopStress(pressureMPa, radiusM, thicknessM);
 const axialStress = calculateAxialStress(pressureMPa, radiusM, thicknessM);
 ```
 
 ### 2. **`/api/designs/[id]/failure`**
+
 **Changes**:
+
 - Real Tsai-Wu failure index calculation
 - Hashin failure indices for test and burst pressures
 - Stress transformation for fiber angles
 - Physics-based failure predictions
 
 **Example**:
+
 ```typescript
 const tsaiWu = calculateTsaiWuIndex(sigma1, sigma2, tau12, CARBON_EPOXY_STRENGTHS);
 const hashin = calculateHashinIndices(sigma1, sigma2, tau12, CARBON_EPOXY_STRENGTHS);
 ```
 
 ### 3. **`/api/designs/[id]/geometry`**
+
 **Changes**:
+
 - Generates real isotensoid dome profile using ODE integration
 - Uses netting theory angle (54.74°)
 - 50-point dome profile based on first principles
 
 **Example**:
+
 ```typescript
 const nettingAngle = getNettingTheoryAngle(); // 54.74°
 const isotensoidProfile = generateIsotensoidDome(cylinderRadius, nettingAngle, bossRadius, 50);
 ```
 
 ### 4. **`/api/designs/[id]/reliability`**
+
 **Changes**:
+
 - Monte Carlo simulation with 100,000 samples
 - Real probability of failure calculation
 - Burst distribution statistics from sampled data
 - Reliability index (β) calculation
 
 **Example**:
+
 ```typescript
-const mcResult = calculateReliability(designStress, materialStrength, strengthCOV, stressCOV, 100000);
+const mcResult = calculateReliability(
+  designStress,
+  materialStrength,
+  strengthCOV,
+  stressCOV,
+  100000
+);
 const burstSamples = generateBurstDistribution(meanBurst, burstCOV, 10000);
 ```
 
@@ -126,6 +168,7 @@ const burstSamples = generateBurstDistribution(meanBurst, burstCOV, 10000);
 ### Test Results: ✅ ALL PASS (14/14)
 
 **Example from Requirements**:
+
 ```
 Input:  P = 700 bar = 70 MPa
         R = 175 mm = 0.175 m
@@ -137,6 +180,7 @@ Output: σ_hoop = 70 × 0.175 / 0.025 = 490 MPa ✅
 ```
 
 **Test Coverage**:
+
 - ✅ Pressure vessel mechanics (hoop, axial, ratio)
 - ✅ Netting theory angle (54.74°)
 - ✅ Tsai-Wu failure criterion
@@ -149,6 +193,7 @@ Output: σ_hoop = 70 × 0.175 / 0.025 = 490 MPa ✅
 ## Physics Constants Used
 
 ### Material Properties (Carbon Fiber/Epoxy - T700)
+
 - `X_t` = 2500 MPa (longitudinal tensile)
 - `X_c` = 1200 MPa (longitudinal compressive)
 - `Y_t` = 80 MPa (transverse tensile)
@@ -156,11 +201,13 @@ Output: σ_hoop = 70 × 0.175 / 0.025 = 490 MPa ✅
 - `S` = 100 MPa (shear strength)
 
 ### Fatigue Properties
+
 - `C` = 10¹² (cycles × MPa^m)
 - `m` = 12 (slope exponent for composites)
 - Endurance limit = 500 MPa
 
 ### Reliability Parameters
+
 - Strength COV = 0.05 (5%)
 - Stress COV = 0.10 (10%)
 - Monte Carlo samples = 100,000
@@ -191,6 +238,7 @@ Output: σ_hoop = 70 × 0.175 / 0.025 = 490 MPa ✅
 **After**: Real physics calculations from pressure, geometry, and material properties
 
 **Benefits**:
+
 - Frontend can trust calculations for design decisions
 - Realistic stress distributions and failure predictions
 - Accurate reliability and fatigue estimates
@@ -199,6 +247,7 @@ Output: σ_hoop = 70 × 0.175 / 0.025 = 490 MPa ✅
 ## Future Enhancements
 
 Potential additions (not in current scope):
+
 - Progressive failure analysis with stiffness degradation
 - Temperature-dependent material properties
 - Dynamic pressure cycling simulation
@@ -208,6 +257,7 @@ Potential additions (not in current scope):
 ## References
 
 Physics equations sourced from:
+
 - `first-principles-h2-tank.md` (project documentation)
 - Classical pressure vessel theory (thin-wall equations)
 - Composite mechanics textbooks (Tsai-Wu, Hashin)

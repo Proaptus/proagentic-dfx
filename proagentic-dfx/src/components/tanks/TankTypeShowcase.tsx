@@ -17,7 +17,7 @@ import {
   TYPE_IV_SPEC,
   TYPE_V_SPEC,
 } from '@/lib/tank-models';
-import { Check, Info, Layers, Gauge, Scale, DollarSign } from 'lucide-react';
+import { Check, Layers, Gauge, Scale, DollarSign } from 'lucide-react';
 
 interface TankTypeShowcaseProps {
   selectedType?: TankType;
@@ -54,10 +54,14 @@ function TankSVG({
   const totalThickness = layers.reduce((sum, l) => sum + l.thickness, 0);
   const scale = maxThickness / totalThickness;
 
-  let currentRadius = baseRadius;
+  // Precalculate cumulative outer radii (avoids mutation during render)
+  const layerOuterRadii = layers.reduce<number[]>((acc, layer) => {
+    const prevRadius = acc.length > 0 ? acc[acc.length - 1] : baseRadius;
+    return [...acc, prevRadius + layer.thickness * scale];
+  }, []);
+
   const layerPaths = layers.map((layer, idx) => {
-    const scaledThickness = layer.thickness * scale;
-    const outerRadius = currentRadius + scaledThickness;
+    const outerRadius = layerOuterRadii[idx];
     const path = `
       M ${60 - outerRadius} 50
       Q ${60 - outerRadius} ${50 - outerRadius * 0.5} ${60} ${50 - outerRadius * 0.4}
@@ -67,7 +71,6 @@ function TankSVG({
       Q ${60 - outerRadius} ${100 + outerRadius * 0.5} ${60 - outerRadius} 100
       Z
     `;
-    currentRadius = outerRadius;
 
     const color = `rgb(${Math.round(layer.color[0] * 255)}, ${Math.round(layer.color[1] * 255)}, ${Math.round(layer.color[2] * 255)})`;
 

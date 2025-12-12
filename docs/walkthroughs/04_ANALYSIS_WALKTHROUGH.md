@@ -1,3 +1,14 @@
+---
+id: WALKTHROUGH-ANALYSIS-001
+doc_type: test-report
+title: 'User Walkthrough & Gap Analysis: Analysis Dashboard'
+status: draft
+date: 2025-12-12
+owner: '@h2-tank-team'
+last_verified_at: 2025-12-12
+keywords: ['uat', 'walkthrough', 'analysis', 'dashboard', 'gap-analysis']
+---
+
 # User Walkthrough & Gap Analysis: Analysis Dashboard
 
 **Status**: In Progress

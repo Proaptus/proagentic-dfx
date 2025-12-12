@@ -3,7 +3,7 @@
 import { useMemo, useState, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Cell, ComposedChart, Line } from 'recharts';
 import { ChartControls, ColorScaleLegend } from './ChartControls';
-import type { ColorMode } from '@/lib/charts/chart-utils';
+import type { ColorMode as _ColorMode } from '@/lib/charts/chart-utils';
 import { interpolateColor, DIVERGING_SCALES, SEQUENTIAL_SCALES } from '@/lib/charts/chart-utils';
 
 export interface SensitivityParameter {
@@ -68,7 +68,7 @@ export function TornadoChart({ data, title = 'Sensitivity Analysis', sortByMagni
 
   const maxMagnitude = useMemo(() => Math.max(...processedData.map(d => d.magnitude)), [processedData]);
 
-  const getBarColor = useCallback((value: number, magnitude: number, index: number) => {
+  const getBarColor = useCallback((value: number, magnitude: number, _index: number) => {
     if (colorMode === 'default') {
       return value < 0 ? '#EF4444' : '#10B981';
     }

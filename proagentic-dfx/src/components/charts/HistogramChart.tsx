@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState } from 'react';
 import { Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Legend, ReferenceLine, Area, Line } from 'recharts';
 import { ChartControls, ColorScaleLegend } from './ChartControls';
-import type { ColorMode } from '@/lib/charts/chart-utils';
+import type { ColorMode as _ColorMode } from '@/lib/charts/chart-utils';
 import { interpolateColor, SEQUENTIAL_SCALES, DIVERGING_SCALES } from '@/lib/charts/chart-utils';
 
 interface HistogramData {
@@ -44,7 +44,7 @@ export function HistogramChart({
   const [colorMode, setColorMode] = useState<HistogramColorMode>('default');
   const [showGrid, setShowGrid] = useState(true);
   const [showLegend, setShowLegend] = useState(true);
-  const [showStats, setShowStats] = useState(true);
+  const [showStats, _setShowStats] = useState(true);
   const [showNormal, setShowNormal] = useState(showNormalOverlay);
 
   const stats = useMemo(() => {

@@ -28,13 +28,13 @@ export function RequirementsScreen({ exampleRequirements = '' }: RequirementsScr
 
   const [inputMode, setInputMode] = useState<InputMode>('chat');
   const [step, setStep] = useState<Step>('input');
-  const [rawText, setRawText] = useState(exampleRequirements);
+  const [rawText, _setRawText] = useState(exampleRequirements);
   const [parsedResult, setParsedResult] = useState<ParseRequirementsResponse | null>(null);
   const [tankRecommendation, setTankRecommendation] = useState<TankTypeRecommendation | null>(null);
   const [progress, setProgress] = useState<ProgressEvent | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleParse = useCallback(async () => {
+  const _handleParse = useCallback(async () => {
     setStep('parsing');
     setError(null);
     try {

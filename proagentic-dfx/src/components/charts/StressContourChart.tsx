@@ -5,7 +5,7 @@ import { Group } from '@visx/group';
 import { scaleLinear } from '@visx/scale';
 import { ParentSize } from '@visx/responsive';
 import { useTooltip, TooltipWithBounds, defaultStyles } from '@visx/tooltip';
-import { LinearGradient } from '@visx/gradient';
+// LinearGradient imported but using CSS gradient definition in defs instead
 import { AxisLeft, AxisBottom } from '@visx/axis';
 import { GridRows, GridColumns } from '@visx/grid';
 import type { DesignStress, MeshElement, MeshNode } from '@/lib/types';
@@ -256,8 +256,8 @@ function ContourInner({
     [minStress, maxStress, colorScaleName]
   );
 
-  // Create color scale for legend
-  const legendScale = useMemo(() => {
+  // Create color scale for legend (used for potential scale display)
+  const _legendScale = useMemo(() => {
     return scaleLinear({
       domain: [minStress, maxStress],
       range: [0, 1],

@@ -12,7 +12,7 @@ import {
   Legend,
 } from 'recharts';
 import { ChartControls, ColorScaleLegend } from './ChartControls';
-import type { ColorMode } from '@/lib/charts/chart-utils';
+import type { ColorMode as _ColorMode } from '@/lib/charts/chart-utils';
 import { interpolateColor, SEQUENTIAL_SCALES, PRIMARY_COLORS } from '@/lib/charts/chart-utils';
 
 export interface RadarMetric {

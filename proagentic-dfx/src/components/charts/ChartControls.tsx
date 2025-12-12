@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import {
   ZoomIn,
   ZoomOut,
   RotateCcw,
   Maximize2,
   Download,
-  Settings,
   Layers,
   BarChart3,
   LineChart,

@@ -21,7 +21,7 @@ import { WebGLRenderer } from '@/components/cad/WebGLRenderer';
 import { TankType, getTankTypeSpec } from './tank-types';
 import { DomeProfileType, generateDomeProfile } from './dome-profiles';
 import { BossType, getBossGeometry } from './boss-components';
-import { getMaterialVisual, applyMaterialColor } from './liner-materials';
+import { getMaterialVisual } from './liner-materials';
 
 export interface TankModel3DProps {
   // Geometry
@@ -46,7 +46,7 @@ export interface TankModel3DProps {
   onRegionClick?: (region: string, point: { x: number; y: number; z: number }) => void;
 }
 
-interface Region {
+interface _Region {
   name: string;
   zMin: number;
   zMax: number;
@@ -63,7 +63,7 @@ export function TankModel3D({
   autoRotate = false,
   highlightRegion = null,
   layerOpacity = 0.85,
-  onRegionClick,
+  onRegionClick: _onRegionClick,
 }: TankModel3DProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<WebGLRenderer | null>(null);

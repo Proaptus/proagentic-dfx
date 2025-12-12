@@ -1,12 +1,28 @@
 ﻿---
 doc_type: reference
-title: "H2 Tank Designer - Design System"
+title: 'H2 Tank Designer - Design System'
 version: 1.0.0
 date: 2025-12-09
-owner: "@h2-tank-team"
+owner: '@h2-tank-team'
 status: accepted
 last_verified_at: 2025-12-09
+code_refs:
+  - path: 'proagentic-dfx/src/components/ui/index.ts'
+  - path: 'proagentic-dfx/src/components/ui/Button.tsx'
+  - path: 'proagentic-dfx/src/components/ui/Card.tsx'
+  - path: 'proagentic-dfx/src/components/ui/LoadingState.tsx'
+  - path: 'proagentic-dfx/src/components/ui/ErrorState.tsx'
+  - path: 'proagentic-dfx/src/components/ui/AccessibleLabel.tsx'
+  - path: 'proagentic-dfx/src/app/globals.css'
+test_refs:
+  - path: 'proagentic-dfx/src/__tests__/components/ui/AccessibleLabel.test.tsx'
+  - path: 'proagentic-dfx/src/__tests__/components/ui/Alert.test.tsx'
+  - path: 'proagentic-dfx/src/__tests__/components/ui/Badge.test.tsx'
+  - path: 'proagentic-dfx/src/__tests__/components/ui/Tooltip.test.tsx'
+  - path: 'proagentic-dfx/src/__tests__/components/ui/Tabs.test.tsx'
+  - path: 'proagentic-dfx/src/__tests__/components/ui/Progress.test.tsx'
 ---
+
 # H2 Tank Designer - Design System
 
 This design system provides a comprehensive foundation for building accessible, consistent, and professional UI components.
@@ -24,15 +40,18 @@ This design system provides a comprehensive foundation for building accessible, 
 ### Colors
 
 #### Primary Brand Colors
+
 - `primary.500` (#0077FF) - Main brand blue
 - Full scale: 50, 100, 200, 300, 400, 500, 600, 700, 800, 900
 
 #### Semantic Colors
+
 - **Success**: Green (#059669)
 - **Warning**: Amber (#D97706)
 - **Error**: Red (#DC2626)
 
 #### Engineering-Specific Colors
+
 - **Stress Visualization**: Green (safe) â†’ Yellow (caution) â†’ Red (critical)
 - **Layer Colors**: Helical (Blue), Hoop (Green), Liner (Purple)
 
@@ -59,6 +78,7 @@ fontSize: {
 ### Spacing Scale
 
 Based on 4px (0.25rem) increments:
+
 - 1 = 4px
 - 2 = 8px
 - 3 = 12px
@@ -81,18 +101,20 @@ xl: 1280px  // Large desktop
 ## Component Library
 
 ### Button
+
 ```tsx
 import { Button } from '@/components/ui';
 
 <Button variant="primary" size="md" loading={false}>
   Click me
-</Button>
+</Button>;
 ```
 
 Variants: `primary` | `secondary` | `outline` | `ghost`
 Sizes: `sm` | `md` | `lg`
 
 ### Card
+
 ```tsx
 import { Card, CardHeader, CardTitle } from '@/components/ui';
 
@@ -101,10 +123,11 @@ import { Card, CardHeader, CardTitle } from '@/components/ui';
     <CardTitle>Title</CardTitle>
   </CardHeader>
   Content
-</Card>
+</Card>;
 ```
 
 ### LoadingState
+
 ```tsx
 import { LoadingState } from '@/components/ui';
 
@@ -114,6 +137,7 @@ import { LoadingState } from '@/components/ui';
 ```
 
 ### ErrorState
+
 ```tsx
 import { ErrorState } from '@/components/ui';
 
@@ -122,13 +146,14 @@ import { ErrorState } from '@/components/ui';
   title="Something went wrong"
   message="Please try again later"
   action={{
-    label: "Retry",
-    onClick: () => retry()
+    label: 'Retry',
+    onClick: () => retry(),
   }}
-/>
+/>;
 ```
 
 ### AccessibleLabel
+
 ```tsx
 import { AccessibleLabel } from '@/components/ui';
 
@@ -140,7 +165,7 @@ import { AccessibleLabel } from '@/components/ui';
   error={errors.email}
 >
   <input id="email" type="email" />
-</AccessibleLabel>
+</AccessibleLabel>;
 ```
 
 ## Accessibility (WCAG 2.1 AA)
@@ -187,7 +212,7 @@ function MyComponent() {
           type="error"
           title="Operation failed"
           message={error.message}
-          action={{ label: "Retry", onClick: handleRetry }}
+          action={{ label: 'Retry', onClick: handleRetry }}
         />
       )}
 
@@ -208,8 +233,7 @@ Custom properties are defined in `globals.css` for consistent theming:
 --color-success: 5 150 105;
 --color-warning: 217 119 6;
 --color-error: 220 38 38;
---font-sans: 'Inter', ...
---font-mono: 'JetBrains Mono', ...
+--font-sans: 'Inter', ... --font-mono: 'JetBrains Mono', ...;
 ```
 
 ## Best Practices
@@ -220,4 +244,3 @@ Custom properties are defined in `globals.css` for consistent theming:
 4. **Test with keyboard navigation**: Ensure all features work without a mouse
 5. **Verify color contrast**: Use tools to ensure WCAG AA compliance
 6. **Respect user preferences**: Support reduced motion and high contrast modes
-

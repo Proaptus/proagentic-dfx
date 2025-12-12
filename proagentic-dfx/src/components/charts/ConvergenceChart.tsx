@@ -17,7 +17,7 @@ import {
   Bar,
 } from 'recharts';
 import { ChartControls, ColorScaleLegend } from './ChartControls';
-import type { ChartType, ColorMode } from '@/lib/charts/chart-utils';
+import type { ChartType as _ChartType, ColorMode as _ColorMode } from '@/lib/charts/chart-utils';
 import {
   interpolateColor,
   SEQUENTIAL_SCALES,
@@ -61,7 +61,7 @@ export function ConvergenceChart({
   const [colorMode, setColorMode] = useState<ConvergenceColorMode>('default');
   const [showGrid, setShowGrid] = useState(true);
   const [showLegend, setShowLegend] = useState(true);
-  const [zoomLevel, setZoomLevel] = useState(1);
+  const [_zoomLevel, setZoomLevel] = useState(1);
 
   // Calculate convergence statistics
   const stats = useMemo(() => {

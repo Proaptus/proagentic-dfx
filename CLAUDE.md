@@ -35,6 +35,33 @@ Bash('npm test'); // ✅ ALLOWED
 (await mcp__proswarm) - neural__execute_plan(result.task_id);
 ```
 
+## 🔴 SINGLE SOURCE OF TRUTH (SSOT) - CRITICAL
+
+**THE RTM (Requirements Traceability Matrix) IS THE SSOT FOR THIS PROJECT.**
+
+| Document       | Location                                   | Purpose                                      |
+| -------------- | ------------------------------------------ | -------------------------------------------- |
+| **RTM Audit**  | `docs/test-report/RTM_AUDIT_2025-12-11.md` | Current compliance status, gaps, priorities  |
+| **RTM Review** | `docs/test-report/RTM_REVIEW_REPORT.md`    | Detailed requirement-by-requirement analysis |
+
+### ALWAYS CHECK RTM BEFORE:
+
+- Making architectural decisions
+- Prioritizing work
+- Claiming a feature is "complete"
+- Updating documentation
+
+### RTM Key Metrics (as of 2025-12-11):
+
+- **~330 requirements** (after deduplication)
+- **64% overall compliance**
+- **Frontend Core**: 74% (B+)
+- **Mock Server**: 81% (A-)
+- **Export/CAD**: 11% (F - Critical Gap)
+- **Professional Features**: 33% (D+)
+
+---
+
 ## 📋 PROJECT OVERVIEW
 
 **ProAgentic DfX** - Multi-agent AI ecosystem for Design for Excellence (DfX), starting with the H2 Tank Designer module.
@@ -65,15 +92,19 @@ agentic-pioneers-prize/
 └── interview/                 # Demo preparation
 ```
 
-### Technology Stack
+### Technology Stack (Verified against RTM)
 
-- **Frontend**: React 18 + TypeScript + Next.js + Tailwind CSS
-- **3D Viewer**: Three.js (@react-three/fiber)
-- **Backend**: Node.js + Express
-- **Analysis**: CadQuery, Gmsh, CalculiX
-- **AI/LLM**: Claude API, GPT-4 (fallback)
-- **Testing**: Vitest + React Testing Library + Playwright
-- **Deployment**: Docker + Docker Compose
+| Layer           | Technology                                                    | Notes                     |
+| --------------- | ------------------------------------------------------------- | ------------------------- |
+| **Frontend**    | React 18 + TypeScript + Next.js 14 + Tailwind CSS             | App Router                |
+| **3D/CAD**      | Three.js (@react-three/fiber) + OpenCascade.js                | B-rep solids, STEP export |
+| **Mock Server** | Next.js 14 (App Router) + TypeScript                          | Port 3001                 |
+| **Physics**     | First-principles equations (pressure vessel, Tsai-Wu, Hashin) | In mock server            |
+| **AI/LLM**      | Claude API, GPT-4 (fallback)                                  | Requirements chat         |
+| **Testing**     | Vitest + React Testing Library + Playwright                   | 80%+ coverage target      |
+| **Deployment**  | Vercel (production) + Docker (local)                          | CI/CD pipeline            |
+
+**NOTE**: CadQuery, Gmsh, CalculiX are planned for production backend, not currently implemented.
 
 ## 🚨 MANDATORY PROSWARM HOOK ENFORCEMENT
 

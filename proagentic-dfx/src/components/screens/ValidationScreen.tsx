@@ -20,11 +20,6 @@ import {
   Clock,
   Play,
   BarChart3,
-  TrendingUp,
-  FlaskConical,
-  Radio,
-  ClipboardCheck,
-  Calendar,
 } from 'lucide-react';
 
 interface SensorLocation {

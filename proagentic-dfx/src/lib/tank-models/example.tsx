@@ -15,7 +15,6 @@ import {
   getTankTypeSpec,
   calculateTankMass,
   generateIsotensoidProfile,
-  type TankModel3DProps,
 } from './index';
 
 /**

@@ -146,7 +146,7 @@ export function ParetoScreen() {
   }, [paretoFront, categoryFilter, sortField, sortDirection]);
 
   // Memoized computed values
-  const highlights = useMemo(() => extractHighlightedDesigns(paretoFront), [paretoFront]);
+  const _highlights = useMemo(() => extractHighlightedDesigns(paretoFront), [paretoFront]);
   const recommendedDesign = useMemo(() => findRecommendedDesign(paretoFront), [paretoFront]);
   const remainingSelections = useMemo(
     () => MIN_COMPARE_DESIGNS - selectedDesigns.length,

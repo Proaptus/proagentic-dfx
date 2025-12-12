@@ -459,7 +459,7 @@ export function batchGetThreeColors(
 // DEFAULT EXPORT
 // ============================================================================
 
-export default {
+const colormapUtils = {
   interpolateColor,
   interpolateColorHex,
   interpolateColorRGB,
@@ -471,3 +471,5 @@ export default {
   getThreeColor,
   batchGetThreeColors
 };
+
+export default colormapUtils;
