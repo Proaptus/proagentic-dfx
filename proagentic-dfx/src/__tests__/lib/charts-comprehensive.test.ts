@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 /**
  * COMPREHENSIVE CHART UTILITIES TEST SUITE
  * 70+ Tests for 80%+ Coverage (ALL 4 METRICS: statements, branches, functions, lines)

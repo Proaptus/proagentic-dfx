@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, prefer-const */
 /**
  * ThemeProvider Tests - Comprehensive Coverage Suite
  *

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Modal Component Tests
  * PHASE 2 Coverage: UI Components (0-10% -> 60%+)

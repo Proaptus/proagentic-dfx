@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Accordion Component Tests
  * PHASE 2 Coverage: UI Components

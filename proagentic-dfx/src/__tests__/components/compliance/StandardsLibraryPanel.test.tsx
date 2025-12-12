@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * StandardsLibraryPanel Component Tests
  * Coverage Target: 80%

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * ChartControls and ColorScaleLegend Component Tests
  * Coverage Target: 80%
