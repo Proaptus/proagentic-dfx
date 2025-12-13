@@ -267,6 +267,10 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
+      - name: Run Post-Deploy Smoke Test
+        run: node scripts/smoke-test.mjs --url=${{ steps.deploy.outputs.preview-url }}
+        continue-on-error: false
+
   # ============================================
   # Deploy to Vercel (Staging)
   # ============================================
@@ -288,10 +292,16 @@ jobs:
       # already have root directory set to 'proagentic-dfx'. Using both
       # causes path doubling errors.
       - name: Deploy to Vercel Staging
-        run: vercel deploy --token=${{ secrets.VERCEL_TOKEN }}
+        id: deploy-staging
+        run: |
+          url=$(vercel deploy --token=${{ secrets.VERCEL_TOKEN }})
+          echo "staging-url=$url" >> $GITHUB_OUTPUT
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Run Post-Deploy Smoke Test (Staging)
+        run: node scripts/smoke-test.mjs --url=https://proagentic-dfx-staging.vercel.app
 
   # ============================================
   # Deploy to Vercel (Production)
@@ -318,3 +328,6 @@ jobs:
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Run Post-Deploy Smoke Test (Production)
+        run: node scripts/smoke-test.mjs --url=https://dfx.proagentic.ai

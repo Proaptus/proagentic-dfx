@@ -28,6 +28,8 @@
     "validate": "turbo run lint typecheck test",
     "validate:full": "npm run check:sizes && npm run lint && npm run typecheck && npm run test:coverage",
     "quality-gate": "npm run check:sizes && npm run lint && npm run typecheck && npm run test:coverage && npm run build",
+    "validate:prod": "node scripts/validate-production.mjs",
+    "smoke-test": "node scripts/smoke-test.mjs",
     "check:sizes": "node scripts/check-file-sizes.mjs all",
     "check:sizes:staged": "node scripts/check-file-sizes.mjs staged",
     "prepare": "husky",

@@ -256,6 +256,83 @@ describe('Deployment Configuration Validation', () => {
     });
   });
 
+  describe('Environment Variables - Documentation Consistency', () => {
+    it('should have all NEXT_PUBLIC_ vars documented in .env.example', () => {
+      const envExamplePath = path.join(PROJECT_ROOT, '.env.example');
+
+      expect(
+        fs.existsSync(envExamplePath),
+        '.env.example must exist to document environment variables'
+      ).toBe(true);
+
+      const envExample = fs.readFileSync(envExamplePath, 'utf-8');
+
+      // Required NEXT_PUBLIC_ vars that must be documented
+      const requiredPublicVars = [
+        'NEXT_PUBLIC_API_URL',
+        'NEXT_PUBLIC_APP_NAME',
+        'NEXT_PUBLIC_APP_VERSION',
+      ];
+
+      const missing: string[] = [];
+      for (const varName of requiredPublicVars) {
+        if (!envExample.includes(varName)) {
+          missing.push(varName);
+        }
+      }
+
+      expect(
+        missing,
+        `Missing environment variables in .env.example:\n` +
+          missing.map((v) => `  - ${v}`).join('\n') +
+          '\n\nAll NEXT_PUBLIC_ vars must be documented for team consistency.'
+      ).toHaveLength(0);
+    });
+
+    it('should not have localhost URLs in .env.example production section', () => {
+      const envExamplePath = path.join(PROJECT_ROOT, '.env.example');
+      const content = fs.readFileSync(envExamplePath, 'utf-8');
+
+      // Find the production section and check it doesn't have localhost
+      const productionCommentPattern =
+        /# Production:.*\n(NEXT_PUBLIC_API_URL=.*)/i;
+      const match = content.match(productionCommentPattern);
+
+      if (match) {
+        expect(
+          match[1].includes('localhost'),
+          'Production API_URL in .env.example should not contain localhost'
+        ).toBe(false);
+      }
+    });
+  });
+
+  describe('Health Check Endpoint - Production Monitoring', () => {
+    it('should have health check route for deployment verification', () => {
+      const healthRoutePath = path.join(SRC_DIR, 'app/api/health/route.ts');
+
+      expect(
+        fs.existsSync(healthRoutePath),
+        'Health check endpoint must exist at src/app/api/health/route.ts\n' +
+          'This is critical for post-deployment smoke tests.'
+      ).toBe(true);
+
+      const content = fs.readFileSync(healthRoutePath, 'utf-8');
+
+      // Should export GET handler
+      expect(
+        content.includes('export async function GET'),
+        'Health route must export GET handler'
+      ).toBe(true);
+
+      // Should check data files (verifies outputFileTracingIncludes works)
+      expect(
+        content.includes('data') && content.includes('readdir'),
+        'Health route should verify data files are accessible'
+      ).toBe(true);
+    });
+  });
+
   describe('API Client - Production Configuration', () => {
     it('should use relative API paths by default (not localhost)', () => {
       const clientPath = path.join(SRC_DIR, 'lib/api/client.ts');
