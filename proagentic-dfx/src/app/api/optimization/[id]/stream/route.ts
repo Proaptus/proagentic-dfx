@@ -1,6 +1,10 @@
 import { NextRequest } from 'next/server';
 import { QuickOptimizationSimulator } from '@/lib/simulators/optimization-simulator';
 
+// Required for Vercel SSE streaming support
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 // GET /api/optimization/[id]/stream - SSE stream for optimization progress
 export async function GET(
   request: NextRequest,
