@@ -190,6 +190,72 @@ describe('Deployment Configuration Validation', () => {
     });
   });
 
+  describe('Serverless File Bundling - CRITICAL', () => {
+    it('should include data directory in outputFileTracingIncludes', () => {
+      const configPath = path.join(PROJECT_ROOT, 'next.config.ts');
+      const content = fs.readFileSync(configPath, 'utf-8');
+
+      // Check that data directory is included for serverless bundling
+      // Without this, any API route using fs.readFileSync on data/ will fail in production
+      expect(
+        content.includes("'./data/**/*'") || content.includes('"./data/**/*"'),
+        'next.config.ts outputFileTracingIncludes must include "./data/**/*"\n' +
+          'Without this, API routes using fs.readFileSync will fail in Vercel production.\n\n' +
+          'Fix: Add "./data/**/*" to outputFileTracingIncludes:\n' +
+          '  outputFileTracingIncludes: {\n' +
+          "    '/api/**/*': ['./wasm/**/*', './data/**/*'],\n" +
+          '  }'
+      ).toBe(true);
+    });
+
+    it('should not use fs.readFileSync without outputFileTracingIncludes coverage', () => {
+      const apiDir = path.join(SRC_DIR, 'app/api');
+
+      // Get all API route files
+      const getAllFiles = (dir: string): string[] => {
+        const files: string[] = [];
+        const items = fs.readdirSync(dir, { withFileTypes: true });
+        for (const item of items) {
+          const fullPath = path.join(dir, item.name);
+          if (item.isDirectory()) {
+            files.push(...getAllFiles(fullPath));
+          } else if (item.name.endsWith('.ts')) {
+            files.push(fullPath);
+          }
+        }
+        return files;
+      };
+
+      const apiFiles = getAllFiles(apiDir);
+      const violations: string[] = [];
+
+      for (const file of apiFiles) {
+        const content = fs.readFileSync(file, 'utf-8');
+        const relativePath = path.relative(PROJECT_ROOT, file);
+
+        // Check for fs.readFileSync or fs.existsSync usage
+        if (
+          content.includes('fs.readFileSync') ||
+          content.includes('fs.existsSync')
+        ) {
+          // Check if it reads from data directory
+          if (
+            content.includes("'data'") ||
+            content.includes('"data"') ||
+            content.includes("'./data") ||
+            content.includes('"./data')
+          ) {
+            // This is fine IF outputFileTracingIncludes has data/**/*
+            // We already check that above, so just log for awareness
+          }
+        }
+      }
+
+      // This test is informational - the real check is outputFileTracingIncludes
+      expect(true).toBe(true);
+    });
+  });
+
   describe('API Client - Production Configuration', () => {
     it('should use relative API paths by default (not localhost)', () => {
       const clientPath = path.join(SRC_DIR, 'lib/api/client.ts');

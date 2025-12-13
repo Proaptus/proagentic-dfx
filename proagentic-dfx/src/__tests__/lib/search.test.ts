@@ -744,14 +744,12 @@ describe('Search Index - Core Functionality', () => {
       expect(result).toContain('Cost');
     });
 
-    // TODO: Implementation does not escape regex special characters.
-    // This test is skipped because the current implementation throws when
-    // given unescaped regex characters like parentheses.
-    it.skip('should handle special regex characters safely', () => {
+    it('should handle special regex characters safely', () => {
       const result = highlightMatch('Price (USD)', '(USD)');
 
       // Should handle special regex chars without crashing
       expect(result).toBeTruthy();
+      expect(result).toContain('<mark>(USD)</mark>');
     });
   });
 });

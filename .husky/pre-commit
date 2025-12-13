@@ -7,11 +7,12 @@
 #
 # Quality Gates (in order):
 #   1. File Size Check - Blocks oversized files (AI context optimization)
-#   2. Hardcoded URL Check - Blocks localhost URLs in production code
-#   3. Lint-Staged - ESLint fix + Prettier formatting
-#   4. TypeScript Check - Type safety verification
-#   5. Unit Tests - All tests must pass
-#   6. Coverage Check - Must meet 80% threshold
+#   2. No Skipped Tests - ALL tests must run, no it.skip allowed
+#   3. Hardcoded URL Check - Blocks localhost URLs in production code
+#   4. Lint-Staged - ESLint fix + Prettier formatting
+#   5. TypeScript Check - Type safety verification
+#   6. Unit Tests - All tests must pass
+#   7. Coverage Check - Must meet 80% threshold
 # =============================================================================
 
 echo ""
@@ -26,7 +27,7 @@ START_TIME=$(date +%s)
 # -----------------------------------------------------------------------------
 # GATE 1: File Size Check (Fast - runs first)
 # -----------------------------------------------------------------------------
-echo "[1/6] Checking file sizes..."
+echo "[1/7] Checking file sizes..."
 node scripts/check-file-sizes.mjs staged
 if [ $? -ne 0 ]; then
   echo ""
@@ -37,71 +38,89 @@ fi
 echo "  File sizes OK"
 
 # -----------------------------------------------------------------------------
-# GATE 2: Hardcoded URL Check (Fast - catches production bugs early)
+# GATE 2: No Skipped Tests (Prevents lazy test disabling)
 # -----------------------------------------------------------------------------
-echo "[2/6] Checking for hardcoded URLs..."
+echo "[2/7] Checking for skipped tests..."
+SKIPPED_TESTS=$(grep -r "it\.skip\|describe\.skip\|test\.skip" proagentic-dfx/src/__tests__/ --include="*.ts" --include="*.tsx" 2>/dev/null | grep -v "node_modules" || true)
+if [ -n "$SKIPPED_TESTS" ]; then
+  echo ""
+  echo "GATE 2 FAILED: Skipped tests detected"
+  echo ""
+  echo "The following tests are skipped:"
+  echo "$SKIPPED_TESTS"
+  echo ""
+  echo "ALL TESTS MUST RUN. Remove .skip and fix the tests."
+  echo "Skipping tests to make builds pass is NOT acceptable."
+  exit 1
+fi
+echo "  No skipped tests OK"
+
+# -----------------------------------------------------------------------------
+# GATE 3: Hardcoded URL Check (Fast - catches production bugs early)
+# -----------------------------------------------------------------------------
+echo "[3/7] Checking for hardcoded URLs..."
 node scripts/check-hardcoded-urls.mjs staged
 if [ $? -ne 0 ]; then
   echo ""
-  echo "GATE 2 FAILED: Hardcoded localhost URLs detected"
+  echo "GATE 3 FAILED: Hardcoded localhost URLs detected"
   echo "Use relative paths (/api) instead of hardcoded localhost URLs."
   exit 1
 fi
 echo "  Hardcoded URLs OK"
 
 # -----------------------------------------------------------------------------
-# GATE 3: Lint-Staged (ESLint + Prettier)
+# GATE 4: Lint-Staged (ESLint + Prettier)
 # -----------------------------------------------------------------------------
-echo "[3/6] Running lint-staged (ESLint + Prettier)..."
+echo "[4/7] Running lint-staged (ESLint + Prettier)..."
 npx lint-staged
 if [ $? -ne 0 ]; then
   echo ""
-  echo "GATE 3 FAILED: Linting/formatting errors"
+  echo "GATE 4 FAILED: Linting/formatting errors"
   echo "Fix ESLint errors before committing."
   exit 1
 fi
 echo "  Lint OK"
 
 # -----------------------------------------------------------------------------
-# GATE 4: TypeScript Type Check
+# GATE 5: TypeScript Type Check
 # -----------------------------------------------------------------------------
-echo "[4/6] Running TypeScript type check..."
+echo "[5/7] Running TypeScript type check..."
 cd proagentic-dfx && npx tsc --noEmit 2>&1
 TSC_EXIT=$?
 cd ..
 if [ $TSC_EXIT -ne 0 ]; then
   echo ""
-  echo "GATE 4 FAILED: TypeScript type errors"
+  echo "GATE 5 FAILED: TypeScript type errors"
   echo "Fix type errors before committing."
   exit 1
 fi
 echo "  TypeScript OK"
 
 # -----------------------------------------------------------------------------
-# GATE 5: Unit Tests (Must Pass)
+# GATE 6: Unit Tests (Must Pass)
 # -----------------------------------------------------------------------------
-echo "[5/6] Running unit tests..."
+echo "[6/7] Running unit tests..."
 cd proagentic-dfx && npm run test -- --run --reporter=dot 2>&1
 TEST_EXIT=$?
 cd ..
 if [ $TEST_EXIT -ne 0 ]; then
   echo ""
-  echo "GATE 5 FAILED: Unit tests failing"
+  echo "GATE 6 FAILED: Unit tests failing"
   echo "All tests must pass before committing."
   exit 1
 fi
 echo "  Tests OK"
 
 # -----------------------------------------------------------------------------
-# GATE 6: Coverage Threshold Check (80% minimum)
+# GATE 7: Coverage Threshold Check (80% minimum)
 # -----------------------------------------------------------------------------
-echo "[6/6] Verifying coverage thresholds (80% minimum)..."
+echo "[7/7] Verifying coverage thresholds (80% minimum)..."
 cd proagentic-dfx && npm run test:coverage -- --run --reporter=dot 2>&1
 COVERAGE_EXIT=$?
 cd ..
 if [ $COVERAGE_EXIT -ne 0 ]; then
   echo ""
-  echo "GATE 6 FAILED: Coverage below 80% threshold"
+  echo "GATE 7 FAILED: Coverage below 80% threshold"
   echo "Add tests to increase coverage before committing."
   echo ""
   echo "Run 'npm run test:coverage' to see detailed coverage report."

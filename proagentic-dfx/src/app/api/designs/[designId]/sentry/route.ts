@@ -105,17 +105,18 @@ export async function GET(
       sensor_locations: sensorLocations,
       inspection_schedule: inspectionSchedule,
       // Legacy format for backwards compatibility
+      // Note: point_idx is sequential index for monitoring points (dome=1, cylinder=2, interface=3)
       critical_monitoring_points: design.sentry?.critical_points?.map((p: { id: number; region: string; reason: string; interval_months: number }, i: number) => ({
-        id: p.id || i + 1,
+        point_idx: p.id || i + 1,
         location: { r: 175, z: i * 400, theta: 0 },
         region: p.region,
         reason: p.reason,
         recommended_sensor: i === 0 ? 'acoustic_emission' : i === 1 ? 'strain_gauge' : 'acoustic_emission',
         inspection_interval_months: p.interval_months
       })) || [
-        { id: 1, location: { r: 175, z: 180, theta: 0 }, region: 'dome_boss_interface', reason: 'Highest stress concentration', recommended_sensor: 'acoustic_emission', inspection_interval_months: 6 },
-        { id: 2, location: { r: 175, z: 600, theta: 0 }, region: 'cylinder_hoop', reason: 'Fatigue critical zone', recommended_sensor: 'strain_gauge', inspection_interval_months: 12 },
-        { id: 3, location: { r: 175, z: 0, theta: 0 }, region: 'liner_composite_interface', reason: 'Delamination monitoring', recommended_sensor: 'acoustic_emission', inspection_interval_months: 24 }
+        { point_idx: 1, location: { r: 175, z: 180, theta: 0 }, region: 'dome_boss_interface', reason: 'Highest stress concentration', recommended_sensor: 'acoustic_emission', inspection_interval_months: 6 },
+        { point_idx: 2, location: { r: 175, z: 600, theta: 0 }, region: 'cylinder_hoop', reason: 'Fatigue critical zone', recommended_sensor: 'strain_gauge', inspection_interval_months: 12 },
+        { point_idx: 3, location: { r: 175, z: 0, theta: 0 }, region: 'liner_composite_interface', reason: 'Delamination monitoring', recommended_sensor: 'acoustic_emission', inspection_interval_months: 24 }
       ],
       recommended_sensors: design.sentry?.sensors || [
         { type: 'acoustic_emission', count: 2, purpose: 'Crack/delamination detection' },

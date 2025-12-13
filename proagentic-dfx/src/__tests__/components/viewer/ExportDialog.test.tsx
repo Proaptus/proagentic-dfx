@@ -728,7 +728,7 @@ describe('ExportDialog - Extended Coverage', () => {
       expect(pngButton).toHaveAttribute('aria-pressed', 'true');
     });
 
-    it.skip('should handle very long custom filenames', async () => {
+    it('should handle very long custom filenames', async () => {
       const user = userEvent.setup();
       render(<ExportDialog {...defaultProps} />);
 
@@ -740,7 +740,7 @@ describe('ExportDialog - Extended Coverage', () => {
       expect((filenameInput as HTMLInputElement).value).toBe(longName);
     });
 
-    it.skip('should handle special characters in filename', async () => {
+    it('should handle special characters in filename', async () => {
       const user = userEvent.setup();
       render(<ExportDialog {...defaultProps} />);
 

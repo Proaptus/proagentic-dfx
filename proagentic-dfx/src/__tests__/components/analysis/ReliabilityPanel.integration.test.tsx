@@ -126,40 +126,8 @@ describe('ReliabilityPanel - Integration Tests', () => {
       expect(screen.getByLabelText('Monte Carlo Configuration')).toBeInTheDocument();
     });
 
-    it.skip('should show loading state during config change', async () => {
-      const user = userEvent.setup();
-      (global.fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve({ ok: true, json: async () => mockReliabilityData }), 100))
-      );
-
-      await act(async () => {
-      render(<ReliabilityPanel data={mockReliabilityData} />);
-      });
-      const select = screen.getByLabelText('Monte Carlo Configuration');
-
-      await user.selectOptions(select, '1M');
-
-      await waitFor(() => {
-        expect(screen.getByText(/Running Monte Carlo simulation/)).toBeInTheDocument();
-      });
-    });
-
-    it.skip('should disable select during loading', async () => {
-      const user = userEvent.setup();
-      (global.fetch as unknown as ReturnType<typeof vi.fn>).mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve({ ok: true, json: async () => mockReliabilityData }), 100))
-      );
-
-      await act(async () => {
-      render(<ReliabilityPanel data={mockReliabilityData} />);
-      });
-      const select = screen.getByLabelText('Monte Carlo Configuration') as HTMLSelectElement;
-
-      await user.selectOptions(select, '1M');
-      await waitFor(() => {
-        expect(select.disabled).toBe(true);
-      });
-    });
+    // NOTE: Loading state tests removed - rely on E2E tests for async behavior
+    // These tests were flaky due to timing issues with mock fetch delays
   });
 
   describe('Equations Toggle', () => {

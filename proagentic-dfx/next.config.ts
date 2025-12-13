@@ -1,9 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Include WASM files in serverless function bundles
+  // Include WASM and data files in serverless function bundles
+  // CRITICAL: Without './data/**/*', all API routes using fs.readFileSync fail in production
   outputFileTracingIncludes: {
-    '/api/**/*': ['./wasm/**/*'],
+    '/api/**/*': ['./wasm/**/*', './data/**/*'],
   },
 
   // Turbopack configuration (Next.js 16+ default bundler)

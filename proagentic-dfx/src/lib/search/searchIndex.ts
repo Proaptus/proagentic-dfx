@@ -275,6 +275,13 @@ export function groupByCategory(results: SearchResult[]): Record<string, SearchR
 }
 
 /**
+ * Escape special regex characters in a string
+ */
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
  * Highlight matching text in search results
  */
 export function highlightMatch(text: string, query: string): string {
@@ -284,7 +291,8 @@ export function highlightMatch(text: string, query: string): string {
   let highlighted = text;
 
   searchTerms.forEach((term) => {
-    const regex = new RegExp(`(${term})`, 'gi');
+    const escapedTerm = escapeRegExp(term);
+    const regex = new RegExp(`(${escapedTerm})`, 'gi');
     highlighted = highlighted.replace(regex, '<mark>$1</mark>');
   });
 

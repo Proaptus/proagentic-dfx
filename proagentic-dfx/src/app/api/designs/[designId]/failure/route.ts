@@ -46,22 +46,23 @@ export async function GET(
       : 0.84;
 
     // Build Tsai-Wu per layer from design data or defaults
+    // Note: ply_num is composite laminate ply number (innermost=1)
     const tsaiWuPerLayer = perLayerStress.length >= 3
       ? [
-          { layer: 1, type: 'Helical (±15°)', value: perLayerStress[0]?.tsai_wu || 0.84, status: perLayerStress[0]?.tsai_wu < 0.9 ? 'Safe' : 'Warning' },
-          { layer: 2, type: 'Hoop (90°)', value: perLayerStress[1]?.tsai_wu || 0.75, status: perLayerStress[1]?.tsai_wu < 0.9 ? 'Safe' : 'Warning' },
-          { layer: 3, type: 'Helical (±15°)', value: perLayerStress[2]?.tsai_wu || 0.81, status: perLayerStress[2]?.tsai_wu < 0.9 ? 'Safe' : 'Warning' },
-          { layer: 4, type: 'Helical (±15°)', value: Math.round((perLayerStress[2]?.tsai_wu || 0.81) * 0.95 * 100) / 100, status: 'Safe' },
-          { layer: 5, type: 'Hoop (90°)', value: Math.round((perLayerStress[1]?.tsai_wu || 0.75) * 0.98 * 100) / 100, status: 'Safe' },
-          { layer: 6, type: 'Hoop (90°)', value: Math.round((perLayerStress[1]?.tsai_wu || 0.75) * 1.05 * 100) / 100, status: 'Safe' }
+          { ply_num: 1, type: 'Helical (±15°)', value: perLayerStress[0]?.tsai_wu || 0.84, status: perLayerStress[0]?.tsai_wu < 0.9 ? 'Safe' : 'Warning' },
+          { ply_num: 2, type: 'Hoop (90°)', value: perLayerStress[1]?.tsai_wu || 0.75, status: perLayerStress[1]?.tsai_wu < 0.9 ? 'Safe' : 'Warning' },
+          { ply_num: 3, type: 'Helical (±15°)', value: perLayerStress[2]?.tsai_wu || 0.81, status: perLayerStress[2]?.tsai_wu < 0.9 ? 'Safe' : 'Warning' },
+          { ply_num: 4, type: 'Helical (±15°)', value: Math.round((perLayerStress[2]?.tsai_wu || 0.81) * 0.95 * 100) / 100, status: 'Safe' },
+          { ply_num: 5, type: 'Hoop (90°)', value: Math.round((perLayerStress[1]?.tsai_wu || 0.75) * 0.98 * 100) / 100, status: 'Safe' },
+          { ply_num: 6, type: 'Hoop (90°)', value: Math.round((perLayerStress[1]?.tsai_wu || 0.75) * 1.05 * 100) / 100, status: 'Safe' }
         ]
       : [
-          { layer: 1, type: 'Helical (±15°)', value: 0.84, status: 'Safe' },
-          { layer: 2, type: 'Hoop (90°)', value: 0.75, status: 'Safe' },
-          { layer: 3, type: 'Helical (±15°)', value: 0.81, status: 'Safe' },
-          { layer: 4, type: 'Helical (±15°)', value: 0.77, status: 'Safe' },
-          { layer: 5, type: 'Hoop (90°)', value: 0.73, status: 'Safe' },
-          { layer: 6, type: 'Hoop (90°)', value: 0.79, status: 'Safe' }
+          { ply_num: 1, type: 'Helical (±15°)', value: 0.84, status: 'Safe' },
+          { ply_num: 2, type: 'Hoop (90°)', value: 0.75, status: 'Safe' },
+          { ply_num: 3, type: 'Helical (±15°)', value: 0.81, status: 'Safe' },
+          { ply_num: 4, type: 'Helical (±15°)', value: 0.77, status: 'Safe' },
+          { ply_num: 5, type: 'Hoop (90°)', value: 0.73, status: 'Safe' },
+          { ply_num: 6, type: 'Hoop (90°)', value: 0.79, status: 'Safe' }
         ];
 
     // Build response using design JSON data for realistic values

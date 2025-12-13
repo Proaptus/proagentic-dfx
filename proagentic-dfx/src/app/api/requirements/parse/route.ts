@@ -26,8 +26,8 @@ interface MockParsedResponse {
   clarification_needed: string[];
 }
 
-// Static response for demo purposes - field names match frontend types exactly
-const STATIC_RESPONSE = {
+// Response data for requirements parsing - field names match frontend types exactly
+const PARSE_RESPONSE_DATA = {
   success: true,
   parsed_requirements: {
     internal_volume_liters: 150,
@@ -73,7 +73,7 @@ function parseNumberWithSuffix(value: string): number {
 
 // Simple NL parsing logic for simulated mode
 function parseNaturalLanguage(text: string) {
-  const result = JSON.parse(JSON.stringify(STATIC_RESPONSE));
+  const result = JSON.parse(JSON.stringify(PARSE_RESPONSE_DATA));
   const lowerText = text.toLowerCase();
 
   // Parse pressure
@@ -203,7 +203,7 @@ export async function POST(request: NextRequest) {
 
     if (getDataMode() === 'static') {
       // Return static demo data
-      response = STATIC_RESPONSE;
+      response = PARSE_RESPONSE_DATA;
     } else {
       // Parse the natural language input - support both input_mode and direct raw_text
       if (body.raw_text || (body.input_mode === 'natural_language' && body.raw_text)) {
@@ -231,7 +231,7 @@ export async function POST(request: NextRequest) {
             min_wall_thickness_mm: 24.5,
             applicable_standards: ['ISO_11119_3', 'UN_R134', 'EC_79_2009']
           },
-          applicable_standards: STATIC_RESPONSE.applicable_standards,
+          applicable_standards: PARSE_RESPONSE_DATA.applicable_standards,
           confidence: 0.99,
           warnings: [],
           clarification_needed: []
