@@ -35,6 +35,6 @@
   "devDependencies": {
     "@proagentic/typescript-config": "*",
     "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
+    "vitest": "^4.0.15"
   }
 }
