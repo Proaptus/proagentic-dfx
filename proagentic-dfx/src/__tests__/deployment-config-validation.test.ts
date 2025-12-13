@@ -21,22 +21,45 @@ const SRC_DIR = path.resolve(__dirname, '..');
 
 describe('Deployment Configuration Validation', () => {
   describe('next.config.ts - Production Safety', () => {
-    it('should not have localhost fallbacks in rewrites', () => {
+    it('should NOT have rewrites function (unified code path architecture)', () => {
       const configPath = path.join(PROJECT_ROOT, 'next.config.ts');
       const content = fs.readFileSync(configPath, 'utf-8');
 
-      // Check for dangerous fallback patterns that would break production
-      const dangerousPatterns = [
-        // Fallback to localhost with || operator
-        /\|\|\s*['"`]https?:\/\/localhost/g,
-        // Fallback to localhost with ?? operator
-        /\?\?\s*['"`]https?:\/\/localhost/g,
-        // Direct localhost assignment without env check
-        /const\s+\w+Url\s*=\s*['"`]https?:\/\/localhost/g,
+      // ARCHITECTURAL DECISION: No rewrites at all
+      // Dev and prod should use the SAME code path:
+      // Frontend → /api/* → Local API routes → Static data files
+      //
+      // The mock server is only for:
+      // 1. Generating static data files
+      // 2. Complex runtime calculations (called FROM local API routes)
+      const hasRewrites =
+        /async\s+rewrites\s*\(\s*\)/.test(content) ||
+        content.includes('rewrites()') ||
+        content.includes('rewrites:');
+
+      expect(
+        hasRewrites,
+        'next.config.ts should NOT have rewrites.\n\n' +
+          'ARCHITECTURAL DECISION:\n' +
+          '- Dev and prod must use the SAME code path\n' +
+          '- Frontend → /api/* → Local API routes → Static data\n' +
+          '- No proxying to mock server in dev\n\n' +
+          'This eliminates "works in dev, fails in prod" issues.'
+      ).toBe(false);
+    });
+
+    it('should not have localhost URLs anywhere', () => {
+      const configPath = path.join(PROJECT_ROOT, 'next.config.ts');
+      const content = fs.readFileSync(configPath, 'utf-8');
+
+      // No localhost URLs should exist in config at all
+      const localhostPatterns = [
+        /['"`]https?:\/\/localhost/g,
+        /['"`]http:\/\/127\.0\.0\.1/g,
       ];
 
       const violations: string[] = [];
-      for (const pattern of dangerousPatterns) {
+      for (const pattern of localhostPatterns) {
         const matches = content.match(pattern);
         if (matches) {
           violations.push(...matches);
@@ -45,30 +68,10 @@ describe('Deployment Configuration Validation', () => {
 
       expect(
         violations,
-        `Found ${violations.length} localhost fallback pattern(s) in next.config.ts that would break production:\n` +
+        `Found localhost URLs in next.config.ts:\n` +
           violations.map((v) => `  - "${v}"`).join('\n') +
-          '\n\nFix: Use conditional rewrites that return [] when MOCK_SERVER_URL is not set.\n' +
-          'See: proagentic-dfx/next.config.ts async rewrites() for correct pattern.'
+          '\n\nFix: Remove all localhost references. Use local API routes instead.'
       ).toHaveLength(0);
-    });
-
-    it('should return empty rewrites array when MOCK_SERVER_URL is not set', () => {
-      const configPath = path.join(PROJECT_ROOT, 'next.config.ts');
-      const content = fs.readFileSync(configPath, 'utf-8');
-
-      // The correct pattern: check for env var and return [] if not set
-      const correctPattern =
-        /if\s*\(\s*!mockServerUrl\s*\)\s*\{[\s\S]*?return\s*\[\s*\]/;
-
-      expect(
-        correctPattern.test(content),
-        'next.config.ts should check if MOCK_SERVER_URL is set and return [] if not.\n' +
-          'This prevents the rewrites from proxying to localhost in production.\n\n' +
-          'Expected pattern:\n' +
-          '  if (!mockServerUrl) {\n' +
-          '    return [];\n' +
-          '  }'
-      ).toBe(true);
     });
 
     it('should not hardcode any production URLs', () => {
