@@ -12,9 +12,16 @@ const nextConfig: NextConfig = {
     resolveExtensions: ['.ts', '.tsx', '.js', '.jsx', '.json', '.wasm'],
   },
 
-  // Proxy API requests to mock server (except auth and requirements/chat which are handled locally)
+  // Proxy API requests to mock server ONLY in development when MOCK_SERVER_URL is set
+  // In production, local API routes are used directly
   async rewrites() {
-    const mockServerUrl = process.env.MOCK_SERVER_URL || 'http://localhost:3001';
+    const mockServerUrl = process.env.MOCK_SERVER_URL;
+
+    // Only apply rewrites if MOCK_SERVER_URL is explicitly set (development with mock server)
+    if (!mockServerUrl) {
+      return [];
+    }
+
     return [
       // ISSUE-001: Add optimization API proxy for Pareto results
       {

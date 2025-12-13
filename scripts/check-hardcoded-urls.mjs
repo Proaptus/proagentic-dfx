@@ -72,9 +72,25 @@ function getFilesToCheck(mode) {
       return [];
     }
   } else {
-    // Check all source files in proagentic-dfx/src
+    // Check all source files in proagentic-dfx/src AND config files at root
     const srcDir = path.join(process.cwd(), 'proagentic-dfx', 'src');
-    return getAllFiles(srcDir);
+    const files = getAllFiles(srcDir);
+
+    // Also check critical config files at project root that affect production
+    const configFiles = [
+      'proagentic-dfx/next.config.ts',
+      'proagentic-dfx/next.config.js',
+      'proagentic-dfx/next.config.mjs',
+    ];
+
+    for (const configFile of configFiles) {
+      const fullPath = path.join(process.cwd(), configFile);
+      if (fs.existsSync(fullPath)) {
+        files.push(fullPath);
+      }
+    }
+
+    return files;
   }
 }
 
