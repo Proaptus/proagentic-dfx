@@ -124,14 +124,16 @@ export type MaterialProperties =
 
 // API Helper Functions
 // Use these to fetch materials from the mock server API
+// In production, use relative /api path (served by Next.js)
+// In development, optionally set NEXT_PUBLIC_API_URL for external mock server
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 /**
  * Fetch all materials from the API
  */
 export async function fetchAllMaterials(): Promise<MaterialProperties[]> {
-  const response = await fetch(`${API_BASE_URL}/api/materials`);
+  const response = await fetch(`${API_BASE}/materials`);
   if (!response.ok) {
     throw new Error('Failed to fetch materials');
   }
@@ -142,7 +144,7 @@ export async function fetchAllMaterials(): Promise<MaterialProperties[]> {
  * Fetch materials by type
  */
 export async function fetchMaterialsByType(type: MaterialType): Promise<MaterialProperties[]> {
-  const response = await fetch(`${API_BASE_URL}/api/materials?type=${type}`);
+  const response = await fetch(`${API_BASE}/materials?type=${type}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch materials of type: ${type}`);
   }
@@ -153,7 +155,7 @@ export async function fetchMaterialsByType(type: MaterialType): Promise<Material
  * Fetch a specific material by ID
  */
 export async function fetchMaterialById(id: string): Promise<MaterialProperties | null> {
-  const response = await fetch(`${API_BASE_URL}/api/materials?id=${id}`);
+  const response = await fetch(`${API_BASE}/materials?id=${id}`);
   if (!response.ok) {
     if (response.status === 404) {
       return null;
