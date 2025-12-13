@@ -255,9 +255,11 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
+      # NOTE: Do NOT use working-directory here - Vercel project settings
+      # already have root directory set to 'proagentic-dfx'. Using both
+      # causes path doubling errors.
       - name: Deploy to Vercel Preview
         id: deploy
-        working-directory: proagentic-dfx
         run: |
           url=$(vercel deploy --token=${{ secrets.VERCEL_TOKEN }})
           echo "preview-url=$url" >> $GITHUB_OUTPUT
@@ -282,8 +284,10 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
+      # NOTE: Do NOT use working-directory here - Vercel project settings
+      # already have root directory set to 'proagentic-dfx'. Using both
+      # causes path doubling errors.
       - name: Deploy to Vercel Staging
-        working-directory: proagentic-dfx
         run: vercel deploy --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -306,8 +310,10 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
+      # NOTE: Do NOT use working-directory here - Vercel project settings
+      # already have root directory set to 'proagentic-dfx'. Using both
+      # causes path doubling errors.
       - name: Deploy to Vercel Production
-        working-directory: proagentic-dfx
         run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
