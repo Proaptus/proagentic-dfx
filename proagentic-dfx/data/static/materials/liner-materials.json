@@ -1,0 +1,90 @@
+[
+  {
+    "id": "HDPE-GM5010T2",
+    "name": "HDPE GM5010T2",
+    "category": "liner",
+    "material_type": "HDPE",
+    "manufacturer": "INEOS Polyolefins",
+    "tensile_strength": 28,
+    "elongation_at_break": 800,
+    "flexural_modulus": 1.1,
+    "h2_permeation": 250,
+    "h2_permeation_at_55C": 800,
+    "density": 0.95,
+    "melting_point": 130,
+    "glass_transition_temp": -110,
+    "rotomolding_capable": true,
+    "blow_molding_capable": true,
+    "cost_per_kg": 2.5,
+    "typical_applications": ["Type 4 tank liners", "Rotomolded tanks", "Blow molded liners"]
+  },
+  {
+    "id": "PA6-ULTRAMID-B3S",
+    "name": "PA6 Ultramid B3S",
+    "category": "liner",
+    "material_type": "PA6",
+    "manufacturer": "BASF",
+    "tensile_strength": 80,
+    "elongation_at_break": 50,
+    "flexural_modulus": 3.0,
+    "h2_permeation": 35,
+    "h2_permeation_at_55C": 120,
+    "density": 1.13,
+    "melting_point": 220,
+    "glass_transition_temp": 50,
+    "rotomolding_capable": false,
+    "blow_molding_capable": true,
+    "cost_per_kg": 4.2,
+    "typical_applications": [
+      "Low permeation liners",
+      "High-strength applications",
+      "Blow molded components"
+    ]
+  },
+  {
+    "id": "PA12-GRILAMID-L25",
+    "name": "PA12 Grilamid L25",
+    "category": "liner",
+    "material_type": "PA12",
+    "manufacturer": "EMS-GRIVORY",
+    "tensile_strength": 50,
+    "elongation_at_break": 300,
+    "flexural_modulus": 1.5,
+    "h2_permeation": 45,
+    "h2_permeation_at_55C": 150,
+    "density": 1.01,
+    "melting_point": 178,
+    "glass_transition_temp": 40,
+    "rotomolding_capable": true,
+    "blow_molding_capable": true,
+    "cost_per_kg": 6.8,
+    "typical_applications": [
+      "Premium low-permeation liners",
+      "Complex geometries",
+      "Automotive tanks"
+    ]
+  },
+  {
+    "id": "PA11-RILSAN-BESNO-TL",
+    "name": "PA11 Rilsan BESNO TL",
+    "category": "liner",
+    "material_type": "PA11",
+    "manufacturer": "Arkema",
+    "tensile_strength": 55,
+    "elongation_at_break": 350,
+    "flexural_modulus": 1.4,
+    "h2_permeation": 42,
+    "h2_permeation_at_55C": 140,
+    "density": 1.03,
+    "melting_point": 188,
+    "glass_transition_temp": 45,
+    "rotomolding_capable": true,
+    "blow_molding_capable": true,
+    "cost_per_kg": 8.5,
+    "typical_applications": [
+      "Bio-based liners",
+      "Superior permeation resistance",
+      "High-end applications"
+    ]
+  }
+]

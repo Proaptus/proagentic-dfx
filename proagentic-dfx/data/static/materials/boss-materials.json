@@ -1,0 +1,90 @@
+[
+  {
+    "id": "AL-6061-T6",
+    "name": "Aluminum 6061-T6",
+    "category": "boss",
+    "material_type": "aluminum",
+    "alloy": "6061-T6",
+    "yield_strength": 276,
+    "ultimate_strength": 310,
+    "E": 69,
+    "elongation": 12,
+    "hardness": "95 HRB",
+    "density": 2.7,
+    "fatigue_strength": 96,
+    "hydrogen_embrittlement_resistance": "excellent",
+    "machinability_rating": 8,
+    "cost_per_kg": 4.5,
+    "typical_applications": [
+      "Type 4 tank bosses",
+      "Structural components",
+      "General purpose fittings"
+    ]
+  },
+  {
+    "id": "AL-7075-T6",
+    "name": "Aluminum 7075-T6",
+    "category": "boss",
+    "material_type": "aluminum",
+    "alloy": "7075-T6",
+    "yield_strength": 503,
+    "ultimate_strength": 572,
+    "E": 72,
+    "elongation": 11,
+    "hardness": "150 HRB",
+    "density": 2.81,
+    "fatigue_strength": 159,
+    "hydrogen_embrittlement_resistance": "good",
+    "machinability_rating": 6,
+    "cost_per_kg": 8.2,
+    "typical_applications": [
+      "High-strength bosses",
+      "Aerospace fittings",
+      "High-pressure applications"
+    ]
+  },
+  {
+    "id": "SS-316-ANNEALED",
+    "name": "Stainless Steel 316 (Annealed)",
+    "category": "boss",
+    "material_type": "stainless_steel",
+    "alloy": "316",
+    "yield_strength": 290,
+    "ultimate_strength": 580,
+    "E": 193,
+    "elongation": 50,
+    "hardness": "217 HB",
+    "density": 8.0,
+    "fatigue_strength": 241,
+    "hydrogen_embrittlement_resistance": "fair",
+    "machinability_rating": 5,
+    "cost_per_kg": 6.5,
+    "typical_applications": [
+      "Corrosion-resistant bosses",
+      "Marine applications",
+      "Chemical resistance required"
+    ]
+  },
+  {
+    "id": "AL-6082-T6",
+    "name": "Aluminum 6082-T6 (European)",
+    "category": "boss",
+    "material_type": "aluminum",
+    "alloy": "6082-T6",
+    "yield_strength": 260,
+    "ultimate_strength": 310,
+    "E": 70,
+    "elongation": 10,
+    "hardness": "95 HRB",
+    "density": 2.7,
+    "fatigue_strength": 90,
+    "hydrogen_embrittlement_resistance": "excellent",
+    "machinability_rating": 8,
+    "cost_per_kg": 4.2,
+    "typical_applications": [
+      "European market tanks",
+      "Structural applications",
+      "Cost-effective bosses"
+    ]
+  }
+]

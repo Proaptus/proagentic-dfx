@@ -1,0 +1,68 @@
+[
+  {
+    "id": "EPON-862",
+    "name": "Epon 862 / W Epoxy",
+    "category": "matrix",
+    "type": "epoxy",
+    "manufacturer": "Hexion",
+    "E": 3.1,
+    "tensile_strength": 80,
+    "elongation_at_break": 5,
+    "density": 1.16,
+    "glass_transition_temp": 180,
+    "cure_temp": 177,
+    "cure_time": 2,
+    "hydrogen_compatibility": "excellent",
+    "moisture_absorption": 1.8,
+    "cost_per_kg": 18,
+    "typical_applications": [
+      "Aerospace composites",
+      "High-temperature applications",
+      "Pressure vessels"
+    ]
+  },
+  {
+    "id": "CYCOM-977-2",
+    "name": "Cycom 977-2 Toughened Epoxy",
+    "category": "matrix",
+    "type": "epoxy",
+    "manufacturer": "Solvay",
+    "E": 3.35,
+    "tensile_strength": 85,
+    "elongation_at_break": 6,
+    "density": 1.28,
+    "glass_transition_temp": 190,
+    "cure_temp": 177,
+    "cure_time": 2,
+    "hydrogen_compatibility": "excellent",
+    "moisture_absorption": 1.5,
+    "cost_per_kg": 28,
+    "typical_applications": [
+      "Primary aircraft structures",
+      "High-performance tanks",
+      "Toughness-critical applications"
+    ]
+  },
+  {
+    "id": "MTM45-1",
+    "name": "MTM45-1 Intermediate Temp Epoxy",
+    "category": "matrix",
+    "type": "epoxy",
+    "manufacturer": "Solvay",
+    "E": 3.0,
+    "tensile_strength": 75,
+    "elongation_at_break": 4.5,
+    "density": 1.18,
+    "glass_transition_temp": 120,
+    "cure_temp": 120,
+    "cure_time": 1.5,
+    "hydrogen_compatibility": "good",
+    "moisture_absorption": 2.0,
+    "cost_per_kg": 22,
+    "typical_applications": [
+      "Automotive composites",
+      "Wind turbine blades",
+      "General purpose structures"
+    ]
+  }
+]
