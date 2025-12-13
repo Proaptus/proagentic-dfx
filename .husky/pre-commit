@@ -7,10 +7,11 @@
 #
 # Quality Gates (in order):
 #   1. File Size Check - Blocks oversized files (AI context optimization)
-#   2. Lint-Staged - ESLint fix + Prettier formatting
-#   3. TypeScript Check - Type safety verification
-#   4. Unit Tests - All tests must pass
-#   5. Coverage Check - Must meet 80% threshold
+#   2. Hardcoded URL Check - Blocks localhost URLs in production code
+#   3. Lint-Staged - ESLint fix + Prettier formatting
+#   4. TypeScript Check - Type safety verification
+#   5. Unit Tests - All tests must pass
+#   6. Coverage Check - Must meet 80% threshold
 # =============================================================================
 
 echo ""
@@ -25,7 +26,7 @@ START_TIME=$(date +%s)
 # -----------------------------------------------------------------------------
 # GATE 1: File Size Check (Fast - runs first)
 # -----------------------------------------------------------------------------
-echo "[1/5] Checking file sizes..."
+echo "[1/6] Checking file sizes..."
 node scripts/check-file-sizes.mjs staged
 if [ $? -ne 0 ]; then
   echo ""
@@ -36,58 +37,71 @@ fi
 echo "  File sizes OK"
 
 # -----------------------------------------------------------------------------
-# GATE 2: Lint-Staged (ESLint + Prettier)
+# GATE 2: Hardcoded URL Check (Fast - catches production bugs early)
 # -----------------------------------------------------------------------------
-echo "[2/5] Running lint-staged (ESLint + Prettier)..."
+echo "[2/6] Checking for hardcoded URLs..."
+node scripts/check-hardcoded-urls.mjs staged
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "GATE 2 FAILED: Hardcoded localhost URLs detected"
+  echo "Use relative paths (/api) instead of hardcoded localhost URLs."
+  exit 1
+fi
+echo "  Hardcoded URLs OK"
+
+# -----------------------------------------------------------------------------
+# GATE 3: Lint-Staged (ESLint + Prettier)
+# -----------------------------------------------------------------------------
+echo "[3/6] Running lint-staged (ESLint + Prettier)..."
 npx lint-staged
 if [ $? -ne 0 ]; then
   echo ""
-  echo "GATE 2 FAILED: Linting/formatting errors"
+  echo "GATE 3 FAILED: Linting/formatting errors"
   echo "Fix ESLint errors before committing."
   exit 1
 fi
 echo "  Lint OK"
 
 # -----------------------------------------------------------------------------
-# GATE 3: TypeScript Type Check
+# GATE 4: TypeScript Type Check
 # -----------------------------------------------------------------------------
-echo "[3/5] Running TypeScript type check..."
+echo "[4/6] Running TypeScript type check..."
 cd proagentic-dfx && npx tsc --noEmit 2>&1
 TSC_EXIT=$?
 cd ..
 if [ $TSC_EXIT -ne 0 ]; then
   echo ""
-  echo "GATE 3 FAILED: TypeScript type errors"
+  echo "GATE 4 FAILED: TypeScript type errors"
   echo "Fix type errors before committing."
   exit 1
 fi
 echo "  TypeScript OK"
 
 # -----------------------------------------------------------------------------
-# GATE 4: Unit Tests (Must Pass)
+# GATE 5: Unit Tests (Must Pass)
 # -----------------------------------------------------------------------------
-echo "[4/5] Running unit tests..."
+echo "[5/6] Running unit tests..."
 cd proagentic-dfx && npm run test -- --run --reporter=dot 2>&1
 TEST_EXIT=$?
 cd ..
 if [ $TEST_EXIT -ne 0 ]; then
   echo ""
-  echo "GATE 4 FAILED: Unit tests failing"
+  echo "GATE 5 FAILED: Unit tests failing"
   echo "All tests must pass before committing."
   exit 1
 fi
 echo "  Tests OK"
 
 # -----------------------------------------------------------------------------
-# GATE 5: Coverage Threshold Check (80% minimum)
+# GATE 6: Coverage Threshold Check (80% minimum)
 # -----------------------------------------------------------------------------
-echo "[5/5] Verifying coverage thresholds (80% minimum)..."
+echo "[6/6] Verifying coverage thresholds (80% minimum)..."
 cd proagentic-dfx && npm run test:coverage -- --run --reporter=dot 2>&1
 COVERAGE_EXIT=$?
 cd ..
 if [ $COVERAGE_EXIT -ne 0 ]; then
   echo ""
-  echo "GATE 5 FAILED: Coverage below 80% threshold"
+  echo "GATE 6 FAILED: Coverage below 80% threshold"
   echo "Add tests to increase coverage before committing."
   echo ""
   echo "Run 'npm run test:coverage' to see detailed coverage report."
