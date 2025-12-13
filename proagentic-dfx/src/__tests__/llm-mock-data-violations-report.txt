@@ -5,26 +5,122 @@
 
 SUMMARY
 -------
-Total Violations:  12
-Files Scanned:     158
-Files Affected:    8
+Total Violations:  56
+Files Scanned:     181
+Files Affected:    31
 
 SEVERITY BREAKDOWN
 ------------------
-  CRITICAL:    5 ⚠️  BLOCKING
-  HIGH:        0 ✓
-  MEDIUM:      7
-  LOW:         0
+  CRITICAL:   29 ⚠️  BLOCKING
+  HIGH:        3 ⚠️
+  MEDIUM:     19
+  LOW:         5
 
 CATEGORY BREAKDOWN
 ------------------
-  🔴 API Routes:    5
+  🔴 API Routes:   28
+  🟡 Repeated Structure:   14
   🟡 Filler Text:    4
-  🟡 Repeated Structure:    3
+  ⚪ Fake Dates:    4
+  🟠 Sequential IDs:    3
+  🟡 Perfect Data:    1
+  ⚪ Duration Patterns:    1
+  🔴 Variable Naming:    1
 
 ==========================================================================================
 DETAILED VIOLATIONS BY FILE
 ==========================================================================================
+
+----------------------------------------------------------------------
+FILE: app\api\designs\[designId]\failure\route.ts
+VIOLATIONS: 7 (Critical: 1, High: 2)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+  🟠 Line 50: [HIGH] Sequential IDs
+     Pattern: [           { layer: 1, type: 'Helical (±15°)', value: perLayerStress[0]?.tsai_wu || 0.84, status: 
+     Reason:  Sequential IDs suggest generated data
+
+  🟡 Line 51: [MEDIUM] Repeated Structure
+     Pattern: { layer: 1, type: 'Helical (±15°)', value: perLayerStress[0]?.tsai_wu || 0.84, status: perLayerStres
+     Reason:  Repeated object structure
+
+  🟡 Line 54: [MEDIUM] Repeated Structure
+     Pattern: { layer: 4, type: 'Helical (±15°)', value: Math.round((perLayerStress[2]?.tsai_wu || 0.81) * 0.95 * 
+     Reason:  Repeated object structure
+
+  🟠 Line 58: [HIGH] Sequential IDs
+     Pattern: [           { layer: 1, type: 'Helical (±15°)', value: 0.84, status: 'Safe' },           { layer: 
+     Reason:  Sequential IDs suggest generated data
+
+  🟡 Line 59: [MEDIUM] Repeated Structure
+     Pattern: { layer: 1, type: 'Helical (±15°)', value: 0.84, status: 'Safe' },           { layer: 2, type: 'Hoo
+     Reason:  Repeated object structure
+
+  🟡 Line 62: [MEDIUM] Repeated Structure
+     Pattern: { layer: 4, type: 'Helical (±15°)', value: 0.77, status: 'Safe' },           { layer: 5, type: 'Hoo
+     Reason:  Repeated object structure
+
+----------------------------------------------------------------------
+FILE: app\api\export\categories\route.ts
+VIOLATIONS: 7 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+  🟡 Line 7: [MEDIUM] Repeated Structure
+     Pattern: {         id: 'cad',         name: 'CAD Models',         description: 'Export 3D geometry for CAD
+     Reason:  Repeated object structure
+
+  🟡 Line 41: [MEDIUM] Repeated Structure
+     Pattern: {         id: 'analysis',         name: 'Analysis Models',         description: 'Export for FEA a
+     Reason:  Repeated object structure
+
+  🟡 Line 75: [MEDIUM] Repeated Structure
+     Pattern: {         id: 'manufacturing',         name: 'Manufacturing Data',         description: 'Export f
+     Reason:  Repeated object structure
+
+  🟡 Line 109: [MEDIUM] Repeated Structure
+     Pattern: {         id: 'documentation',         name: 'Documentation',         description: 'Export design
+     Reason:  Repeated object structure
+
+  🟡 Line 143: [MEDIUM] Repeated Structure
+     Pattern: {         id: 'data',         name: 'Raw Data',         description: 'Export design data in struc
+     Reason:  Repeated object structure
+
+  🟡 Line 177: [MEDIUM] Repeated Structure
+     Pattern: {         id: 'visualization',         name: 'Visualization',         description: 'Export for 3D
+     Reason:  Repeated object structure
+
+----------------------------------------------------------------------
+FILE: app\api\standards\library\route.ts
+VIOLATIONS: 5 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+  ⚪ Line 189: [LOW] Fake Dates
+     Pattern: '2024-01-01'
+     Reason:  Suspicious date pattern
+
+  ⚪ Line 190: [LOW] Fake Dates
+     Pattern: '2025-01-01'
+     Reason:  Suspicious date pattern
+
+  ⚪ Line 226: [LOW] Fake Dates
+     Pattern: '2024-01-01'
+     Reason:  Suspicious date pattern
+
+  ⚪ Line 227: [LOW] Fake Dates
+     Pattern: '2025-01-01'
+     Reason:  Suspicious date pattern
 
 ----------------------------------------------------------------------
 FILE: components\screens\AnalysisScreen.tsx
@@ -61,6 +157,62 @@ VIOLATIONS: 3 (Critical: 0, High: 0)
      Reason:  Repeated object structure
 
 ----------------------------------------------------------------------
+FILE: app\api\requirements\parse\route.ts
+VIOLATIONS: 3 (Critical: 2, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+  🔴 Line 30: [CRITICAL] Variable Naming
+     Pattern: const STATIC_RESPONSE = {
+     Reason:  Variable naming suggests mock/fake data
+
+  🟡 Line 51: [MEDIUM] Repeated Structure
+     Pattern: { id: 'ISO_11119_3', name: 'Gas cylinders - Composite construction', region: 'International', releva
+     Reason:  Repeated object structure
+
+----------------------------------------------------------------------
+FILE: app\api\designs\[designId]\cost\route.ts
+VIOLATIONS: 2 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+  🟡 Line 93: [MEDIUM] Perfect Data
+     Pattern: batch: 1, cost_multiplier: 2.5 },         { batch: 2, cost_multiplier: 2.13 },         { batch: 5
+     Reason:  Suspiciously perfect data distribution
+
+----------------------------------------------------------------------
+FILE: app\api\designs\[designId]\sentry\route.ts
+VIOLATIONS: 2 (Critical: 1, High: 1)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+  🟠 Line 115: [HIGH] Sequential IDs
+     Pattern: [         { id: 1, location: { r: 175, z: 180, theta: 0 }, region: 'dome_boss_interface', reason: '
+     Reason:  Sequential IDs suggest generated data
+
+----------------------------------------------------------------------
+FILE: app\api\designs\[designId]\test-plan\route.ts
+VIOLATIONS: 2 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+  ⚪ Line 19: [LOW] Duration Patterns
+     Pattern: [         { test: 'Hydrostatic burst', articles: 3, duration: '1 week', parameters: '≥1,575 bar' }
+     Reason:  Round duration value
+
+----------------------------------------------------------------------
 FILE: components\analysis\ReliabilityPanel.tsx
 VIOLATIONS: 1 (Critical: 0, High: 0)
 ----------------------------------------------------------------------
@@ -79,7 +231,43 @@ VIOLATIONS: 1 (Critical: 1, High: 0)
      Reason:  Frontend should not have API routes - use mock server
 
 ----------------------------------------------------------------------
+FILE: app\api\compare\route.ts
+VIOLATIONS: 1 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+----------------------------------------------------------------------
 FILE: app\api\designs\route.ts
+VIOLATIONS: 1 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+----------------------------------------------------------------------
+FILE: app\api\designs\[designId]\compliance\route.ts
+VIOLATIONS: 1 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+----------------------------------------------------------------------
+FILE: app\api\designs\[designId]\geometry\route.ts
+VIOLATIONS: 1 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+----------------------------------------------------------------------
+FILE: app\api\designs\[designId]\reliability\route.ts
 VIOLATIONS: 1 (Critical: 1, High: 0)
 ----------------------------------------------------------------------
 
@@ -106,7 +294,115 @@ VIOLATIONS: 1 (Critical: 1, High: 0)
      Reason:  Frontend should not have API routes - use mock server
 
 ----------------------------------------------------------------------
+FILE: app\api\designs\[designId]\thermal\route.ts
+VIOLATIONS: 1 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+----------------------------------------------------------------------
+FILE: app\api\export\route.ts
+VIOLATIONS: 1 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+----------------------------------------------------------------------
+FILE: app\api\export\[id]\download\route.ts
+VIOLATIONS: 1 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+----------------------------------------------------------------------
+FILE: app\api\export\[id]\route.ts
+VIOLATIONS: 1 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+----------------------------------------------------------------------
+FILE: app\api\materials\route.ts
+VIOLATIONS: 1 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+----------------------------------------------------------------------
+FILE: app\api\optimization\route.ts
+VIOLATIONS: 1 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+----------------------------------------------------------------------
+FILE: app\api\optimization\[id]\results\route.ts
+VIOLATIONS: 1 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+----------------------------------------------------------------------
+FILE: app\api\optimization\[id]\route.ts
+VIOLATIONS: 1 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+----------------------------------------------------------------------
+FILE: app\api\optimization\[id]\stream\route.ts
+VIOLATIONS: 1 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+----------------------------------------------------------------------
 FILE: app\api\requirements\chat\route.ts
+VIOLATIONS: 1 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+----------------------------------------------------------------------
+FILE: app\api\standards\route.ts
+VIOLATIONS: 1 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+----------------------------------------------------------------------
+FILE: app\api\standards\[id]\details\route.ts
+VIOLATIONS: 1 (Critical: 1, High: 0)
+----------------------------------------------------------------------
+
+  🔴 Line 1: [CRITICAL] API Routes
+     Pattern: API route file exists in frontend (should be in mock server only)
+     Reason:  Frontend should not have API routes - use mock server
+
+----------------------------------------------------------------------
+FILE: app\api\tank-type\recommend\route.ts
 VIOLATIONS: 1 (Critical: 1, High: 0)
 ----------------------------------------------------------------------
 

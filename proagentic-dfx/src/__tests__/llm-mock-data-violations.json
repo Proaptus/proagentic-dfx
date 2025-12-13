@@ -72,7 +72,124 @@
     "description": "Frontend should not have API routes - use mock server"
   },
   {
+    "file": "app\\api\\compare\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
     "file": "app\\api\\designs\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\designs\\[designId]\\compliance\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\designs\\[designId]\\cost\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\designs\\[designId]\\cost\\route.ts",
+    "line": 93,
+    "type": "perfect_data",
+    "category": "Perfect Data",
+    "match": "batch: 1, cost_multiplier: 2.5 },\r         { batch: 2, cost_multiplier: 2.13 },\r         { batch: 5",
+    "severity": "medium",
+    "description": "Suspiciously perfect data distribution"
+  },
+  {
+    "file": "app\\api\\designs\\[designId]\\failure\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\designs\\[designId]\\failure\\route.ts",
+    "line": 50,
+    "type": "sequential_ids",
+    "category": "Sequential IDs",
+    "match": "[\r           { layer: 1, type: 'Helical (±15°)', value: perLayerStress[0]?.tsai_wu || 0.84, status: ",
+    "severity": "high",
+    "description": "Sequential IDs suggest generated data"
+  },
+  {
+    "file": "app\\api\\designs\\[designId]\\failure\\route.ts",
+    "line": 58,
+    "type": "sequential_ids",
+    "category": "Sequential IDs",
+    "match": "[\r           { layer: 1, type: 'Helical (±15°)', value: 0.84, status: 'Safe' },\r           { layer: ",
+    "severity": "high",
+    "description": "Sequential IDs suggest generated data"
+  },
+  {
+    "file": "app\\api\\designs\\[designId]\\failure\\route.ts",
+    "line": 51,
+    "type": "repeated_structure",
+    "category": "Repeated Structure",
+    "match": "{ layer: 1, type: 'Helical (±15°)', value: perLayerStress[0]?.tsai_wu || 0.84, status: perLayerStres",
+    "severity": "medium",
+    "description": "Repeated object structure"
+  },
+  {
+    "file": "app\\api\\designs\\[designId]\\failure\\route.ts",
+    "line": 54,
+    "type": "repeated_structure",
+    "category": "Repeated Structure",
+    "match": "{ layer: 4, type: 'Helical (±15°)', value: Math.round((perLayerStress[2]?.tsai_wu || 0.81) * 0.95 * ",
+    "severity": "medium",
+    "description": "Repeated object structure"
+  },
+  {
+    "file": "app\\api\\designs\\[designId]\\failure\\route.ts",
+    "line": 59,
+    "type": "repeated_structure",
+    "category": "Repeated Structure",
+    "match": "{ layer: 1, type: 'Helical (±15°)', value: 0.84, status: 'Safe' },\r           { layer: 2, type: 'Hoo",
+    "severity": "medium",
+    "description": "Repeated object structure"
+  },
+  {
+    "file": "app\\api\\designs\\[designId]\\failure\\route.ts",
+    "line": 62,
+    "type": "repeated_structure",
+    "category": "Repeated Structure",
+    "match": "{ layer: 4, type: 'Helical (±15°)', value: 0.77, status: 'Safe' },\r           { layer: 5, type: 'Hoo",
+    "severity": "medium",
+    "description": "Repeated object structure"
+  },
+  {
+    "file": "app\\api\\designs\\[designId]\\geometry\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\designs\\[designId]\\reliability\\route.ts",
     "line": 1,
     "type": "api_route",
     "category": "API Routes",
@@ -90,6 +207,24 @@
     "description": "Frontend should not have API routes - use mock server"
   },
   {
+    "file": "app\\api\\designs\\[designId]\\sentry\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\designs\\[designId]\\sentry\\route.ts",
+    "line": 115,
+    "type": "sequential_ids",
+    "category": "Sequential IDs",
+    "match": "[\r         { id: 1, location: { r: 175, z: 180, theta: 0 }, region: 'dome_boss_interface', reason: '",
+    "severity": "high",
+    "description": "Sequential IDs suggest generated data"
+  },
+  {
     "file": "app\\api\\designs\\[designId]\\stress\\route.ts",
     "line": 1,
     "type": "api_route",
@@ -99,7 +234,268 @@
     "description": "Frontend should not have API routes - use mock server"
   },
   {
+    "file": "app\\api\\designs\\[designId]\\test-plan\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\designs\\[designId]\\test-plan\\route.ts",
+    "line": 19,
+    "type": "duration_patterns",
+    "category": "Duration Patterns",
+    "match": "[         { test: 'Hydrostatic burst', articles: 3, duration: '1 week', parameters: '≥1,575 bar' }",
+    "severity": "low",
+    "description": "Round duration value"
+  },
+  {
+    "file": "app\\api\\designs\\[designId]\\thermal\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\export\\categories\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\export\\categories\\route.ts",
+    "line": 7,
+    "type": "repeated_structure",
+    "category": "Repeated Structure",
+    "match": "{\r         id: 'cad',\r         name: 'CAD Models',\r         description: 'Export 3D geometry for CAD",
+    "severity": "medium",
+    "description": "Repeated object structure"
+  },
+  {
+    "file": "app\\api\\export\\categories\\route.ts",
+    "line": 41,
+    "type": "repeated_structure",
+    "category": "Repeated Structure",
+    "match": "{\r         id: 'analysis',\r         name: 'Analysis Models',\r         description: 'Export for FEA a",
+    "severity": "medium",
+    "description": "Repeated object structure"
+  },
+  {
+    "file": "app\\api\\export\\categories\\route.ts",
+    "line": 75,
+    "type": "repeated_structure",
+    "category": "Repeated Structure",
+    "match": "{\r         id: 'manufacturing',\r         name: 'Manufacturing Data',\r         description: 'Export f",
+    "severity": "medium",
+    "description": "Repeated object structure"
+  },
+  {
+    "file": "app\\api\\export\\categories\\route.ts",
+    "line": 109,
+    "type": "repeated_structure",
+    "category": "Repeated Structure",
+    "match": "{\r         id: 'documentation',\r         name: 'Documentation',\r         description: 'Export design",
+    "severity": "medium",
+    "description": "Repeated object structure"
+  },
+  {
+    "file": "app\\api\\export\\categories\\route.ts",
+    "line": 143,
+    "type": "repeated_structure",
+    "category": "Repeated Structure",
+    "match": "{\r         id: 'data',\r         name: 'Raw Data',\r         description: 'Export design data in struc",
+    "severity": "medium",
+    "description": "Repeated object structure"
+  },
+  {
+    "file": "app\\api\\export\\categories\\route.ts",
+    "line": 177,
+    "type": "repeated_structure",
+    "category": "Repeated Structure",
+    "match": "{\r         id: 'visualization',\r         name: 'Visualization',\r         description: 'Export for 3D",
+    "severity": "medium",
+    "description": "Repeated object structure"
+  },
+  {
+    "file": "app\\api\\export\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\export\\[id]\\download\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\export\\[id]\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\materials\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\optimization\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\optimization\\[id]\\results\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\optimization\\[id]\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\optimization\\[id]\\stream\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
     "file": "app\\api\\requirements\\chat\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\requirements\\parse\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\requirements\\parse\\route.ts",
+    "line": 30,
+    "type": "variable_naming",
+    "category": "Variable Naming",
+    "match": "const STATIC_RESPONSE = {",
+    "severity": "critical",
+    "description": "Variable naming suggests mock/fake data"
+  },
+  {
+    "file": "app\\api\\requirements\\parse\\route.ts",
+    "line": 51,
+    "type": "repeated_structure",
+    "category": "Repeated Structure",
+    "match": "{ id: 'ISO_11119_3', name: 'Gas cylinders - Composite construction', region: 'International', releva",
+    "severity": "medium",
+    "description": "Repeated object structure"
+  },
+  {
+    "file": "app\\api\\standards\\library\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\standards\\library\\route.ts",
+    "line": 189,
+    "type": "fake_dates",
+    "category": "Fake Dates",
+    "match": "'2024-01-01'",
+    "severity": "low",
+    "description": "Suspicious date pattern"
+  },
+  {
+    "file": "app\\api\\standards\\library\\route.ts",
+    "line": 226,
+    "type": "fake_dates",
+    "category": "Fake Dates",
+    "match": "'2024-01-01'",
+    "severity": "low",
+    "description": "Suspicious date pattern"
+  },
+  {
+    "file": "app\\api\\standards\\library\\route.ts",
+    "line": 190,
+    "type": "fake_dates",
+    "category": "Fake Dates",
+    "match": "'2025-01-01'",
+    "severity": "low",
+    "description": "Suspicious date pattern"
+  },
+  {
+    "file": "app\\api\\standards\\library\\route.ts",
+    "line": 227,
+    "type": "fake_dates",
+    "category": "Fake Dates",
+    "match": "'2025-01-01'",
+    "severity": "low",
+    "description": "Suspicious date pattern"
+  },
+  {
+    "file": "app\\api\\standards\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\standards\\[id]\\details\\route.ts",
+    "line": 1,
+    "type": "api_route",
+    "category": "API Routes",
+    "match": "API route file exists in frontend (should be in mock server only)",
+    "severity": "critical",
+    "description": "Frontend should not have API routes - use mock server"
+  },
+  {
+    "file": "app\\api\\tank-type\\recommend\\route.ts",
     "line": 1,
     "type": "api_route",
     "category": "API Routes",
